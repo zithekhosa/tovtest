@@ -5,7 +5,7 @@ import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
-import { User as SelectUser, UserRole } from "@shared/schema";
+import { User as SelectUser } from "@shared/schema";
 
 declare global {
   namespace Express {
@@ -29,14 +29,17 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 export function setupAuth(app: Express) {
+  // Use session secret from environment or fallback to a random value
+  // In production, this should be set as an environment variable
+  const sessionSecret = process.env.SESSION_SECRET || randomBytes(32).toString('hex');
+  
   const sessionSettings: session.SessionOptions = {
-    secret: process.env.SESSION_SECRET || "tov-platform-session-secret",
+    secret: sessionSecret,
     resave: false,
     saveUninitialized: false,
     store: storage.sessionStore,
     cookie: {
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
     }
   };
 
@@ -46,14 +49,11 @@ export function setupAuth(app: Express) {
   app.use(passport.session());
 
   passport.use(
-    new LocalStrategy({
-      usernameField: 'email',
-      passwordField: 'password'
-    }, async (email, password, done) => {
+    new LocalStrategy(async (username, password, done) => {
       try {
-        const user = await storage.getUserByEmail(email);
+        const user = await storage.getUserByUsername(username);
         if (!user || !(await comparePasswords(password, user.password))) {
-          return done(null, false, { message: "Invalid email or password" });
+          return done(null, false);
         } else {
           return done(null, user);
         }
@@ -75,36 +75,30 @@ export function setupAuth(app: Express) {
 
   app.post("/api/register", async (req, res, next) => {
     try {
-      // Validate role
-      const role = req.body.role;
-      if (!Object.values(UserRole).includes(role)) {
-        return res.status(400).json({ message: "Invalid role specified" });
-      }
-
-      // Check if user with email already exists
-      const existingUserEmail = await storage.getUserByEmail(req.body.email);
-      if (existingUserEmail) {
-        return res.status(400).json({ message: "Email already in use" });
-      }
-
       // Check if username already exists
-      const existingUserName = await storage.getUserByUsername(req.body.username);
-      if (existingUserName) {
-        return res.status(400).json({ message: "Username already exists" });
+      const existingUserByUsername = await storage.getUserByUsername(req.body.username);
+      if (existingUserByUsername) {
+        return res.status(400).send("Username already exists");
+      }
+      
+      // Check if email already exists
+      const existingUserByEmail = await storage.getUserByEmail(req.body.email);
+      if (existingUserByEmail) {
+        return res.status(400).send("Email already exists");
       }
 
-      // Create the user
+      // Create the new user with hashed password
       const user = await storage.createUser({
         ...req.body,
         password: await hashPassword(req.body.password),
       });
 
-      // Remove password from response
-      const { password, ...userResponse } = user;
-
+      // Log the user in
       req.login(user, (err) => {
         if (err) return next(err);
-        res.status(201).json(userResponse);
+        // Return user data without the password
+        const { password, ...userWithoutPassword } = user;
+        res.status(201).json(userWithoutPassword);
       });
     } catch (error) {
       next(error);
@@ -113,20 +107,14 @@ export function setupAuth(app: Express) {
 
   app.post("/api/login", (req, res, next) => {
     passport.authenticate("local", (err, user, info) => {
-      if (err) {
-        return next(err);
-      }
-      if (!user) {
-        return res.status(401).json({ message: info?.message || "Authentication failed" });
-      }
+      if (err) return next(err);
+      if (!user) return res.status(401).json({ message: "Invalid username or password" });
+      
       req.login(user, (err) => {
-        if (err) {
-          return next(err);
-        }
-        
-        // Remove password from response
-        const { password, ...userResponse } = user;
-        return res.status(200).json(userResponse);
+        if (err) return next(err);
+        // Return user data without the password
+        const { password, ...userWithoutPassword } = user;
+        return res.status(200).json(userWithoutPassword);
       });
     })(req, res, next);
   });
@@ -140,9 +128,8 @@ export function setupAuth(app: Express) {
 
   app.get("/api/user", (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
-    
-    // Remove password from response
-    const { password, ...userResponse } = req.user;
-    res.json(userResponse);
+    // Return user data without the password
+    const { password, ...userWithoutPassword } = req.user as SelectUser;
+    res.json(userWithoutPassword);
   });
 }

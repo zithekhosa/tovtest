@@ -1,190 +1,200 @@
-import { pgTable, text, serial, integer, boolean, timestamp, json } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// User roles enum
+// User role types
 export const UserRole = {
-  LANDLORD: "landlord",
   TENANT: "tenant",
+  LANDLORD: "landlord",
   AGENCY: "agency",
-  MAINTENANCE: "maintenance"
+  MAINTENANCE: "maintenance",
 } as const;
 
-// User model
+export type UserRoleType = (typeof UserRole)[keyof typeof UserRole];
+
+// User table
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
   email: text("email").notNull().unique(),
-  name: text("name").notNull(),
-  role: text("role").notNull().$type<keyof typeof UserRole>(),
-  avatar: text("avatar"),
-  phoneNumber: text("phone_number"),
-  createdAt: timestamp("created_at").defaultNow(),
+  role: text("role").notNull().$type<UserRoleType>(),
+  phone: text("phone"),
+  profileImage: text("profile_image"),
 });
 
-export const insertUserSchema = createInsertSchema(users).omit({
-  id: true,
-  createdAt: true,
+export const insertUserSchema = createInsertSchema(users).pick({
+  username: true,
+  password: true,
+  firstName: true,
+  lastName: true,
+  email: true,
+  role: true,
+  phone: true,
+  profileImage: true,
 });
 
-// Property model
+// Property table
 export const properties = pgTable("properties", {
   id: serial("id").primaryKey(),
-  name: text("name").notNull(),
+  landlordId: integer("landlord_id").notNull(),
   address: text("address").notNull(),
   city: text("city").notNull(),
   state: text("state").notNull(),
   zipCode: text("zip_code").notNull(),
-  description: text("description"),
-  units: integer("units").notNull(),
-  ownerId: integer("owner_id").notNull(), // References users table (landlords)
-  images: json("images").$type<string[]>().default([]),
-  monthlyIncome: integer("monthly_income").default(0),
-  createdAt: timestamp("created_at").defaultNow(),
-});
-
-export const insertPropertySchema = createInsertSchema(properties).omit({
-  id: true,
-  createdAt: true,
-});
-
-// Units model (apartments or individual rental units)
-export const units = pgTable("units", {
-  id: serial("id").primaryKey(),
-  unitNumber: text("unit_number").notNull(),
-  propertyId: integer("property_id").notNull(),
+  propertyType: text("property_type").notNull(),
   bedrooms: integer("bedrooms").notNull(),
   bathrooms: integer("bathrooms").notNull(),
   squareFeet: integer("square_feet"),
-  monthlyRent: integer("monthly_rent").notNull(),
-  isOccupied: boolean("is_occupied").default(false),
-  currentTenantId: integer("current_tenant_id"),
+  rentAmount: integer("rent_amount").notNull(),
   description: text("description"),
-  images: json("images").$type<string[]>().default([]),
-  createdAt: timestamp("created_at").defaultNow(),
+  available: boolean("available").notNull().default(true),
+  images: jsonb("images").$type<string[]>(),
 });
 
-export const insertUnitSchema = createInsertSchema(units).omit({
-  id: true,
-  createdAt: true,
+export const insertPropertySchema = createInsertSchema(properties).pick({
+  landlordId: true,
+  address: true,
+  city: true,
+  state: true,
+  zipCode: true,
+  propertyType: true,
+  bedrooms: true,
+  bathrooms: true,
+  squareFeet: true,
+  rentAmount: true,
+  description: true,
+  available: true,
+  images: true,
 });
 
-// Lease model
+// Lease table
 export const leases = pgTable("leases", {
   id: serial("id").primaryKey(),
-  unitId: integer("unit_id").notNull(),
+  propertyId: integer("property_id").notNull(),
   tenantId: integer("tenant_id").notNull(),
-  landlordId: integer("landlord_id").notNull(),
   startDate: timestamp("start_date").notNull(),
   endDate: timestamp("end_date").notNull(),
-  monthlyRent: integer("monthly_rent").notNull(),
+  rentAmount: integer("rent_amount").notNull(),
   securityDeposit: integer("security_deposit").notNull(),
-  leaseDocument: text("lease_document"),
-  isActive: boolean("is_active").default(true),
-  createdAt: timestamp("created_at").defaultNow(),
+  documentUrl: text("document_url"),
+  active: boolean("active").notNull().default(true),
 });
 
-export const insertLeaseSchema = createInsertSchema(leases).omit({
-  id: true,
-  createdAt: true,
+export const insertLeaseSchema = createInsertSchema(leases).pick({
+  propertyId: true,
+  tenantId: true,
+  startDate: true,
+  endDate: true,
+  rentAmount: true,
+  securityDeposit: true,
+  documentUrl: true,
+  active: true,
 });
 
-// Payment model
+// Payments table
 export const payments = pgTable("payments", {
   id: serial("id").primaryKey(),
   leaseId: integer("lease_id").notNull(),
   tenantId: integer("tenant_id").notNull(),
   amount: integer("amount").notNull(),
   paymentDate: timestamp("payment_date").notNull(),
-  dueDate: timestamp("due_date").notNull(),
-  isPaid: boolean("is_paid").default(false),
-  paymentMethod: text("payment_method"),
-  notes: text("notes"),
-  createdAt: timestamp("created_at").defaultNow(),
+  paymentType: text("payment_type").notNull(),
+  description: text("description"),
 });
 
-export const insertPaymentSchema = createInsertSchema(payments).omit({
-  id: true,
-  createdAt: true,
+export const insertPaymentSchema = createInsertSchema(payments).pick({
+  leaseId: true,
+  tenantId: true,
+  amount: true,
+  paymentDate: true,
+  paymentType: true,
+  description: true,
 });
 
-// Maintenance request model
+// Maintenance Requests
 export const maintenanceRequests = pgTable("maintenance_requests", {
   id: serial("id").primaryKey(),
-  unitId: integer("unit_id").notNull(),
+  propertyId: integer("property_id").notNull(),
   tenantId: integer("tenant_id").notNull(),
   title: text("title").notNull(),
   description: text("description").notNull(),
-  priority: text("priority").notNull().$type<"low" | "medium" | "high" | "urgent">(),
-  status: text("status").notNull().$type<"pending" | "assigned" | "in_progress" | "completed" | "cancelled">().default("pending"),
-  images: json("images").$type<string[]>().default([]),
-  assignedTo: integer("assigned_to"), // References users table (maintenance providers)
-  submittedAt: timestamp("submitted_at").defaultNow(),
-  completedAt: timestamp("completed_at"),
+  status: text("status").notNull().default("pending"),
+  priority: text("priority").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at"),
+  assignedToId: integer("assigned_to_id"),
+  images: jsonb("images").$type<string[]>(),
 });
 
-export const insertMaintenanceRequestSchema = createInsertSchema(maintenanceRequests).omit({
-  id: true,
-  submittedAt: true,
-  completedAt: true,
+export const insertMaintenanceRequestSchema = createInsertSchema(maintenanceRequests).pick({
+  propertyId: true,
+  tenantId: true,
+  title: true,
+  description: true,
+  status: true,
+  priority: true,
+  assignedToId: true,
+  images: true,
 });
 
-// Document model
+// Documents
 export const documents = pgTable("documents", {
   id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  description: text("description"),
+  userId: integer("user_id").notNull(),
+  propertyId: integer("property_id"),
+  fileName: text("file_name").notNull(),
   fileUrl: text("file_url").notNull(),
   fileType: text("file_type").notNull(),
-  ownerId: integer("owner_id").notNull(), // References users table
-  propertyId: integer("property_id"), // Optional reference to property
-  unitId: integer("unit_id"), // Optional reference to unit
-  isPublic: boolean("is_public").default(false),
-  createdAt: timestamp("created_at").defaultNow(),
+  uploadedAt: timestamp("uploaded_at").notNull().defaultNow(),
+  documentType: text("document_type").notNull(),
 });
 
-export const insertDocumentSchema = createInsertSchema(documents).omit({
-  id: true,
-  createdAt: true,
+export const insertDocumentSchema = createInsertSchema(documents).pick({
+  userId: true,
+  propertyId: true,
+  fileName: true,
+  fileUrl: true,
+  fileType: true,
+  documentType: true,
 });
 
-// Message model
+// Messages
 export const messages = pgTable("messages", {
   id: serial("id").primaryKey(),
-  senderId: integer("sender_id").notNull(), // References users table
-  receiverId: integer("receiver_id").notNull(), // References users table
+  senderId: integer("sender_id").notNull(),
+  receiverId: integer("receiver_id").notNull(),
   content: text("content").notNull(),
-  isRead: boolean("is_read").default(false),
-  sentAt: timestamp("sent_at").defaultNow(),
+  sentAt: timestamp("sent_at").notNull().defaultNow(),
+  read: boolean("read").notNull().default(false),
 });
 
-export const insertMessageSchema = createInsertSchema(messages).omit({
-  id: true,
-  sentAt: true,
+export const insertMessageSchema = createInsertSchema(messages).pick({
+  senderId: true,
+  receiverId: true,
+  content: true,
 });
 
-// Type exports
-export type User = typeof users.$inferSelect;
+// Type definitions
 export type InsertUser = z.infer<typeof insertUserSchema>;
+export type User = typeof users.$inferSelect;
 
-export type Property = typeof properties.$inferSelect;
 export type InsertProperty = z.infer<typeof insertPropertySchema>;
+export type Property = typeof properties.$inferSelect;
 
-export type Unit = typeof units.$inferSelect;
-export type InsertUnit = z.infer<typeof insertUnitSchema>;
-
-export type Lease = typeof leases.$inferSelect;
 export type InsertLease = z.infer<typeof insertLeaseSchema>;
+export type Lease = typeof leases.$inferSelect;
 
-export type Payment = typeof payments.$inferSelect;
 export type InsertPayment = z.infer<typeof insertPaymentSchema>;
+export type Payment = typeof payments.$inferSelect;
 
-export type MaintenanceRequest = typeof maintenanceRequests.$inferSelect;
 export type InsertMaintenanceRequest = z.infer<typeof insertMaintenanceRequestSchema>;
+export type MaintenanceRequest = typeof maintenanceRequests.$inferSelect;
 
-export type Document = typeof documents.$inferSelect;
 export type InsertDocument = z.infer<typeof insertDocumentSchema>;
+export type Document = typeof documents.$inferSelect;
 
-export type Message = typeof messages.$inferSelect;
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
+export type Message = typeof messages.$inferSelect;

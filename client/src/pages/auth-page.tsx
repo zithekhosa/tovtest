@@ -1,105 +1,314 @@
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
-import { AuthForms } from "@/components/auth/auth-forms";
-import { Building, Shield, User, Tool, MessageSquare } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { loginSchema, registerSchema } from "@/hooks/use-auth";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { UserRoleType } from "@shared/schema";
+
+type AuthTab = "login" | "register";
+type UserTab = "tenant" | "landlord" | "agency" | "maintenance";
 
 export default function AuthPage() {
-  const { user, isLoading } = useAuth();
-  const [, navigate] = useLocation();
+  const [authTab, setAuthTab] = useState<AuthTab>("login");
+  const [userTab, setUserTab] = useState<UserTab>("tenant");
+  const { user, loginMutation, registerMutation, userRoles } = useAuth();
+  const [location, navigate] = useLocation();
 
-  // Redirect to dashboard if already logged in
+  // Create forms
+  const loginForm = useForm<z.infer<typeof loginSchema>>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      username: "",
+      password: "",
+    },
+  });
+
+  const registerForm = useForm<z.infer<typeof registerSchema>>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      username: "",
+      password: "",
+      confirmPassword: "",
+      firstName: "",
+      lastName: "",
+      email: "",
+      role: userTab as UserRoleType,
+      phone: "",
+      profileImage: "",
+    },
+  });
+
+  // If user is already logged in, redirect to appropriate dashboard
   useEffect(() => {
-    if (user && !isLoading) {
-      navigate("/dashboard");
+    if (user) {
+      const roleRedirectMap: Record<string, string> = {
+        tenant: "/tenant/dashboard",
+        landlord: "/landlord/dashboard",
+        agency: "/agency/dashboard",
+        maintenance: "/maintenance/dashboard"
+      };
+      navigate(roleRedirectMap[user.role] || "/");
     }
-  }, [user, isLoading, navigate]);
+  }, [user, navigate]);
+
+  // Update the role in register form when user tab changes
+  useEffect(() => {
+    registerForm.setValue("role", userTab as UserRoleType);
+  }, [userTab, registerForm]);
+
+  const onLoginSubmit = (data: z.infer<typeof loginSchema>) => {
+    loginMutation.mutate(data);
+  };
+
+  const onRegisterSubmit = (data: z.infer<typeof registerSchema>) => {
+    registerMutation.mutate(data);
+  };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row">
-      {/* Auth Form Column */}
-      <div className="w-full md:w-1/2 p-6 md:p-12 flex items-center justify-center">
-        <div className="w-full max-w-md">
-          <div className="mb-8">
-            <div className="flex items-center space-x-2 mb-6">
-              <div className="w-10 h-10 bg-primary rounded-md flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-xl">T</span>
-              </div>
-              <h1 className="text-2xl font-bold text-gray-900">TOV Platform</h1>
-            </div>
-            <h2 className="text-3xl font-bold text-gray-900">Welcome</h2>
-            <p className="text-gray-500 mt-2">
-              Sign in to your account or create a new one to get started.
-            </p>
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12 bg-gray-50">
+      <div className="w-full max-w-md">
+        {/* Logo */}
+        <div className="flex justify-center mb-8">
+          <div className="flex items-center justify-center h-14 w-14 rounded-xl bg-primary text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+            </svg>
           </div>
-          
-          <AuthForms />
         </div>
-      </div>
-      
-      {/* Hero Column */}
-      <div className="hidden md:flex md:w-1/2 bg-primary-50 p-12 flex-col justify-center">
-        <div className="max-w-md mx-auto">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6">
-            Modern Property Management Made Simple
-          </h2>
+        
+        <h1 className="text-3xl font-bold text-center mb-2">TOV Property Management</h1>
+        <p className="text-gray-500 text-center mb-8">
+          {authTab === "login" ? "Sign in to your account" : "Create a new account"}
+        </p>
+        
+        {/* Auth Type Tabs */}
+        <Tabs defaultValue="login" value={authTab} onValueChange={(value) => setAuthTab(value as AuthTab)} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsTrigger value="login">Login</TabsTrigger>
+            <TabsTrigger value="register">Register</TabsTrigger>
+          </TabsList>
           
-          <div className="space-y-6">
-            <div className="flex items-start space-x-4">
-              <div className="bg-white p-3 rounded-lg shadow-sm">
-                <Building className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900">Property Management</h3>
-                <p className="text-gray-600 mt-1">
-                  Efficiently manage your properties, units, and leases in one place.
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex items-start space-x-4">
-              <div className="bg-white p-3 rounded-lg shadow-sm">
-                <User className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900">Tenant Portal</h3>
-                <p className="text-gray-600 mt-1">
-                  Pay rent, submit maintenance requests, and access documents easily.
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex items-start space-x-4">
-              <div className="bg-white p-3 rounded-lg shadow-sm">
-                <Tool className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900">Maintenance Management</h3>
-                <p className="text-gray-600 mt-1">
-                  Streamline maintenance requests and connect with service providers.
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex items-start space-x-4">
-              <div className="bg-white p-3 rounded-lg shadow-sm">
-                <MessageSquare className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900">Communication</h3>
-                <p className="text-gray-600 mt-1">
-                  Seamless communication between landlords, tenants, and service providers.
-                </p>
-              </div>
-            </div>
+          {/* User Role Tabs */}
+          <div className="flex mb-6 border-b border-gray-200">
+            <button 
+              className={`px-4 py-2 font-medium ${userTab === 'tenant' ? 'text-primary relative after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-0.5 after:bg-primary after:rounded-full' : 'text-gray-500'}`} 
+              onClick={() => setUserTab('tenant')}
+            >
+              Tenant
+            </button>
+            <button 
+              className={`px-4 py-2 font-medium ${userTab === 'landlord' ? 'text-primary relative after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-0.5 after:bg-primary after:rounded-full' : 'text-gray-500'}`} 
+              onClick={() => setUserTab('landlord')}
+            >
+              Landlord
+            </button>
+            <button 
+              className={`px-4 py-2 font-medium ${userTab === 'agency' ? 'text-primary relative after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-0.5 after:bg-primary after:rounded-full' : 'text-gray-500'}`} 
+              onClick={() => setUserTab('agency')}
+            >
+              Agency
+            </button>
+            <button 
+              className={`px-4 py-2 font-medium ${userTab === 'maintenance' ? 'text-primary relative after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-0.5 after:bg-primary after:rounded-full' : 'text-gray-500'}`} 
+              onClick={() => setUserTab('maintenance')}
+            >
+              Maintenance
+            </button>
           </div>
           
-          <div className="mt-10 pt-6 border-t border-gray-200">
-            <p className="text-sm text-gray-500">
-              TOV is a complete property management solution designed for landlords,
-              tenants, property agencies, and maintenance providers.
-            </p>
-          </div>
+          {/* Login Form */}
+          <TabsContent value="login">
+            <Form {...loginForm}>
+              <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
+                <FormField
+                  control={loginForm.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Username</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter your username" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={loginForm.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex items-center justify-between">
+                        <FormLabel>Password</FormLabel>
+                        <a href="#" className="text-sm font-medium text-primary hover:text-primary/80">
+                          Forgot password?
+                        </a>
+                      </div>
+                      <FormControl>
+                        <Input type="password" placeholder="••••••••" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <div className="flex items-center">
+                  <input
+                    id="remember-me"
+                    name="remember-me"
+                    type="checkbox"
+                    className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                  />
+                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+                    Remember me
+                  </label>
+                </div>
+                
+                <Button 
+                  type="submit" 
+                  className="w-full" 
+                  disabled={loginMutation.isPending}
+                >
+                  {loginMutation.isPending ? "Signing in..." : "Sign in"}
+                </Button>
+              </form>
+            </Form>
+          </TabsContent>
+          
+          {/* Register Form */}
+          <TabsContent value="register">
+            <Form {...registerForm}>
+              <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={registerForm.control}
+                    name="firstName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>First Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="John" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={registerForm.control}
+                    name="lastName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Last Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Doe" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                <FormField
+                  control={registerForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input type="email" placeholder="you@example.com" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={registerForm.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Username</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Choose a username" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={registerForm.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Input type="password" placeholder="••••••••" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={registerForm.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Confirm Password</FormLabel>
+                      <FormControl>
+                        <Input type="password" placeholder="••••••••" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={registerForm.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone (optional)</FormLabel>
+                      <FormControl>
+                        <Input placeholder="+1 (555) 123-4567" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <Button 
+                  type="submit" 
+                  className="w-full" 
+                  disabled={registerMutation.isPending}
+                >
+                  {registerMutation.isPending ? "Creating account..." : "Create account"}
+                </Button>
+              </form>
+            </Form>
+          </TabsContent>
+        </Tabs>
+        
+        <div className="mt-6 text-center">
+          <span className="text-sm text-gray-600">
+            {authTab === "login" ? "Don't have an account?" : "Already have an account?"}
+          </span>
+          <button 
+            className="ml-1 text-sm font-medium text-primary hover:text-primary/80"
+            onClick={() => setAuthTab(authTab === "login" ? "register" : "login")}
+          >
+            {authTab === "login" ? "Sign up" : "Sign in"}
+          </button>
         </div>
       </div>
     </div>

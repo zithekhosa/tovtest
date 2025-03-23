@@ -3,433 +3,592 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { z } from "zod";
-import { insertPropertySchema, insertUnitSchema, insertLeaseSchema, insertPaymentSchema, insertMaintenanceRequestSchema, insertDocumentSchema, insertMessageSchema } from "@shared/schema";
+import { insertMaintenanceRequestSchema, insertPropertySchema, insertLeaseSchema, insertPaymentSchema, insertDocumentSchema, insertMessageSchema } from "@shared/schema";
 
-export function registerRoutes(app: Express): Server {
-  // Setup authentication routes
+export async function registerRoutes(app: Express): Promise<Server> {
+  // Set up authentication routes
   setupAuth(app);
 
-  // Property routes
+  // API routes
+  // =====================
+  
+  // Properties
   app.get("/api/properties", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
-
-    const properties = await storage.getAllProperties();
-    res.json(properties);
-  });
-
-  app.get("/api/properties/user", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
     
-    if (req.user.role === "landlord") {
-      const properties = await storage.getPropertiesByOwner(req.user.id);
+    try {
+      const properties = await storage.getProperties();
       res.json(properties);
-    } else {
-      res.status(403).json({ message: "Access denied" });
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching properties" });
     }
   });
-
+  
+  app.get("/api/properties/available", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    try {
+      const properties = await storage.getAvailableProperties();
+      res.json(properties);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching available properties" });
+    }
+  });
+  
+  app.get("/api/properties/landlord", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    if (req.user.role !== 'landlord') {
+      return res.status(403).json({ message: "Access denied" });
+    }
+    
+    try {
+      const properties = await storage.getPropertiesByLandlord(req.user.id);
+      res.json(properties);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching landlord properties" });
+    }
+  });
+  
   app.get("/api/properties/:id", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     
-    const property = await storage.getProperty(Number(req.params.id));
-    if (!property) {
-      return res.status(404).json({ message: "Property not found" });
+    try {
+      const property = await storage.getProperty(parseInt(req.params.id));
+      if (!property) {
+        return res.status(404).json({ message: "Property not found" });
+      }
+      res.json(property);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching property" });
     }
-    
-    res.json(property);
   });
-
+  
   app.post("/api/properties", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     
-    if (req.user.role !== "landlord" && req.user.role !== "agency") {
-      return res.status(403).json({ message: "Only landlords and agencies can create properties" });
+    if (req.user.role !== 'landlord' && req.user.role !== 'agency') {
+      return res.status(403).json({ message: "Access denied" });
     }
     
     try {
-      const validatedData = insertPropertySchema.parse({
+      const propertyData = insertPropertySchema.parse({
         ...req.body,
-        ownerId: req.user.id
+        landlordId: req.user.role === 'landlord' ? req.user.id : req.body.landlordId
       });
       
-      const property = await storage.createProperty(validatedData);
+      const property = await storage.createProperty(propertyData);
       res.status(201).json(property);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        res.status(400).json({ message: "Invalid property data", errors: error.errors });
-      } else {
-        res.status(500).json({ message: "Failed to create property" });
+        return res.status(400).json({ message: "Invalid property data", errors: error.errors });
       }
+      res.status(500).json({ message: "Error creating property" });
     }
   });
-
-  app.put("/api/properties/:id", async (req, res) => {
+  
+  app.patch("/api/properties/:id", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     
-    const propertyId = Number(req.params.id);
-    const property = await storage.getProperty(propertyId);
-    
-    if (!property) {
-      return res.status(404).json({ message: "Property not found" });
-    }
-    
-    if (property.ownerId !== req.user.id && req.user.role !== "agency") {
-      return res.status(403).json({ message: "You don't have permission to update this property" });
-    }
-    
     try {
-      const validatedData = insertPropertySchema.partial().parse(req.body);
-      const updatedProperty = await storage.updateProperty(propertyId, validatedData);
+      const property = await storage.getProperty(parseInt(req.params.id));
+      
+      if (!property) {
+        return res.status(404).json({ message: "Property not found" });
+      }
+      
+      // Only landlord of the property or agency can update it
+      if (req.user.role === 'landlord' && property.landlordId !== req.user.id && req.user.role !== 'agency') {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const updatedProperty = await storage.updateProperty(
+        parseInt(req.params.id),
+        req.body
+      );
+      
       res.json(updatedProperty);
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        res.status(400).json({ message: "Invalid property data", errors: error.errors });
-      } else {
-        res.status(500).json({ message: "Failed to update property" });
-      }
+      res.status(500).json({ message: "Error updating property" });
     }
   });
-
-  app.delete("/api/properties/:id", async (req, res) => {
+  
+  // Leases
+  app.get("/api/leases/tenant", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     
-    const propertyId = Number(req.params.id);
-    const property = await storage.getProperty(propertyId);
-    
-    if (!property) {
-      return res.status(404).json({ message: "Property not found" });
-    }
-    
-    if (property.ownerId !== req.user.id) {
-      return res.status(403).json({ message: "You don't have permission to delete this property" });
-    }
-    
-    const deleted = await storage.deleteProperty(propertyId);
-    if (deleted) {
-      res.status(204).send();
-    } else {
-      res.status(500).json({ message: "Failed to delete property" });
-    }
-  });
-
-  // Unit routes
-  app.get("/api/properties/:propertyId/units", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
-    
-    const propertyId = Number(req.params.propertyId);
-    const property = await storage.getProperty(propertyId);
-    
-    if (!property) {
-      return res.status(404).json({ message: "Property not found" });
-    }
-    
-    const units = await storage.getUnitsByProperty(propertyId);
-    res.json(units);
-  });
-
-  app.post("/api/properties/:propertyId/units", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
-    
-    const propertyId = Number(req.params.propertyId);
-    const property = await storage.getProperty(propertyId);
-    
-    if (!property) {
-      return res.status(404).json({ message: "Property not found" });
-    }
-    
-    if (property.ownerId !== req.user.id && req.user.role !== "agency") {
-      return res.status(403).json({ message: "You don't have permission to add units to this property" });
+    if (req.user.role !== 'tenant') {
+      return res.status(403).json({ message: "Access denied" });
     }
     
     try {
-      const validatedData = insertUnitSchema.parse({
-        ...req.body,
-        propertyId
-      });
-      
-      const unit = await storage.createUnit(validatedData);
-      res.status(201).json(unit);
+      const leases = await storage.getLeasesByTenant(req.user.id);
+      res.json(leases);
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        res.status(400).json({ message: "Invalid unit data", errors: error.errors });
-      } else {
-        res.status(500).json({ message: "Failed to create unit" });
-      }
+      res.status(500).json({ message: "Error fetching tenant leases" });
     }
   });
-
-  // Maintenance Request routes
-  app.get("/api/maintenance-requests", async (req, res) => {
+  
+  app.get("/api/leases/property/:propertyId", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
-    
-    let requests;
-    
-    switch (req.user.role) {
-      case "landlord":
-        requests = await storage.getMaintenanceRequestsByLandlord(req.user.id);
-        break;
-      case "tenant":
-        requests = await storage.getMaintenanceRequestsByTenant(req.user.id);
-        break;
-      case "maintenance":
-        requests = await storage.getMaintenanceRequestsByAssignee(req.user.id);
-        break;
-      default:
-        return res.status(403).json({ message: "Access denied" });
-    }
-    
-    res.json(requests);
-  });
-
-  app.post("/api/maintenance-requests", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
-    
-    if (req.user.role !== "tenant") {
-      return res.status(403).json({ message: "Only tenants can create maintenance requests" });
-    }
     
     try {
-      const validatedData = insertMaintenanceRequestSchema.parse({
-        ...req.body,
-        tenantId: req.user.id,
-      });
+      const property = await storage.getProperty(parseInt(req.params.propertyId));
       
-      const request = await storage.createMaintenanceRequest(validatedData);
-      res.status(201).json(request);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        res.status(400).json({ message: "Invalid request data", errors: error.errors });
-      } else {
-        res.status(500).json({ message: "Failed to create maintenance request" });
+      if (!property) {
+        return res.status(404).json({ message: "Property not found" });
       }
-    }
-  });
-
-  app.put("/api/maintenance-requests/:id", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
-    
-    const requestId = Number(req.params.id);
-    const request = await storage.getMaintenanceRequest(requestId);
-    
-    if (!request) {
-      return res.status(404).json({ message: "Maintenance request not found" });
-    }
-    
-    // Allow landlords to assign and update status, maintenance to update status
-    if (req.user.role === "landlord") {
-      try {
-        const validatedData = insertMaintenanceRequestSchema.partial().parse(req.body);
-        const updatedRequest = await storage.updateMaintenanceRequest(requestId, validatedData);
-        res.json(updatedRequest);
-      } catch (error) {
-        if (error instanceof z.ZodError) {
-          res.status(400).json({ message: "Invalid request data", errors: error.errors });
-        } else {
-          res.status(500).json({ message: "Failed to update maintenance request" });
-        }
-      }
-    } else if (req.user.role === "maintenance" && request.assignedTo === req.user.id) {
-      try {
-        // Maintenance providers can only update status
-        const validatedData = insertMaintenanceRequestSchema.pick({ status: true }).parse(req.body);
-        const updatedRequest = await storage.updateMaintenanceRequest(requestId, validatedData);
-        res.json(updatedRequest);
-      } catch (error) {
-        if (error instanceof z.ZodError) {
-          res.status(400).json({ message: "Invalid request data", errors: error.errors });
-        } else {
-          res.status(500).json({ message: "Failed to update maintenance request" });
-        }
-      }
-    } else {
-      res.status(403).json({ message: "You don't have permission to update this request" });
-    }
-  });
-
-  // Lease routes
-  app.get("/api/leases", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
-    
-    let leases;
-    
-    switch (req.user.role) {
-      case "landlord":
-        leases = await storage.getLeasesByLandlord(req.user.id);
-        break;
-      case "tenant":
-        leases = await storage.getLeasesByTenant(req.user.id);
-        break;
-      default:
+      
+      // Only landlord of the property or agency can view its leases
+      if (req.user.role === 'landlord' && property.landlordId !== req.user.id && req.user.role !== 'agency') {
         return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const leases = await storage.getLeasesByProperty(parseInt(req.params.propertyId));
+      res.json(leases);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching property leases" });
     }
-    
-    res.json(leases);
   });
-
+  
+  app.get("/api/leases/:id", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    try {
+      const lease = await storage.getLease(parseInt(req.params.id));
+      
+      if (!lease) {
+        return res.status(404).json({ message: "Lease not found" });
+      }
+      
+      // Check authorization
+      const property = await storage.getProperty(lease.propertyId);
+      
+      if (!property) {
+        return res.status(404).json({ message: "Property not found" });
+      }
+      
+      const isAuthorized = 
+        req.user.role === 'tenant' && lease.tenantId === req.user.id ||
+        req.user.role === 'landlord' && property.landlordId === req.user.id ||
+        req.user.role === 'agency';
+      
+      if (!isAuthorized) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      res.json(lease);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching lease" });
+    }
+  });
+  
   app.post("/api/leases", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     
-    if (req.user.role !== "landlord") {
-      return res.status(403).json({ message: "Only landlords can create leases" });
+    if (req.user.role !== 'landlord' && req.user.role !== 'agency') {
+      return res.status(403).json({ message: "Access denied" });
     }
     
     try {
-      const validatedData = insertLeaseSchema.parse({
-        ...req.body,
-        landlordId: req.user.id,
-      });
+      const property = await storage.getProperty(req.body.propertyId);
       
-      const lease = await storage.createLease(validatedData);
+      if (!property) {
+        return res.status(404).json({ message: "Property not found" });
+      }
       
-      // Update unit with tenant information
-      await storage.updateUnit(validatedData.unitId, {
-        isOccupied: true,
-        currentTenantId: validatedData.tenantId
-      });
+      // Check authorization for landlord
+      if (req.user.role === 'landlord' && property.landlordId !== req.user.id) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const leaseData = insertLeaseSchema.parse(req.body);
+      const lease = await storage.createLease(leaseData);
+      
+      // Update property availability
+      await storage.updateProperty(property.id, { available: false });
       
       res.status(201).json(lease);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        res.status(400).json({ message: "Invalid lease data", errors: error.errors });
-      } else {
-        res.status(500).json({ message: "Failed to create lease" });
+        return res.status(400).json({ message: "Invalid lease data", errors: error.errors });
       }
+      res.status(500).json({ message: "Error creating lease" });
     }
   });
-
-  // Payment routes
-  app.get("/api/payments", async (req, res) => {
+  
+  // Payments
+  app.get("/api/payments/tenant", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     
-    let payments;
-    
-    switch (req.user.role) {
-      case "landlord":
-        // This is inefficient but works for memory storage
-        const leases = await storage.getLeasesByLandlord(req.user.id);
-        payments = [];
-        for (const lease of leases) {
-          const leasePayments = await storage.getPaymentsByLease(lease.id);
-          payments.push(...leasePayments);
-        }
-        break;
-      case "tenant":
-        payments = await storage.getPaymentsByTenant(req.user.id);
-        break;
-      default:
-        return res.status(403).json({ message: "Access denied" });
-    }
-    
-    res.json(payments);
-  });
-
-  app.post("/api/payments", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
-    
-    // Both tenants and landlords can create payment records
-    if (req.user.role !== "tenant" && req.user.role !== "landlord") {
-      return res.status(403).json({ message: "Only tenants and landlords can create payments" });
+    if (req.user.role !== 'tenant') {
+      return res.status(403).json({ message: "Access denied" });
     }
     
     try {
-      let validatedData;
+      const payments = await storage.getPaymentsByTenant(req.user.id);
+      res.json(payments);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching payments" });
+    }
+  });
+  
+  app.get("/api/payments/lease/:leaseId", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    try {
+      const lease = await storage.getLease(parseInt(req.params.leaseId));
       
-      if (req.user.role === "tenant") {
-        validatedData = insertPaymentSchema.parse({
-          ...req.body,
-          tenantId: req.user.id,
-        });
-      } else {
-        validatedData = insertPaymentSchema.parse(req.body);
+      if (!lease) {
+        return res.status(404).json({ message: "Lease not found" });
       }
       
-      const payment = await storage.createPayment(validatedData);
+      // Check authorization
+      const property = await storage.getProperty(lease.propertyId);
+      
+      if (!property) {
+        return res.status(404).json({ message: "Property not found" });
+      }
+      
+      const isAuthorized = 
+        req.user.role === 'tenant' && lease.tenantId === req.user.id ||
+        req.user.role === 'landlord' && property.landlordId === req.user.id ||
+        req.user.role === 'agency';
+      
+      if (!isAuthorized) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const payments = await storage.getPaymentsByLease(parseInt(req.params.leaseId));
+      res.json(payments);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching lease payments" });
+    }
+  });
+  
+  app.post("/api/payments", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    if (req.user.role !== 'tenant') {
+      return res.status(403).json({ message: "Access denied" });
+    }
+    
+    try {
+      const lease = await storage.getLease(req.body.leaseId);
+      
+      if (!lease) {
+        return res.status(404).json({ message: "Lease not found" });
+      }
+      
+      // Check that tenant is on the lease
+      if (lease.tenantId !== req.user.id) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const paymentData = insertPaymentSchema.parse({
+        ...req.body,
+        tenantId: req.user.id,
+        paymentDate: new Date()
+      });
+      
+      const payment = await storage.createPayment(paymentData);
       res.status(201).json(payment);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        res.status(400).json({ message: "Invalid payment data", errors: error.errors });
-      } else {
-        res.status(500).json({ message: "Failed to create payment" });
+        return res.status(400).json({ message: "Invalid payment data", errors: error.errors });
       }
+      res.status(500).json({ message: "Error processing payment" });
     }
   });
-
-  // Document routes
-  app.get("/api/documents", async (req, res) => {
+  
+  // Maintenance Requests
+  app.get("/api/maintenance/tenant", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     
-    const documents = await storage.getDocumentsByOwner(req.user.id);
-    res.json(documents);
+    if (req.user.role !== 'tenant') {
+      return res.status(403).json({ message: "Access denied" });
+    }
+    
+    try {
+      const requests = await storage.getMaintenanceRequestsByTenant(req.user.id);
+      res.json(requests);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching maintenance requests" });
+    }
   });
-
+  
+  app.get("/api/maintenance/property/:propertyId", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    try {
+      const property = await storage.getProperty(parseInt(req.params.propertyId));
+      
+      if (!property) {
+        return res.status(404).json({ message: "Property not found" });
+      }
+      
+      // Check authorization
+      const isAuthorized = 
+        req.user.role === 'landlord' && property.landlordId === req.user.id ||
+        req.user.role === 'agency' || 
+        req.user.role === 'maintenance';
+      
+      if (!isAuthorized) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const requests = await storage.getMaintenanceRequestsByProperty(parseInt(req.params.propertyId));
+      res.json(requests);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching property maintenance requests" });
+    }
+  });
+  
+  app.get("/api/maintenance/assigned", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    if (req.user.role !== 'maintenance') {
+      return res.status(403).json({ message: "Access denied" });
+    }
+    
+    try {
+      const requests = await storage.getMaintenanceRequestsByAssignee(req.user.id);
+      res.json(requests);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching assigned maintenance requests" });
+    }
+  });
+  
+  app.post("/api/maintenance", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    if (req.user.role !== 'tenant') {
+      return res.status(403).json({ message: "Access denied" });
+    }
+    
+    try {
+      // Check if there's an active lease for the property for this tenant
+      const leases = await storage.getLeasesByTenant(req.user.id);
+      const activeLease = leases.find(lease => 
+        lease.propertyId === req.body.propertyId && lease.active === true
+      );
+      
+      if (!activeLease) {
+        return res.status(403).json({ message: "No active lease for this property" });
+      }
+      
+      const requestData = insertMaintenanceRequestSchema.parse({
+        ...req.body,
+        tenantId: req.user.id,
+        status: "pending"
+      });
+      
+      const request = await storage.createMaintenanceRequest(requestData);
+      res.status(201).json(request);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid request data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Error creating maintenance request" });
+    }
+  });
+  
+  app.patch("/api/maintenance/:id", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    try {
+      const request = await storage.getMaintenanceRequest(parseInt(req.params.id));
+      
+      if (!request) {
+        return res.status(404).json({ message: "Maintenance request not found" });
+      }
+      
+      // Check authorization
+      const property = await storage.getProperty(request.propertyId);
+      
+      if (!property) {
+        return res.status(404).json({ message: "Property not found" });
+      }
+      
+      const isAuthorized = 
+        req.user.role === 'landlord' && property.landlordId === req.user.id ||
+        req.user.role === 'agency' || 
+        req.user.role === 'maintenance' && (
+          request.assignedToId === req.user.id || 
+          !request.assignedToId // Allow assignment of unassigned requests
+        );
+      
+      if (!isAuthorized) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const updatedRequest = await storage.updateMaintenanceRequest(
+        parseInt(req.params.id),
+        req.body
+      );
+      
+      res.json(updatedRequest);
+    } catch (error) {
+      res.status(500).json({ message: "Error updating maintenance request" });
+    }
+  });
+  
+  // Documents
+  app.get("/api/documents/user", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    try {
+      const documents = await storage.getDocumentsByUser(req.user.id);
+      res.json(documents);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching user documents" });
+    }
+  });
+  
+  app.get("/api/documents/property/:propertyId", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    try {
+      const property = await storage.getProperty(parseInt(req.params.propertyId));
+      
+      if (!property) {
+        return res.status(404).json({ message: "Property not found" });
+      }
+      
+      // Check for lease if tenant
+      if (req.user.role === 'tenant') {
+        const leases = await storage.getLeasesByTenant(req.user.id);
+        const hasLease = leases.some(lease => 
+          lease.propertyId === parseInt(req.params.propertyId) && lease.active === true
+        );
+        
+        if (!hasLease) {
+          return res.status(403).json({ message: "Access denied" });
+        }
+      }
+      
+      // Check if landlord owns property
+      if (req.user.role === 'landlord' && property.landlordId !== req.user.id) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const documents = await storage.getDocumentsByProperty(parseInt(req.params.propertyId));
+      res.json(documents);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching property documents" });
+    }
+  });
+  
   app.post("/api/documents", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     
     try {
-      const validatedData = insertDocumentSchema.parse({
+      // If document is for a property, check authorization
+      if (req.body.propertyId) {
+        const property = await storage.getProperty(req.body.propertyId);
+        
+        if (!property) {
+          return res.status(404).json({ message: "Property not found" });
+        }
+        
+        if (req.user.role === 'landlord' && property.landlordId !== req.user.id) {
+          return res.status(403).json({ message: "Access denied" });
+        }
+        
+        if (req.user.role === 'tenant') {
+          const leases = await storage.getLeasesByTenant(req.user.id);
+          const hasLease = leases.some(lease => 
+            lease.propertyId === req.body.propertyId && lease.active === true
+          );
+          
+          if (!hasLease) {
+            return res.status(403).json({ message: "Access denied" });
+          }
+        }
+      }
+      
+      const documentData = insertDocumentSchema.parse({
         ...req.body,
-        ownerId: req.user.id,
+        userId: req.user.id
       });
       
-      const document = await storage.createDocument(validatedData);
+      const document = await storage.createDocument(documentData);
       res.status(201).json(document);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        res.status(400).json({ message: "Invalid document data", errors: error.errors });
-      } else {
-        res.status(500).json({ message: "Failed to create document" });
+        return res.status(400).json({ message: "Invalid document data", errors: error.errors });
       }
+      res.status(500).json({ message: "Error uploading document" });
     }
   });
-
-  // Message routes
-  app.get("/api/messages/:userId", async (req, res) => {
+  
+  // Messages
+  app.get("/api/messages/conversation/:userId", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     
-    const otherUserId = Number(req.params.userId);
-    const messages = await storage.getMessagesBetweenUsers(req.user.id, otherUserId);
-    
-    res.json(messages);
+    try {
+      const otherUser = await storage.getUser(parseInt(req.params.userId));
+      
+      if (!otherUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const conversation = await storage.getConversation(req.user.id, parseInt(req.params.userId));
+      res.json(conversation);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching conversation" });
+    }
   });
-
+  
   app.post("/api/messages", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     
     try {
-      const validatedData = insertMessageSchema.parse({
+      const receiver = await storage.getUser(req.body.receiverId);
+      
+      if (!receiver) {
+        return res.status(404).json({ message: "Receiver not found" });
+      }
+      
+      const messageData = insertMessageSchema.parse({
         ...req.body,
-        senderId: req.user.id,
+        senderId: req.user.id
       });
       
-      const message = await storage.createMessage(validatedData);
+      const message = await storage.createMessage(messageData);
       res.status(201).json(message);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        res.status(400).json({ message: "Invalid message data", errors: error.errors });
-      } else {
-        res.status(500).json({ message: "Failed to send message" });
+        return res.status(400).json({ message: "Invalid message data", errors: error.errors });
       }
+      res.status(500).json({ message: "Error sending message" });
     }
   });
-
+  
   app.patch("/api/messages/:id/read", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     
-    const messageId = Number(req.params.id);
-    const message = await storage.getMessage(messageId);
-    
-    if (!message) {
-      return res.status(404).json({ message: "Message not found" });
+    try {
+      const message = await storage.getMessage(parseInt(req.params.id));
+      
+      if (!message) {
+        return res.status(404).json({ message: "Message not found" });
+      }
+      
+      // Only receiver can mark as read
+      if (message.receiverId !== req.user.id) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      
+      const updatedMessage = await storage.markMessageAsRead(parseInt(req.params.id));
+      res.json(updatedMessage);
+    } catch (error) {
+      res.status(500).json({ message: "Error marking message as read" });
     }
-    
-    if (message.receiverId !== req.user.id) {
-      return res.status(403).json({ message: "You don't have permission to mark this message as read" });
-    }
-    
-    const updatedMessage = await storage.markMessageAsRead(messageId);
-    res.json(updatedMessage);
   });
 
+  // Create HTTP server
   const httpServer = createServer(app);
+
   return httpServer;
 }

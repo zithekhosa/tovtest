@@ -4,40 +4,60 @@ import {
   useMutation,
   UseMutationResult,
 } from "@tanstack/react-query";
-import { insertUserSchema, User, InsertUser } from "@shared/schema";
-import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
+import { User, insertUserSchema, UserRole } from "@shared/schema";
+import { getQueryFn, apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+
+// Extended schemas for frontend validation
+export const loginSchema = z.object({
+  username: z.string().min(1, "Username is required"),
+  password: z.string().min(1, "Password is required"),
+});
+
+export const registerSchema = insertUserSchema.extend({
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  confirmPassword: z.string(),
+}).refine(data => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+});
 
 type AuthContextType = {
-  user: User | null;
+  user: Omit<User, "password"> | null;
   isLoading: boolean;
   error: Error | null;
-  loginMutation: UseMutationResult<User, Error, LoginData>;
+  loginMutation: UseMutationResult<Omit<User, "password">, Error, z.infer<typeof loginSchema>>;
   logoutMutation: UseMutationResult<void, Error, void>;
-  registerMutation: UseMutationResult<User, Error, InsertUser>;
+  registerMutation: UseMutationResult<Omit<User, "password">, Error, z.infer<typeof registerSchema>>;
+  userRoles: typeof UserRole;
 };
 
-type LoginData = Pick<InsertUser, "email" | "password">;
-
 export const AuthContext = createContext<AuthContextType | null>(null);
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
   const {
     data: user,
     error,
     isLoading,
-  } = useQuery<User | null, Error>({
+  } = useQuery<Omit<User, "password"> | null, Error>({
     queryKey: ["/api/user"],
     queryFn: getQueryFn({ on401: "returnNull" }),
   });
 
   const loginMutation = useMutation({
-    mutationFn: async (credentials: LoginData) => {
+    mutationFn: async (credentials: z.infer<typeof loginSchema>) => {
       const res = await apiRequest("POST", "/api/login", credentials);
       return await res.json();
     },
-    onSuccess: (user: User) => {
+    onSuccess: (user: Omit<User, "password">) => {
       queryClient.setQueryData(["/api/user"], user);
+      toast({
+        title: "Logged in successfully",
+        description: `Welcome back, ${user.firstName}!`,
+      });
     },
     onError: (error: Error) => {
       toast({
@@ -49,12 +69,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   const registerMutation = useMutation({
-    mutationFn: async (credentials: InsertUser) => {
-      const res = await apiRequest("POST", "/api/register", credentials);
+    mutationFn: async (userData: z.infer<typeof registerSchema>) => {
+      // Remove confirmPassword before sending to API
+      const { confirmPassword, ...dataToSend } = userData;
+      const res = await apiRequest("POST", "/api/register", dataToSend);
       return await res.json();
     },
-    onSuccess: (user: User) => {
+    onSuccess: (user: Omit<User, "password">) => {
       queryClient.setQueryData(["/api/user"], user);
+      toast({
+        title: "Registration successful",
+        description: `Welcome to TOV Property Management, ${user.firstName}!`,
+      });
     },
     onError: (error: Error) => {
       toast({
@@ -71,6 +97,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: () => {
       queryClient.setQueryData(["/api/user"], null);
+      toast({
+        title: "Logged out successfully",
+      });
     },
     onError: (error: Error) => {
       toast({
@@ -90,6 +119,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loginMutation,
         logoutMutation,
         registerMutation,
+        userRoles: UserRole,
       }}
     >
       {children}
