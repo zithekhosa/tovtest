@@ -1,0 +1,97 @@
+rompt:
+
+Develop a Minimum Viable Product (MVP) for the TOV Property Management Platform, a web application tailored for landlords, tenants, property agencies, and maintenance service providers. The platform should embody a sleek, modern, and intuitive design aesthetic similar to cursor.com, emphasizing minimalism, clean lines, and user-centric navigation.​
+
+Key Features:
+User Authentication
+
+Distinct login portals for landlords, tenants, property agencies, and maintenance providers.​
+
+Secure email/password authentication.​
+
+Landlord Dashboard
+
+Manage owned properties with ease.​
+
+Access tenant profiles, monitor rent payment histories, and review lease agreements.​
+
+Upload and organize property-related documents.​
+
+List available rental properties with comprehensive details.​
+
+Facilitate direct communication with tenants.​
+
+Tenant Dashboard
+
+View detailed rental property information.​
+
+Seamlessly pay rent and access payment histories.​
+
+Submit maintenance requests, including photo attachments.​
+Visualmodo
++1
+MYSense Marketing
++1
+
+Explore available rental properties.​
+Visualmodo
++5
+PeakSites Web Design
++5
+cursorup.com
++5
+
+Property Listings
+
+A centralized marketplace showcasing available rentals.​
+Webflow
++3
+Dora
++3
+GreenWireMedia
++3
+
+Landlords can feature properties with high-quality images, detailed descriptions, and pricing.​
+GreenWireMedia
++2
+Dora
++2
+PeakSites Web Design
++2
+
+Maintenance Marketplace
+
+Platform for tenants and landlords to post maintenance jobs.​
+
+Verified maintenance providers can apply for listed jobs.​
+
+Integrated communication channels among landlords, tenants, and service providers.​
+
+Agency Portal
+
+Real estate agencies can list properties for sale and rent.​
+
+Manage inquiries from potential buyers or tenants efficiently.​
+
+Direct messaging system for seamless communication with interested parties.​
+
+Design Aesthetic:
+The platform's design should reflect the modern and clean aesthetic of cursor.com, focusing on:​
+
+Minimalism: Utilize ample white space to enhance content focus and readability.​
+
+Consistent Color Palette: Employ a cohesive set of 2-3 colors to maintain visual harmony.​
+cursorup.com
+
+Typography: Select a single, legible font family with varying weights to establish clear hierarchy and emphasis.​
+cursorup.com
++1
+MYSense Marketing
++1
+
+Imagery: Incorporate high-quality visuals that align with the platform's professional tone.​
+
+Interactivity: Implement subtle animations and hover effects to enhance user engagement without overwhelming the interface.​
+Visualmodo
+
+Ensure the platform is intuitive, responsive, and scalable, providing an optimal user experience across all devices.
