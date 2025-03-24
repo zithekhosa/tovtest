@@ -61,7 +61,7 @@ export function MobileNav() {
         },
         {
           href: "/maintenance",
-          icon: Tool,
+          icon: Wrench,
           label: "Maintenance",
           active: location === "/maintenance",
         },
@@ -81,7 +81,7 @@ export function MobileNav() {
         },
         {
           href: "/maintenance",
-          icon: Tool,
+          icon: Wrench,
           label: "Maintenance",
           active: location === "/maintenance",
         },
@@ -109,7 +109,7 @@ export function MobileNav() {
       maintenance: [
         {
           href: "/maintenance",
-          icon: Tool,
+          icon: Wrench,
           label: "Jobs",
           active: location === "/maintenance",
         },
