@@ -12,6 +12,7 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   getUsersByRole(role: string): Promise<User[]>;
+  clearUsers(): Promise<void>;
   
   // Properties
   getProperty(id: number): Promise<Property | undefined>;
@@ -20,6 +21,7 @@ export interface IStorage {
   createProperty(property: InsertProperty): Promise<Property>;
   updateProperty(id: number, property: Partial<InsertProperty>): Promise<Property | undefined>;
   getAvailableProperties(): Promise<Property[]>;
+  clearProperties(): Promise<void>;
   
   // Leases
   getLease(id: number): Promise<Lease | undefined>;
@@ -27,12 +29,14 @@ export interface IStorage {
   getLeasesByProperty(propertyId: number): Promise<Lease[]>;
   createLease(lease: InsertLease): Promise<Lease>;
   updateLease(id: number, lease: Partial<InsertLease>): Promise<Lease | undefined>;
+  clearLeases(): Promise<void>;
   
   // Payments
   getPayment(id: number): Promise<Payment | undefined>;
   getPaymentsByTenant(tenantId: number): Promise<Payment[]>;
   getPaymentsByLease(leaseId: number): Promise<Payment[]>;
   createPayment(payment: InsertPayment): Promise<Payment>;
+  clearPayments(): Promise<void>;
   
   // Maintenance Requests
   getMaintenanceRequest(id: number): Promise<MaintenanceRequest | undefined>;
@@ -42,12 +46,14 @@ export interface IStorage {
   getMaintenanceRequestsByAssignee(assigneeId: number): Promise<MaintenanceRequest[]>;
   createMaintenanceRequest(request: InsertMaintenanceRequest): Promise<MaintenanceRequest>;
   updateMaintenanceRequest(id: number, request: Partial<InsertMaintenanceRequest>): Promise<MaintenanceRequest | undefined>;
+  clearMaintenanceRequests(): Promise<void>;
   
   // Documents
   getDocument(id: number): Promise<Document | undefined>;
   getDocumentsByUser(userId: number): Promise<Document[]>;
   getDocumentsByProperty(propertyId: number): Promise<Document[]>;
   createDocument(document: InsertDocument): Promise<Document>;
+  clearDocuments(): Promise<void>;
   
   // Messages
   getMessage(id: number): Promise<Message | undefined>;
@@ -56,6 +62,7 @@ export interface IStorage {
   getConversation(user1Id: number, user2Id: number): Promise<Message[]>;
   createMessage(message: InsertMessage): Promise<Message>;
   markMessageAsRead(id: number): Promise<Message | undefined>;
+  clearMessages(): Promise<void>;
   
   // Session store
   sessionStore: session.Store;
@@ -100,6 +107,42 @@ export class MemStorage implements IStorage {
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000, // 24 hours
     });
+  }
+  
+  // Clear data methods for testing and cleanup
+  async clearUsers(): Promise<void> {
+    this.users.clear();
+    this.userIdCounter = 1;
+  }
+  
+  async clearProperties(): Promise<void> {
+    this.properties.clear();
+    this.propertyIdCounter = 1;
+  }
+  
+  async clearLeases(): Promise<void> {
+    this.leases.clear();
+    this.leaseIdCounter = 1;
+  }
+  
+  async clearPayments(): Promise<void> {
+    this.payments.clear();
+    this.paymentIdCounter = 1;
+  }
+  
+  async clearMaintenanceRequests(): Promise<void> {
+    this.maintenanceRequests.clear();
+    this.maintenanceRequestIdCounter = 1;
+  }
+  
+  async clearDocuments(): Promise<void> {
+    this.documents.clear();
+    this.documentIdCounter = 1;
+  }
+  
+  async clearMessages(): Promise<void> {
+    this.messages.clear();
+    this.messageIdCounter = 1;
   }
   
   // Users
