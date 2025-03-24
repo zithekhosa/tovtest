@@ -12,7 +12,7 @@ export function ProtectedRoute({
   role,
 }: {
   path: string;
-  component: () => React.JSX.Element;
+  component: (props?: { user?: any }) => React.JSX.Element;
   role?: UserRoleType;
 }) {
   const { user, isLoading } = useAuth();
@@ -63,7 +63,7 @@ export function ProtectedRoute({
           <Sidebar role={user.role} />
           <main className="flex-1 pt-16 pb-20 md:ml-64 md:pb-10">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
-              <Component />
+              <Component user={user} />
             </div>
           </main>
         </div>

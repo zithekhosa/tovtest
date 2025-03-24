@@ -1,170 +1,243 @@
+import { useState } from "react";
 import { Link, useLocation } from "wouter";
+import { useAuth } from "@/hooks/use-auth";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Menu, X, Home, Building, Users, Wrench, FileText, MessageSquare, Settings, LogOut } from "lucide-react";
 import { UserRoleType } from "@shared/schema";
-import { 
-  LayoutDashboard, 
-  Home, 
-  Wrench, 
-  MessageSquare, 
-  FileText,
-  Building,
-  User,
-  Search
-} from "lucide-react";
 
 interface MobileNavProps {
   role: UserRoleType;
 }
 
 export default function MobileNav({ role }: MobileNavProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const { user, logoutMutation } = useAuth();
   const [location] = useLocation();
 
-  const getLinkClass = (path: string) => {
-    const isActive = location === path;
-    return `flex flex-col items-center justify-center ${
-      isActive ? "text-primary" : "text-gray-500"
-    }`;
+  if (!user) return null;
+
+  const getInitials = (firstName: string, lastName: string) => {
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
   };
 
-  const renderTenantNav = () => (
-    <div className="grid grid-cols-5 h-16">
-      <Link href="/tenant/dashboard">
-        <a className={getLinkClass("/tenant/dashboard")}>
-          <LayoutDashboard className="h-6 w-6" />
-          <span className="text-xs mt-1">Home</span>
-        </a>
-      </Link>
-      <Link href="/tenant/properties">
-        <a className={getLinkClass("/tenant/properties")}>
-          <Home className="h-6 w-6" />
-          <span className="text-xs mt-1">Property</span>
-        </a>
-      </Link>
-      <Link href="/tenant/maintenance">
-        <a className={getLinkClass("/tenant/maintenance")}>
-          <Wrench className="h-6 w-6" />
-          <span className="text-xs mt-1">Maintenance</span>
-        </a>
-      </Link>
-      <Link href="/tenant/messages">
-        <a className={getLinkClass("/tenant/messages")}>
-          <MessageSquare className="h-6 w-6" />
-          <span className="text-xs mt-1">Messages</span>
-        </a>
-      </Link>
-      <Link href="/tenant/documents">
-        <a className={getLinkClass("/tenant/documents")}>
-          <FileText className="h-6 w-6" />
-          <span className="text-xs mt-1">Documents</span>
-        </a>
-      </Link>
-    </div>
-  );
+  // Determine navigation items based on user role
+  const getNavItems = () => {
+    const baseItems = [
+      {
+        href: role === "tenant" ? "/tenant/dashboard" : role === "landlord" ? "/landlord/dashboard" : role === "agency" ? "/agency/dashboard" : "/maintenance/dashboard",
+        icon: Home,
+        label: "Dashboard",
+        active: location.includes("dashboard"),
+      },
+      {
+        href: `/${role}/messages`,
+        icon: MessageSquare,
+        label: "Messages",
+        active: location.includes("messages"),
+      }
+    ];
 
-  const renderLandlordNav = () => (
-    <div className="grid grid-cols-5 h-16">
-      <Link href="/landlord/dashboard">
-        <a className={getLinkClass("/landlord/dashboard")}>
-          <LayoutDashboard className="h-6 w-6" />
-          <span className="text-xs mt-1">Dashboard</span>
-        </a>
-      </Link>
-      <Link href="/landlord/properties">
-        <a className={getLinkClass("/landlord/properties")}>
-          <Building className="h-6 w-6" />
-          <span className="text-xs mt-1">Properties</span>
-        </a>
-      </Link>
-      <Link href="/landlord/tenants">
-        <a className={getLinkClass("/landlord/tenants")}>
-          <User className="h-6 w-6" />
-          <span className="text-xs mt-1">Tenants</span>
-        </a>
-      </Link>
-      <Link href="/landlord/maintenance">
-        <a className={getLinkClass("/landlord/maintenance")}>
-          <Wrench className="h-6 w-6" />
-          <span className="text-xs mt-1">Maintenance</span>
-        </a>
-      </Link>
-      <Link href="/landlord/messages">
-        <a className={getLinkClass("/landlord/messages")}>
-          <MessageSquare className="h-6 w-6" />
-          <span className="text-xs mt-1">Messages</span>
-        </a>
-      </Link>
-    </div>
-  );
+    const roleSpecificItems = {
+      landlord: [
+        {
+          href: "/landlord/properties",
+          icon: Building,
+          label: "Properties",
+          active: location.includes("properties"),
+        },
+        {
+          href: "/landlord/tenants",
+          icon: Users,
+          label: "Tenants",
+          active: location.includes("tenants"),
+        },
+        {
+          href: "/landlord/maintenance",
+          icon: Wrench,
+          label: "Maintenance",
+          active: location.includes("maintenance"),
+        },
+        {
+          href: "/landlord/documents",
+          icon: FileText,
+          label: "Documents",
+          active: location.includes("documents"),
+        },
+      ],
+      tenant: [
+        {
+          href: "/tenant/properties",
+          icon: Building,
+          label: "My Rental",
+          active: location.includes("properties"),
+        },
+        {
+          href: "/tenant/maintenance",
+          icon: Wrench,
+          label: "Maintenance",
+          active: location.includes("maintenance"),
+        },
+        {
+          href: "/tenant/documents",
+          icon: FileText,
+          label: "Documents",
+          active: location.includes("documents"),
+        },
+      ],
+      agency: [
+        {
+          href: "/agency/properties",
+          icon: Building,
+          label: "Properties",
+          active: location.includes("properties"),
+        },
+        {
+          href: "/agency/tenants",
+          icon: Users,
+          label: "Tenants",
+          active: location.includes("tenants"),
+        },
+        {
+          href: "/agency/documents",
+          icon: FileText,
+          label: "Documents",
+          active: location.includes("documents"),
+        },
+      ],
+      maintenance: [
+        {
+          href: "/maintenance/jobs",
+          icon: Wrench,
+          label: "Jobs",
+          active: location.includes("jobs"),
+        },
+        {
+          href: "/maintenance/documents",
+          icon: FileText,
+          label: "Documents",
+          active: location.includes("documents"),
+        },
+      ],
+    };
 
-  const renderAgencyNav = () => (
-    <div className="grid grid-cols-5 h-16">
-      <Link href="/agency/dashboard">
-        <a className={getLinkClass("/agency/dashboard")}>
-          <LayoutDashboard className="h-6 w-6" />
-          <span className="text-xs mt-1">Dashboard</span>
-        </a>
-      </Link>
-      <Link href="/agency/properties">
-        <a className={getLinkClass("/agency/properties")}>
-          <Building className="h-6 w-6" />
-          <span className="text-xs mt-1">Properties</span>
-        </a>
-      </Link>
-      <Link href="/agency/landlords">
-        <a className={getLinkClass("/agency/landlords")}>
-          <User className="h-6 w-6" />
-          <span className="text-xs mt-1">Landlords</span>
-        </a>
-      </Link>
-      <Link href="/agency/tenants">
-        <a className={getLinkClass("/agency/tenants")}>
-          <User className="h-6 w-6" />
-          <span className="text-xs mt-1">Tenants</span>
-        </a>
-      </Link>
-      <Link href="/agency/messages">
-        <a className={getLinkClass("/agency/messages")}>
-          <MessageSquare className="h-6 w-6" />
-          <span className="text-xs mt-1">Messages</span>
-        </a>
-      </Link>
-    </div>
-  );
+    return [...roleSpecificItems[role], ...baseItems];
+  };
 
-  const renderMaintenanceNav = () => (
-    <div className="grid grid-cols-4 h-16">
-      <Link href="/maintenance/dashboard">
-        <a className={getLinkClass("/maintenance/dashboard")}>
-          <LayoutDashboard className="h-6 w-6" />
-          <span className="text-xs mt-1">Dashboard</span>
-        </a>
-      </Link>
-      <Link href="/maintenance/jobs">
-        <a className={getLinkClass("/maintenance/jobs")}>
-          <Wrench className="h-6 w-6" />
-          <span className="text-xs mt-1">Jobs</span>
-        </a>
-      </Link>
-      <Link href="/maintenance/messages">
-        <a className={getLinkClass("/maintenance/messages")}>
-          <MessageSquare className="h-6 w-6" />
-          <span className="text-xs mt-1">Messages</span>
-        </a>
-      </Link>
-      <Link href="/maintenance/profile">
-        <a className={getLinkClass("/maintenance/profile")}>
-          <User className="h-6 w-6" />
-          <span className="text-xs mt-1">Profile</span>
-        </a>
-      </Link>
-    </div>
-  );
+  const navItems = getNavItems();
+
+  const handleLogout = async () => {
+    await logoutMutation.mutateAsync();
+  };
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-10">
-      {role === "tenant" && renderTenantNav()}
-      {role === "landlord" && renderLandlordNav()}
-      {role === "agency" && renderAgencyNav()}
-      {role === "maintenance" && renderMaintenanceNav()}
-    </div>
+    <>
+      <div className="fixed bottom-0 left-0 z-50 w-full h-16 bg-white border-t border-gray-200 md:hidden">
+        <div className="grid h-full grid-cols-5">
+          {navItems.slice(0, 4).map((item, i) => (
+            <Link key={i} href={item.href}>
+              <a className="inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 relative">
+                <item.icon className="w-6 h-6 mb-1 text-gray-500 group-hover:text-primary" />
+                <span className="text-xs text-gray-500">{item.label}</span>
+                {item.label === "Messages" && (
+                  <span className="absolute top-2 right-6 bg-primary text-primary-foreground text-xs font-medium px-1.5 rounded-full">
+                    2
+                  </span>
+                )}
+              </a>
+            </Link>
+          ))}
+          <button
+            className="inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50"
+            onClick={() => setIsOpen(true)}
+          >
+            <Menu className="w-6 h-6 mb-1 text-gray-500" />
+            <span className="text-xs text-gray-500">Menu</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Full-screen drawer menu */}
+      {isOpen && (
+        <div className="fixed inset-0 z-50 bg-gray-900/50 md:hidden">
+          <div className="h-full w-full max-w-sm ml-auto bg-white flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b">
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
+                  <span className="text-primary-foreground font-bold text-lg">T</span>
+                </div>
+                <span className="font-bold text-lg">TOV Platform</span>
+              </div>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+
+            <div className="p-4 border-b">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <span className="text-primary font-medium">
+                    {user.firstName && user.lastName 
+                      ? getInitials(user.firstName, user.lastName) 
+                      : user.username.substring(0, 2).toUpperCase()}
+                  </span>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900">
+                    {user.firstName && user.lastName 
+                      ? `${user.firstName} ${user.lastName}` 
+                      : user.username}
+                  </p>
+                  <p className="text-sm text-gray-500 capitalize">{role}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto py-2">
+              {navItems.map((item, i) => (
+                <Link
+                  key={i}
+                  href={item.href}
+                  onClick={() => setIsOpen(false)}
+                >
+                  <a
+                    className={cn(
+                      "flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100",
+                      item.active && "bg-primary/10 text-primary"
+                    )}
+                  >
+                    <item.icon className="h-5 w-5 mr-3" />
+                    <span>{item.label}</span>
+                    {item.label === "Messages" && (
+                      <span className="ml-auto bg-primary text-primary-foreground text-xs font-medium px-2 py-0.5 rounded-full">
+                        2
+                      </span>
+                    )}
+                  </a>
+                </Link>
+              ))}
+            </div>
+
+            <div className="p-4 border-t">
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-gray-700 hover:bg-gray-100"
+                onClick={() => {
+                  handleLogout();
+                  setIsOpen(false);
+                }}
+                disabled={logoutMutation.isPending}
+              >
+                <LogOut className="mr-3 h-5 w-5" />
+                {logoutMutation.isPending ? "Logging out..." : "Log out"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

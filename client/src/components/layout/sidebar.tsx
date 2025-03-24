@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { User, Home, Building, Users, Tool, FileText, MessageSquare, Settings, LogOut } from "lucide-react";
+import { User, Home, Building, Users, Wrench, FileText, MessageSquare, Settings, LogOut } from "lucide-react";
 
 interface SidebarProps {
   className?: string;

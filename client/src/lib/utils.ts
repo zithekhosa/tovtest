@@ -6,9 +6,9 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatCurrency(amount: number, includeSymbol = true): string {
-  const formatter = new Intl.NumberFormat('en-US', {
+  const formatter = new Intl.NumberFormat('en-BW', {
     style: includeSymbol ? 'currency' : 'decimal',
-    currency: 'USD',
+    currency: 'BWP',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
