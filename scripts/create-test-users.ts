@@ -66,6 +66,18 @@ async function createTestUsers() {
     console.log(`Maintenance: ${maintenance.username} / password123`);
     console.log("\nAll users have the password: password123");
     
+    // Verify the users were actually stored by retrieving them
+    const storedLandlord = await storage.getUserByUsername("landlord");
+    const storedTenant = await storage.getUserByUsername("tenant");
+    const storedAgency = await storage.getUserByUsername("agency");
+    const storedMaintenance = await storage.getUserByUsername("maintenance");
+    
+    console.log("\n=== User Storage Verification ===");
+    console.log(`Landlord exists: ${!!storedLandlord}`);
+    console.log(`Tenant exists: ${!!storedTenant}`);
+    console.log(`Agency exists: ${!!storedAgency}`);
+    console.log(`Maintenance exists: ${!!storedMaintenance}`);
+    
     return { landlord, tenant, agency, maintenance };
   } catch (error) {
     console.error("Error creating test users:", error);

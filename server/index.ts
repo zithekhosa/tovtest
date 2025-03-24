@@ -1,6 +1,9 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { hashPassword } from "./utils";
+import { storage } from "./storage";
+import { UserRole } from "@shared/schema";
 
 const app = express();
 app.use(express.json());
@@ -36,8 +39,90 @@ app.use((req, res, next) => {
   next();
 });
 
+// Function to create test users on server startup
+async function createTestUsers() {
+  try {
+    console.log("Creating test users for development environment...");
+    
+    // Check if users already exist
+    const existingLandlord = await storage.getUserByUsername("landlord");
+    if (existingLandlord) {
+      console.log("Test users already exist, skipping creation");
+      return;
+    }
+    
+    // Create landlord user
+    await storage.createUser({
+      username: "landlord",
+      password: await hashPassword("password123"),
+      firstName: "Kago",
+      lastName: "Moagi",
+      email: "kago.moagi@example.com",
+      role: UserRole.LANDLORD,
+      phone: "+267 71234567",
+      profileImage: null
+    });
+    
+    // Create tenant user
+    await storage.createUser({
+      username: "tenant",
+      password: await hashPassword("password123"),
+      firstName: "Tumelo",
+      lastName: "Ndaba",
+      email: "tumelo.ndaba@example.com",
+      role: UserRole.TENANT,
+      phone: "+267 72345678",
+      profileImage: null
+    });
+    
+    // Create agency user
+    await storage.createUser({
+      username: "agency",
+      password: await hashPassword("password123"),
+      firstName: "Lesego",
+      lastName: "Tshwene",
+      email: "lesego.tshwene@example.com",
+      role: UserRole.AGENCY,
+      phone: "+267 73456789",
+      profileImage: null
+    });
+    
+    // Create maintenance user
+    await storage.createUser({
+      username: "maintenance",
+      password: await hashPassword("password123"),
+      firstName: "Mpho",
+      lastName: "Rampou",
+      email: "mpho.rampou@example.com",
+      role: UserRole.MAINTENANCE,
+      phone: "+267 74567890",
+      profileImage: null
+    });
+    
+    console.log("Test users created successfully");
+    
+    // Verify users were created
+    const landlord = await storage.getUserByUsername("landlord");
+    const tenant = await storage.getUserByUsername("tenant");
+    const agency = await storage.getUserByUsername("agency");
+    const maintenance = await storage.getUserByUsername("maintenance");
+    
+    console.log("=== User Verification ===");
+    console.log(`Landlord exists: ${Boolean(landlord)}`);
+    console.log(`Tenant exists: ${Boolean(tenant)}`);
+    console.log(`Agency exists: ${Boolean(agency)}`);
+    console.log(`Maintenance exists: ${Boolean(maintenance)}`);
+    
+  } catch (error) {
+    console.error("Error creating test users:", error);
+  }
+}
+
 (async () => {
   const server = await registerRoutes(app);
+  
+  // Create test users on server startup
+  await createTestUsers();
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
