@@ -64,7 +64,7 @@ export function Sidebar({ className }: SidebarProps) {
         },
         {
           href: "/maintenance",
-          icon: Tool,
+          icon: Wrench,
           label: "Maintenance",
           active: location === "/maintenance",
         },
@@ -84,7 +84,7 @@ export function Sidebar({ className }: SidebarProps) {
         },
         {
           href: "/maintenance",
-          icon: Tool,
+          icon: Wrench,
           label: "Maintenance",
           active: location === "/maintenance",
         },
@@ -112,7 +112,7 @@ export function Sidebar({ className }: SidebarProps) {
       maintenance: [
         {
           href: "/maintenance",
-          icon: Tool,
+          icon: Wrench,
           label: "Jobs",
           active: location === "/maintenance",
         },
