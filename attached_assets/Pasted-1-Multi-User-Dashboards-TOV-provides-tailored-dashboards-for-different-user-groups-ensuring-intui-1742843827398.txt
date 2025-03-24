@@ -1,0 +1,40 @@
+1. Multi-User Dashboards
+TOV provides tailored dashboards for different user groups, ensuring intuitive access to essential tools:
+•	Landlord Dashboard: View rental income, manage properties, track maintenance requests, and monitor financial reports.
+•	Tenant Dashboard: Pay rent, submit maintenance requests, access lease agreements, and communicate with landlords.
+•	Agent Dashboard: List properties, track commissions, manage clients, and gain market insights.
+•	Maintenance Professional Dashboard: Access job postings, manage work orders, track earnings, and receive ratings for completed jobs.
+2. Property Listing & Tenant Screening
+•	Advanced Listings: Landlords and agents can create detailed property listings with virtual tours and multimedia support.
+•	Automated Screening: Background checks, rental history, and creditworthiness analysis for tenant applications.
+•	Custom Criteria: Landlords can set personalized tenant screening parameters to ensure suitable applicants.
+3. Rent Collection, Financial Management & Tax Compliance
+•	Flexible Payment Options: Supports mobile money, credit/debit cards, and bank transfers.
+•	Automated Reminders: Sends alerts for upcoming rent payments to tenants.
+•	Late Fee Application: Calculates and applies late fees automatically as per lease agreements.
+•	Financial Reports & Accounting Journals: Generates income statements, cash flow reports, and tax-ready documents to help landlords comply with local tax regulations.
+•	Tax Compliance: Provides automated accounting entries and tax reporting features customized for different regional tax codes, ensuring landlords can easily manage their tax obligations.
+4. Maintenance Request System
+•	Tenant Requests: Tenants can submit maintenance requests with detailed descriptions and images.
+•	Work Order Automation: Assigns maintenance tasks to service providers based on availability and expertise.
+•	Real-Time Tracking: Landlords, tenants, and service providers can track maintenance progress.
+•	Review System: Tenants and landlords can rate maintenance professionals, ensuring service quality.
+5. Document Management
+•	Cloud Storage: Securely stores lease agreements, inspection reports, and other essential property documents.
+•	E-Signature Integration: Enables digital signing of contracts and agreements.
+•	Access Control: Ensures the right stakeholders have appropriate access to documents.
+6. Communication Portal
+•	Centralized Messaging: Streamlines communication between landlords, tenants, agents, and maintenance professionals.
+•	Automated Notifications: Sends rent reminders, maintenance updates, and lease renewal alerts.
+•	Pre-Written Templates: Facilitates quick responses for common communications.
+7. Analytics & Market Insights
+•	Rental Trends: Provides data-driven insights into property market dynamics.
+•	Performance Metrics: Tracks property occupancy rates, rental yields, and maintenance expenses.
+•	Predictive Analytics: Uses AI to forecast trends, optimizing rental pricing and investment decisions.
+8. Mobile & Offline Functionality
+•	Mobile-Friendly Design: Ensures accessibility from smartphones and tablets.
+•	Offline Capabilities: Key features such as document viewing and maintenance request submissions function without an internet connection, syncing when connectivity is restored.
+9. Maintenance Marketplace
+•	Job Matching: Connects landlords and tenants with vetted maintenance professionals.
+•	Bidding System: Allows professionals to bid on maintenance jobs, fostering competitive pricing.
+•	Secure Payments: Ensures professionals are paid fairly and on time for completed jobs.
