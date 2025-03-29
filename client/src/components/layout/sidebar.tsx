@@ -1,199 +1,305 @@
 import { useAuth } from "@/hooks/use-auth";
-import { cn } from "@/lib/utils";
 import { Link, useLocation } from "wouter";
+import { cn, getInitials } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { User, Home, Building, Users, Wrench, FileText, MessageSquare, Settings, LogOut } from "lucide-react";
+import { UserRoleType } from "@shared/schema";
+import {
+  Building,
+  Calendar,
+  ChevronRight,
+  FileText,
+  Home,
+  LogOut,
+  MessageSquare,
+  Settings,
+  User,
+  Users,
+  Wrench,
+  DollarSign,
+  BarChart,
+  LayoutDashboard,
+  PanelLeft,
+  Phone
+} from "lucide-react";
 
-interface SidebarProps {
-  className?: string;
-}
-
-export function Sidebar({ className }: SidebarProps) {
+export function Sidebar() {
   const { user, logoutMutation } = useAuth();
   const [location] = useLocation();
 
   if (!user) return null;
 
+  // Get user's role
+  const role = user.role as UserRoleType;
+
   // Get user's initials for avatar
-  const initials = user.name
-    ? user.name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2)
+  const initials = user.firstName && user.lastName
+    ? getInitials(user.firstName, user.lastName)
     : user.username.slice(0, 2).toUpperCase();
 
   // Determine navigation items based on user role
-  const getNavItems = () => {
+  const getRoleSpecificItems = () => {
+    // Base navigation items for each role
     const baseItems = [
       {
-        href: "/dashboard",
+        href: `/${role}/dashboard`,
         icon: Home,
         label: "Dashboard",
-        active: location === "/dashboard",
+        active: location === `/${role}/dashboard` || location === "/dashboard",
       },
       {
         href: "/messages",
         icon: MessageSquare,
         label: "Messages",
-        active: location === "/messages",
+        active: location.includes("/messages"),
       },
       {
-        href: "/settings",
-        icon: Settings,
-        label: "Settings",
-        active: location === "/settings",
+        href: "/documents",
+        icon: FileText,
+        label: "Documents",
+        active: location.includes("/documents"),
       },
     ];
 
-    const roleSpecificItems = {
-      landlord: [
-        {
-          href: "/properties",
-          icon: Building,
-          label: "Properties",
-          active: location === "/properties",
-        },
-        {
-          href: "/tenants",
-          icon: Users,
-          label: "Tenants",
-          active: location === "/tenants",
-        },
-        {
-          href: "/maintenance",
-          icon: Wrench,
-          label: "Maintenance",
-          active: location === "/maintenance",
-        },
-        {
-          href: "/documents",
-          icon: FileText,
-          label: "Documents",
-          active: location === "/documents",
-        },
-      ],
+    // Role-specific items
+    const roleItems = {
+      // Tenant items
       tenant: [
         {
-          href: "/properties",
-          icon: Building,
-          label: "My Rental",
-          active: location === "/properties",
-        },
-        {
-          href: "/maintenance",
+          href: "/tenant/maintenance",
           icon: Wrench,
           label: "Maintenance",
-          active: location === "/maintenance",
+          active: location.includes("/tenant/maintenance"),
         },
         {
-          href: "/documents",
-          icon: FileText,
-          label: "Documents",
-          active: location === "/documents",
+          href: "/maintenance/marketplace",
+          icon: Calendar,
+          label: "Service Marketplace",
+          active: location.includes("/marketplace"),
+        },
+        {
+          href: "/tenant/properties",
+          icon: Building,
+          label: "My Property",
+          active: location.includes("/tenant/properties"),
         },
       ],
-      agency: [
+      
+      // Landlord items
+      landlord: [
         {
-          href: "/properties",
+          href: "/landlord/properties",
           icon: Building,
           label: "Properties",
-          active: location === "/properties",
+          active: location.includes("/landlord/properties"),
         },
         {
-          href: "/documents",
-          icon: FileText,
-          label: "Documents",
-          active: location === "/documents",
+          href: "/landlord/tenants",
+          icon: Users,
+          label: "Tenants",
+          active: location.includes("/landlord/tenants"),
+        },
+        {
+          href: "/landlord/maintenance",
+          icon: Wrench,
+          label: "Maintenance",
+          active: location.includes("/landlord/maintenance"),
+        },
+        {
+          href: "/maintenance/marketplace",
+          icon: Calendar,
+          label: "Service Marketplace",
+          active: location.includes("/marketplace"),
+        },
+        {
+          href: "/landlord/financials",
+          icon: DollarSign,
+          label: "Financials",
+          active: location.includes("/landlord/financials"),
+        },
+        {
+          href: "/landlord/analytics",
+          icon: BarChart,
+          label: "Analytics",
+          active: location.includes("/landlord/analytics"),
         },
       ],
-      maintenance: [
+      
+      // Agency items
+      agency: [
         {
-          href: "/maintenance",
-          icon: Wrench,
-          label: "Jobs",
-          active: location === "/maintenance",
+          href: "/agency/properties",
+          icon: Building,
+          label: "Properties",
+          active: location.includes("/agency/properties"),
         },
         {
-          href: "/documents",
-          icon: FileText,
-          label: "Documents",
-          active: location === "/documents",
+          href: "/agency/landlords",
+          icon: User,
+          label: "Landlords",
+          active: location.includes("/agency/landlords"),
+        },
+        {
+          href: "/agency/tenants",
+          icon: Users,
+          label: "Tenants",
+          active: location.includes("/agency/tenants"),
+        },
+        {
+          href: "/maintenance/marketplace",
+          icon: Calendar,
+          label: "Service Marketplace",
+          active: location.includes("/marketplace"),
+        },
+        {
+          href: "/agency/commissions",
+          icon: DollarSign,
+          label: "Commissions",
+          active: location.includes("/agency/commissions"),
+        },
+        {
+          href: "/agency/analytics",
+          icon: BarChart,
+          label: "Analytics",
+          active: location.includes("/agency/analytics"),
+        },
+      ],
+      
+      // Maintenance provider items
+      maintenance: [
+        {
+          href: "/maintenance/jobs",
+          icon: Wrench,
+          label: "My Jobs",
+          active: location.includes("/maintenance/jobs") && !location.includes("/marketplace"),
+        },
+        {
+          href: "/maintenance/marketplace",
+          icon: Calendar,
+          label: "Service Marketplace",
+          active: location.includes("/marketplace"),
+        },
+        {
+          href: "/maintenance/earnings",
+          icon: DollarSign,
+          label: "Earnings",
+          active: location.includes("/maintenance/earnings"),
+        },
+        {
+          href: "/maintenance/schedule",
+          icon: Calendar,
+          label: "Schedule",
+          active: location.includes("/maintenance/schedule"),
         },
       ],
     };
 
-    return [...roleSpecificItems[user.role], ...baseItems];
+    return roleItems[role] || [];
   };
 
-  const navItems = getNavItems();
+  const roleSpecificItems = getRoleSpecificItems();
+  
+  // Common navigation items at the bottom
+  const bottomItems = [
+    {
+      href: "/settings",
+      icon: Settings,
+      label: "Settings",
+      active: location === "/settings",
+    },
+    {
+      href: "/contact",
+      icon: Phone,
+      label: "Support",
+      active: location === "/contact",
+    },
+  ];
 
+  // Handle logout
   const handleLogout = async () => {
     await logoutMutation.mutateAsync();
   };
 
   return (
-    <aside className={cn("hidden md:flex flex-col w-64 bg-white border-r border-gray-200 h-full", className)}>
-      <div className="p-4 border-b border-gray-200">
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-lg">T</span>
-          </div>
-          <h1 className="text-xl font-bold text-gray-900">TOV Platform</h1>
-        </div>
-      </div>
-      
-      {/* User Profile Summary */}
-      <div className="p-4 border-b border-gray-200">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-            <span className="text-primary font-medium">{initials}</span>
-          </div>
-          <div>
-            <p className="font-medium text-gray-900">{user.name}</p>
-            <p className="text-sm text-gray-500 capitalize">{user.role}</p>
-          </div>
-        </div>
-      </div>
-      
-      {/* Navigation Links */}
-      <nav className="flex-1 p-4 space-y-1">
-        {navItems.map((item) => (
-          <Link key={item.href} href={item.href}>
-            <a
-              className={cn(
-                "flex items-center space-x-2 px-3 py-2 rounded-md transition-colors",
-                item.active
-                  ? "bg-primary/10 text-primary font-medium"
-                  : "text-gray-700 hover:bg-gray-100"
-              )}
-            >
-              <item.icon className="h-5 w-5" />
-              <span>{item.label}</span>
-              {item.label === "Messages" && (
-                <span className="ml-auto bg-primary text-primary-foreground text-xs px-1.5 py-0.5 rounded-full">
-                  3
-                </span>
-              )}
+    <>
+      {/* Desktop Sidebar */}
+      <aside className="hidden md:flex flex-col w-64 bg-white border-r border-gray-200 h-screen fixed top-0 left-0">
+        <div className="flex items-center h-16 px-6 border-b border-gray-200">
+          <Link href="/">
+            <a className="flex items-center">
+              <span className="font-bold text-xl text-primary">TOV</span>
+              <span className="font-medium text-gray-700 ml-2">Property OS</span>
             </a>
           </Link>
-        ))}
-      </nav>
-      
-      {/* Account Actions */}
-      <div className="p-4 border-t border-gray-200">
-        <Button
-          variant="ghost"
-          className="w-full justify-start text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-          onClick={handleLogout}
-          disabled={logoutMutation.isPending}
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          {logoutMutation.isPending ? "Logging out..." : "Log out"}
-        </Button>
-      </div>
-    </aside>
+        </div>
+        
+        <div className="flex-1 overflow-y-auto py-5 px-4">
+          <div className="mb-6 pb-6 border-b border-gray-200">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+                <span className="text-primary-foreground font-semibold">{initials}</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.username}
+                </p>
+                <p className="text-xs text-gray-500 capitalize">{role}</p>
+              </div>
+            </div>
+          </div>
+          
+          <nav className="space-y-1">
+            {roleSpecificItems.map((item, i) => (
+              <Link key={i} href={item.href}>
+                <a
+                  className={cn(
+                    "flex items-center px-3 py-2 text-sm font-medium rounded-md group",
+                    item.active
+                      ? "bg-primary/10 text-primary"
+                      : "text-gray-700 hover:bg-gray-100"
+                  )}
+                >
+                  <item.icon className={cn(
+                    "mr-3 h-5 w-5",
+                    item.active ? "text-primary" : "text-gray-400 group-hover:text-gray-500"
+                  )} />
+                  {item.label}
+                  {item.active && <ChevronRight className="ml-auto h-4 w-4 text-primary" />}
+                </a>
+              </Link>
+            ))}
+          </nav>
+          
+          <div className="pt-6 mt-6 border-t border-gray-200">
+            <nav className="space-y-1">
+              {bottomItems.map((item, i) => (
+                <Link key={i} href={item.href}>
+                  <a
+                    className={cn(
+                      "flex items-center px-3 py-2 text-sm font-medium rounded-md group",
+                      item.active
+                        ? "bg-primary/10 text-primary"
+                        : "text-gray-700 hover:bg-gray-100"
+                    )}
+                  >
+                    <item.icon className={cn(
+                      "mr-3 h-5 w-5",
+                      item.active ? "text-primary" : "text-gray-400 group-hover:text-gray-500"
+                    )} />
+                    {item.label}
+                  </a>
+                </Link>
+              ))}
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-100 group"
+              >
+                <LogOut className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" />
+                Sign out
+              </button>
+            </nav>
+          </div>
+        </div>
+      </aside>
+    </>
   );
 }

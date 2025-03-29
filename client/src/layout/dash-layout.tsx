@@ -1,18 +1,23 @@
 import { ReactNode } from "react";
 import { Sidebar } from "@/components/layout/sidebar";
 import { MobileNav } from "@/components/layout/mobile-nav";
+import { useAuth } from "@/hooks/use-auth";
 
 interface DashLayoutProps {
   children: ReactNode;
 }
 
 export function DashLayout({ children }: DashLayoutProps) {
+  const { user } = useAuth();
+
+  if (!user) return null;
+
   return (
-    <div className="min-h-screen flex flex-col md:flex-row">
+    <div className="min-h-screen flex flex-col md:flex-row bg-gray-50">
       <Sidebar />
       <MobileNav />
-      <main className="flex-1 overflow-auto bg-gray-50">
-        <div className="p-4 md:p-6 max-w-7xl mx-auto">
+      <main className="flex-1 overflow-auto pt-4 pb-20 md:pb-5 md:ml-64">
+        <div className="px-4 md:px-6 max-w-7xl mx-auto">
           {children}
         </div>
       </main>

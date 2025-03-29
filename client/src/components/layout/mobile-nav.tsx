@@ -1,208 +1,314 @@
 import { useState } from "react";
-import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
-import { cn } from "@/lib/utils";
+import { Link, useLocation } from "wouter";
+import { cn, getInitials } from "@/lib/utils";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Home, Building, Users, Wrench, FileText, MessageSquare, Settings, LogOut } from "lucide-react";
+import { UserRoleType } from "@shared/schema";
+import { 
+  Building, 
+  Calendar, 
+  FileText, 
+  Home, 
+  LogOut, 
+  Menu, 
+  MessageSquare, 
+  Settings, 
+  User, 
+  Users, 
+  Wrench,
+  DollarSign,
+  BarChart,
+  X,
+  Phone
+} from "lucide-react";
 
 export function MobileNav() {
-  const [isOpen, setIsOpen] = useState(false);
   const { user, logoutMutation } = useAuth();
   const [location] = useLocation();
+  const [isOpen, setIsOpen] = useState(false);
 
   if (!user) return null;
 
+  // Get user's role
+  const role = user.role as UserRoleType;
+
   // Get user's initials for avatar
   const initials = user.firstName && user.lastName
-    ? `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase()
+    ? getInitials(user.firstName, user.lastName)
     : user.username.slice(0, 2).toUpperCase();
 
   // Determine navigation items based on user role
-  const getNavItems = () => {
-    const baseItems = [
-      {
-        href: "/dashboard",
-        icon: Home,
-        label: "Dashboard",
-        active: location === "/dashboard",
-      },
-      {
-        href: "/maintenance/marketplace",
-        icon: Wrench,
-        label: "Marketplace",
-        active: location.includes("marketplace"),
-      },
-      {
-        href: "/messages",
-        icon: MessageSquare,
-        label: "Messages",
-        active: location === "/messages",
-      },
-    ];
-
-    const roleSpecificItems = {
-      landlord: [
-        {
-          href: "/properties",
-          icon: Building,
-          label: "Properties",
-          active: location === "/properties",
-        },
-        {
-          href: "/tenants",
-          icon: Users,
-          label: "Tenants",
-          active: location === "/tenants",
-        },
-        {
-          href: "/maintenance",
-          icon: Wrench,
-          label: "Maintenance",
-          active: location === "/maintenance",
-        },
-        {
-          href: "/documents",
-          icon: FileText,
-          label: "Documents",
-          active: location === "/documents",
-        },
-      ],
+  const getRoleSpecificItems = () => {
+    // Role-specific items
+    const roleItems = {
+      // Tenant items
       tenant: [
         {
-          href: "/properties",
-          icon: Building,
-          label: "My Rental",
-          active: location === "/properties",
+          href: "/tenant/dashboard",
+          icon: Home,
+          label: "Dashboard",
+          active: location.includes("/tenant/dashboard") || location === "/dashboard",
         },
         {
-          href: "/maintenance",
+          href: "/tenant/maintenance",
           icon: Wrench,
           label: "Maintenance",
-          active: location === "/maintenance",
+          active: location.includes("/tenant/maintenance"),
         },
         {
-          href: "/documents",
-          icon: FileText,
-          label: "Documents",
-          active: location === "/documents",
+          href: "/maintenance/marketplace",
+          icon: Calendar,
+          label: "Service Marketplace",
+          active: location.includes("/marketplace"),
+        },
+        {
+          href: "/tenant/properties",
+          icon: Building,
+          label: "My Property",
+          active: location.includes("/tenant/properties"),
         },
       ],
-      agency: [
+      
+      // Landlord items
+      landlord: [
         {
-          href: "/properties",
+          href: "/landlord/dashboard",
+          icon: Home,
+          label: "Dashboard",
+          active: location.includes("/landlord/dashboard") || location === "/dashboard",
+        },
+        {
+          href: "/landlord/properties",
           icon: Building,
           label: "Properties",
-          active: location === "/properties",
+          active: location.includes("/landlord/properties"),
         },
         {
-          href: "/documents",
-          icon: FileText,
-          label: "Documents",
-          active: location === "/documents",
+          href: "/landlord/tenants",
+          icon: Users,
+          label: "Tenants",
+          active: location.includes("/landlord/tenants"),
+        },
+        {
+          href: "/landlord/maintenance",
+          icon: Wrench,
+          label: "Maintenance",
+          active: location.includes("/landlord/maintenance"),
         },
       ],
-      maintenance: [
+      
+      // Agency items
+      agency: [
         {
-          href: "/maintenance",
-          icon: Wrench,
-          label: "Jobs",
-          active: location === "/maintenance",
+          href: "/agency/dashboard",
+          icon: Home,
+          label: "Dashboard",
+          active: location.includes("/agency/dashboard") || location === "/dashboard",
         },
         {
-          href: "/documents",
-          icon: FileText,
-          label: "Documents",
-          active: location === "/documents",
+          href: "/agency/properties",
+          icon: Building,
+          label: "Properties",
+          active: location.includes("/agency/properties"),
+        },
+        {
+          href: "/agency/landlords",
+          icon: User,
+          label: "Landlords",
+          active: location.includes("/agency/landlords"),
+        },
+        {
+          href: "/agency/tenants",
+          icon: Users,
+          label: "Tenants",
+          active: location.includes("/agency/tenants"),
+        },
+      ],
+      
+      // Maintenance provider items
+      maintenance: [
+        {
+          href: "/maintenance/dashboard",
+          icon: Home,
+          label: "Dashboard",
+          active: location.includes("/maintenance/dashboard") || location === "/dashboard",
+        },
+        {
+          href: "/maintenance/jobs",
+          icon: Wrench,
+          label: "My Jobs",
+          active: location.includes("/maintenance/jobs") && !location.includes("/marketplace"),
+        },
+        {
+          href: "/maintenance/marketplace",
+          icon: Calendar,
+          label: "Service Marketplace",
+          active: location.includes("/marketplace"),
+        },
+        {
+          href: "/maintenance/earnings",
+          icon: DollarSign,
+          label: "Earnings",
+          active: location.includes("/maintenance/earnings"),
         },
       ],
     };
 
-    return [...roleSpecificItems[user.role], ...baseItems];
+    return roleItems[role] || [];
   };
 
-  const navItems = getNavItems();
+  // Common items for mobile menu
+  const commonItems = [
+    {
+      href: "/messages",
+      icon: MessageSquare,
+      label: "Messages",
+      active: location.includes("/messages"),
+    },
+    {
+      href: "/documents",
+      icon: FileText,
+      label: "Documents",
+      active: location.includes("/documents"),
+    },
+    {
+      href: "/settings",
+      icon: Settings,
+      label: "Settings",
+      active: location === "/settings",
+    },
+    {
+      href: "/contact",
+      icon: Phone,
+      label: "Support",
+      active: location === "/contact",
+    },
+  ];
 
+  const navItems = [...getRoleSpecificItems(), ...commonItems];
+
+  // Handle logout
   const handleLogout = async () => {
     await logoutMutation.mutateAsync();
     setIsOpen(false);
   };
 
+  // Mobile bottom tabs (max 5 items)
+  const bottomTabs = [
+    {
+      href: `/${role}/dashboard`,
+      icon: Home,
+      label: "Home",
+    },
+    {
+      href: role === "tenant" ? "/tenant/maintenance" : 
+            role === "landlord" ? "/landlord/properties" :
+            role === "agency" ? "/agency/properties" : "/maintenance/jobs",
+      icon: role === "tenant" || role === "maintenance" ? Wrench : Building,
+      label: role === "tenant" || role === "maintenance" ? "Service" : "Properties",
+    },
+    {
+      href: "/maintenance/marketplace",
+      icon: Calendar,
+      label: "Marketplace",
+    },
+    {
+      href: "/messages",
+      icon: MessageSquare,
+      label: "Messages",
+    },
+  ];
+
   return (
-    <div className="md:hidden bg-white border-b border-gray-200 sticky top-0 z-10">
-      <div className="flex items-center justify-between p-4">
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-lg">T</span>
-          </div>
-          <h1 className="text-xl font-bold text-gray-900">TOV</h1>
+    <>
+      {/* Mobile Bottom Nav */}
+      <div className="fixed bottom-0 left-0 z-50 w-full h-16 bg-white border-t border-gray-200 md:hidden">
+        <div className="grid h-full grid-cols-4">
+          {bottomTabs.map((item, i) => (
+            <Link key={i} href={item.href}>
+              <a className="inline-flex flex-col items-center justify-center px-1 hover:bg-gray-50">
+                <item.icon className="w-6 h-6 mb-1 text-gray-500" />
+                <span className="text-xs text-gray-500">{item.label}</span>
+              </a>
+            </Link>
+          ))}
         </div>
-        
-        <button 
-          onClick={() => setIsOpen(!isOpen)} 
-          className="text-gray-500"
-          aria-label={isOpen ? "Close menu" : "Open menu"}
-        >
-          {isOpen ? (
-            <X className="h-6 w-6" />
-          ) : (
-            <Menu className="h-6 w-6" />
-          )}
-        </button>
       </div>
-      
-      {/* Mobile menu */}
-      {isOpen && (
-        <div className="animate-fade-in">
-          <div className="p-4 border-t border-gray-200">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <span className="text-primary font-medium">{initials}</span>
+
+      {/* Mobile Menu Sheet */}
+      <Sheet open={isOpen} onOpenChange={setIsOpen}>
+        <SheetTrigger asChild>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="fixed top-3 right-3 z-50 md:hidden"
+          >
+            <Menu className="h-6 w-6" />
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="left" className="w-[85%] sm:w-[350px] pt-10">
+          <SheetHeader className="border-b pb-4 mb-4">
+            <SheetTitle className="flex items-center justify-between">
+              <div className="flex items-center">
+                <span className="font-bold text-xl text-primary">TOV</span>
+                <span className="font-medium text-gray-700 ml-2">Property OS</span>
               </div>
-              <div>
-                <p className="font-medium text-gray-900">
-                  {user.firstName && user.lastName
-                    ? `${user.firstName} ${user.lastName}`
-                    : user.username}
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setIsOpen(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </SheetTitle>
+          </SheetHeader>
+          
+          <div className="mb-6 pb-4 border-b">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+                <span className="text-primary-foreground font-semibold">{initials}</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.username}
                 </p>
-                <p className="text-sm text-gray-500 capitalize">{user.role}</p>
+                <p className="text-xs text-gray-500 capitalize">{role}</p>
               </div>
             </div>
-            
-            <nav className="space-y-1">
-              {navItems.map((item) => (
-                <Link key={item.href} href={item.href}>
-                  <a
-                    className={cn(
-                      "flex items-center space-x-2 px-3 py-2 rounded-md transition-colors",
-                      item.active
-                        ? "bg-primary/10 text-primary font-medium"
-                        : "text-gray-700 hover:bg-gray-100"
-                    )}
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <item.icon className="h-5 w-5" />
-                    <span>{item.label}</span>
-                    {item.label === "Messages" && (
-                      <span className="ml-auto bg-primary text-primary-foreground text-xs px-1.5 py-0.5 rounded-full">
-                        3
-                      </span>
-                    )}
-                  </a>
-                </Link>
-              ))}
-              <Button
-                variant="ghost"
-                className="w-full justify-start text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                onClick={handleLogout}
-                disabled={logoutMutation.isPending}
-              >
-                <LogOut className="mr-2 h-5 w-5" />
-                {logoutMutation.isPending ? "Logging out..." : "Log out"}
-              </Button>
-            </nav>
           </div>
-        </div>
-      )}
-    </div>
+          
+          <nav className="space-y-1">
+            {navItems.map((item, i) => (
+              <Link key={i} href={item.href}>
+                <a
+                  className={cn(
+                    "flex items-center px-3 py-2 text-sm font-medium rounded-md",
+                    item.active
+                      ? "bg-primary/10 text-primary"
+                      : "text-gray-700 hover:bg-gray-100"
+                  )}
+                  onClick={() => setIsOpen(false)}
+                >
+                  <item.icon className={cn(
+                    "mr-3 h-5 w-5",
+                    item.active ? "text-primary" : "text-gray-400"
+                  )} />
+                  {item.label}
+                </a>
+              </Link>
+            ))}
+            
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-100"
+            >
+              <LogOut className="mr-3 h-5 w-5 text-gray-400" />
+              Sign out
+            </button>
+          </nav>
+        </SheetContent>
+      </Sheet>
+    </>
   );
 }
