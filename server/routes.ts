@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { z } from "zod";
@@ -35,6 +36,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(providers);
     } catch (error) {
       res.status(500).json({ message: "Error fetching maintenance providers" });
+    }
+  });
+  
+  app.get("/api/users/landlords", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    if (req.user.role !== 'agency') {
+      return res.status(403).json({ message: "Access denied" });
+    }
+    
+    try {
+      const landlords = await storage.getUsersByRole('landlord');
+      // Remove sensitive information from the response
+      const safeUsers = landlords.map(landlord => {
+        const { password, ...safeUser } = landlord;
+        return safeUser;
+      });
+      res.json(safeUsers);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching landlords" });
+    }
+  });
+  
+  app.get("/api/users/tenants", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    if (req.user.role !== 'landlord' && req.user.role !== 'agency') {
+      return res.status(403).json({ message: "Access denied" });
+    }
+    
+    try {
+      const tenants = await storage.getUsersByRole('tenant');
+      // Remove sensitive information from the response
+      const safeUsers = tenants.map(tenant => {
+        const { password, ...safeUser } = tenant;
+        return safeUser;
+      });
+      res.json(safeUsers);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching tenants" });
     }
   });
   
@@ -108,6 +149,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  app.get("/api/properties/analytics", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    if (req.user.role !== 'landlord' && req.user.role !== 'agency') {
+      return res.status(403).json({ message: "Access denied" });
+    }
+    
+    try {
+      let properties = [];
+      
+      if (req.user.role === 'landlord') {
+        properties = await storage.getPropertiesByLandlord(req.user.id);
+      } else {
+        properties = await storage.getProperties();
+      }
+      
+      // Get all leases for these properties
+      const propertyIds = properties.map(p => p.id);
+      const leasePromises = propertyIds.map(id => storage.getLeasesByProperty(id));
+      const leaseGroups = await Promise.all(leasePromises);
+      const allLeases = leaseGroups.flat();
+      
+      // Calculate occupancy rate
+      const totalProperties = properties.length;
+      const occupiedProperties = properties.filter(p => !p.available).length;
+      const occupancyRate = totalProperties > 0 ? (occupiedProperties / totalProperties) * 100 : 0;
+      
+      // Calculate average rent amount
+      const totalRent = properties.reduce((sum, property) => sum + property.rentAmount, 0);
+      const avgRent = totalProperties > 0 ? totalRent / totalProperties : 0;
+      
+      // Get active vs. expired leases
+      const activeLeases = allLeases.filter(lease => lease.active).length;
+      const expiredLeases = allLeases.filter(lease => !lease.active).length;
+      
+      // Get number of available properties
+      const availableCount = properties.filter(p => p.available).length;
+      
+      const analytics = {
+        totalProperties,
+        occupiedProperties,
+        availableProperties: availableCount,
+        occupancyRate: Math.round(occupancyRate * 100) / 100, // Round to 2 decimal places
+        averageRent: Math.round(avgRent * 100) / 100, // Round to 2 decimal places
+        activeLeases,
+        expiredLeases,
+        propertiesByType: {} // To be populated if we add property types
+      };
+      
+      res.json(analytics);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching property analytics" });
+    }
+  });
+  
   app.get("/api/properties/landlord", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     
@@ -120,6 +216,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(properties);
     } catch (error) {
       res.status(500).json({ message: "Error fetching landlord properties" });
+    }
+  });
+  
+  app.get("/api/properties/agency", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    if (req.user.role !== 'agency') {
+      return res.status(403).json({ message: "Access denied" });
+    }
+    
+    try {
+      // For now, agencies can see all properties
+      const properties = await storage.getProperties();
+      res.json(properties);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching agency-managed properties" });
     }
   });
   
@@ -199,6 +311,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(leases);
     } catch (error) {
       res.status(500).json({ message: "Error fetching tenant leases" });
+    }
+  });
+  
+  app.get("/api/leases/landlord", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    if (req.user.role !== 'landlord') {
+      return res.status(403).json({ message: "Access denied" });
+    }
+    
+    try {
+      // Find properties owned by this landlord
+      const properties = await storage.getPropertiesByLandlord(req.user.id);
+      const propertyIds = properties.map(p => p.id);
+      
+      // For each property, get leases
+      const leasePromises = propertyIds.map(id => 
+        storage.getLeasesByProperty(id)
+      );
+      
+      // Flatten the results
+      const leaseGroups = await Promise.all(leasePromises);
+      const leases = leaseGroups.flat();
+      
+      res.json(leases);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching landlord leases" });
+    }
+  });
+  
+  app.get("/api/leases/agency", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    if (req.user.role !== 'agency') {
+      return res.status(403).json({ message: "Access denied" });
+    }
+    
+    try {
+      // Get all properties
+      const properties = await storage.getProperties();
+      const propertyIds = properties.map(p => p.id);
+      
+      // For each property, get leases
+      const leasePromises = propertyIds.map(id => 
+        storage.getLeasesByProperty(id)
+      );
+      
+      // Flatten the results
+      const leaseGroups = await Promise.all(leasePromises);
+      const leases = leaseGroups.flat();
+      
+      res.json(leases);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching agency leases" });
     }
   });
   
@@ -303,6 +469,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(payments);
     } catch (error) {
       res.status(500).json({ message: "Error fetching payments" });
+    }
+  });
+  
+  // Get recent payments for a landlord or agency
+  app.get("/api/payments/recent", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    if (req.user.role !== 'landlord' && req.user.role !== 'agency') {
+      return res.status(403).json({ message: "Access denied" });
+    }
+    
+    try {
+      let payments = [];
+      
+      if (req.user.role === 'landlord') {
+        // Get all properties owned by the landlord
+        const properties = await storage.getPropertiesByLandlord(req.user.id);
+        const propertyIds = properties.map(p => p.id);
+        
+        // Get all leases for these properties
+        const leasePromises = propertyIds.map(id => storage.getLeasesByProperty(id));
+        const leaseGroups = await Promise.all(leasePromises);
+        const leases = leaseGroups.flat();
+        
+        // Get payments for these leases
+        const paymentPromises = leases.map(lease => storage.getPaymentsByLease(lease.id));
+        const paymentGroups = await Promise.all(paymentPromises);
+        payments = paymentGroups.flat();
+      } else if (req.user.role === 'agency') {
+        // For agencies, get all properties
+        const properties = await storage.getProperties();
+        const propertyIds = properties.map(p => p.id);
+        
+        // Get all leases for these properties
+        const leasePromises = propertyIds.map(id => storage.getLeasesByProperty(id));
+        const leaseGroups = await Promise.all(leasePromises);
+        const leases = leaseGroups.flat();
+        
+        // Get payments for these leases
+        const paymentPromises = leases.map(lease => storage.getPaymentsByLease(lease.id));
+        const paymentGroups = await Promise.all(paymentPromises);
+        payments = paymentGroups.flat();
+      }
+      
+      // Sort payments by date (most recent first)
+      payments.sort((a, b) => new Date(b.paymentDate).getTime() - new Date(a.paymentDate).getTime());
+      
+      // Limit to the most recent 10 payments
+      const recentPayments = payments.slice(0, 10);
+      
+      res.json(recentPayments);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching recent payments" });
     }
   });
   
@@ -433,6 +652,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  app.get("/api/maintenance/landlord", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    if (req.user.role !== 'landlord') {
+      return res.status(403).json({ message: "Access denied" });
+    }
+    
+    try {
+      // Find properties owned by this landlord
+      const properties = await storage.getPropertiesByLandlord(req.user.id);
+      const propertyIds = properties.map(p => p.id);
+      
+      // For each property, get maintenance requests
+      const requestPromises = propertyIds.map(id => 
+        storage.getMaintenanceRequestsByProperty(id)
+      );
+      
+      // Flatten the results
+      const requestGroups = await Promise.all(requestPromises);
+      const requests = requestGroups.flat();
+      
+      res.json(requests);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching maintenance requests" });
+    }
+  });
+  
+  app.get("/api/maintenance/agency", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    if (req.user.role !== 'agency') {
+      return res.status(403).json({ message: "Access denied" });
+    }
+    
+    try {
+      // Agencies can see all maintenance requests
+      const pendingRequests = await storage.getMaintenanceRequestsByStatus('pending');
+      const assignedRequests = await storage.getMaintenanceRequestsByStatus('assigned');
+      const inProgressRequests = await storage.getMaintenanceRequestsByStatus('in_progress');
+      const completedRequests = await storage.getMaintenanceRequestsByStatus('completed');
+      const requests = [...pendingRequests, ...assignedRequests, ...inProgressRequests, ...completedRequests];
+      
+      res.json(requests);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching maintenance requests" });
+    }
+  });
+  
   app.get("/api/maintenance/property/:propertyId", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     
@@ -472,6 +739,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(requests);
     } catch (error) {
       res.status(500).json({ message: "Error fetching assigned maintenance requests" });
+    }
+  });
+  
+  app.get("/api/maintenance/available", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    if (req.user.role !== 'maintenance') {
+      return res.status(403).json({ message: "Access denied" });
+    }
+    
+    try {
+      // Get all pending maintenance requests without an assignee
+      const pendingRequests = await storage.getMaintenanceRequestsByStatus('pending');
+      const availableRequests = pendingRequests.filter(request => !request.assignedToId);
+      res.json(availableRequests);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching available maintenance requests" });
+    }
+  });
+  
+  app.get("/api/maintenance/completed", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    if (req.user.role !== 'maintenance') {
+      return res.status(403).json({ message: "Access denied" });
+    }
+    
+    try {
+      // Get completed maintenance requests assigned to this provider
+      const completedRequests = await storage.getMaintenanceRequestsByStatus('completed');
+      const providerCompletedRequests = completedRequests.filter(request => request.assignedToId === req.user.id);
+      res.json(providerCompletedRequests);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching completed maintenance requests" });
     }
   });
   
@@ -705,6 +1006,166 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Create HTTP server
   const httpServer = createServer(app);
+  
+  // Initialize WebSocket server on the same HTTP server
+  const wss = new WebSocketServer({ 
+    server: httpServer,
+    path: '/ws' 
+  });
+  
+  // Create a map to store active connections by user ID
+  const activeConnections = new Map<number, WebSocket[]>();
+  
+  wss.on('connection', (ws) => {
+    let userId: number | null = null;
+    
+    // Handle authentication and message routing
+    ws.on('message', (message) => {
+      try {
+        const data = JSON.parse(message.toString());
+        
+        // Handle authentication message (first message sent after connection)
+        if (data.type === 'auth' && data.userId) {
+          userId = data.userId as number;
+          
+          // Store connection in the map
+          if (!activeConnections.has(userId)) {
+            activeConnections.set(userId, []);
+          }
+          activeConnections.get(userId)?.push(ws);
+          
+          // Send confirmation
+          ws.send(JSON.stringify({
+            type: 'auth_success',
+            message: 'Authentication successful'
+          }));
+        }
+        
+        // Handle other message types once authenticated
+        if (userId) {
+          if (data.type === 'maintenance_update' && data.requestId) {
+            // Broadcast maintenance update to relevant users
+            broadcastMaintenanceUpdate(data);
+          } else if (data.type === 'property_notification' && data.propertyId) {
+            // Broadcast property notification to relevant users
+            broadcastPropertyNotification(data);
+          } else if (data.type === 'chat_message' && data.receiverId) {
+            // Send direct message to a specific user
+            sendDirectMessage(data.receiverId, data);
+          }
+        }
+      } catch (error) {
+        console.error('WebSocket message parsing error:', error);
+      }
+    });
+    
+    // Handle disconnect
+    ws.on('close', () => {
+      if (userId) {
+        // Remove this connection from the user's connections
+        const userConnections = activeConnections.get(userId);
+        if (userConnections) {
+          const index = userConnections.indexOf(ws);
+          if (index !== -1) {
+            userConnections.splice(index, 1);
+          }
+          
+          // If no more connections, remove the user from the map
+          if (userConnections.length === 0) {
+            activeConnections.delete(userId);
+          }
+        }
+      }
+    });
+  });
+  
+  // Helper function to broadcast maintenance updates
+  function broadcastMaintenanceUpdate(data: any) {
+    // Find the maintenance request
+    storage.getMaintenanceRequest(data.requestId)
+      .then(request => {
+        if (!request) return;
+        
+        // Get the property
+        return storage.getProperty(request.propertyId)
+          .then(property => {
+            if (!property) return;
+            
+            // Send to tenant who created the request
+            sendToUser(request.tenantId, data);
+            
+            // Send to assigned maintenance provider
+            if (request.assignedToId) {
+              sendToUser(request.assignedToId, data);
+            }
+            
+            // Send to landlord who owns the property
+            sendToUser(property.landlordId, data);
+            
+            // Send to all agency users (in a real system, would be more targeted)
+            storage.getUsersByRole('agency')
+              .then(agencies => {
+                agencies.forEach(agency => {
+                  sendToUser(agency.id, data);
+                });
+              });
+          });
+      })
+      .catch(error => {
+        console.error('Error broadcasting maintenance update:', error);
+      });
+  }
+  
+  // Helper function to broadcast property notifications
+  function broadcastPropertyNotification(data: any) {
+    // Find the property
+    storage.getProperty(data.propertyId)
+      .then(property => {
+        if (!property) return;
+        
+        // Send to landlord who owns the property
+        sendToUser(property.landlordId, data);
+        
+        // Send to all tenants with active leases on this property
+        storage.getLeasesByProperty(property.id)
+          .then(leases => {
+            leases.forEach(lease => {
+              if (lease.active) {
+                sendToUser(lease.tenantId, data);
+              }
+            });
+          });
+        
+        // Send to all agency users
+        storage.getUsersByRole('agency')
+          .then(agencies => {
+            agencies.forEach(agency => {
+              sendToUser(agency.id, data);
+            });
+          });
+      })
+      .catch(error => {
+        console.error('Error broadcasting property notification:', error);
+      });
+  }
+  
+  // Helper function to send a message to a specific user
+  function sendToUser(userId: number, data: any) {
+    const userConnections = activeConnections.get(userId);
+    if (userConnections && userConnections.length > 0) {
+      const message = JSON.stringify(data);
+      userConnections.forEach(connection => {
+        if (connection.readyState === WebSocket.OPEN) {
+          connection.send(message);
+        }
+      });
+    }
+  }
+  
+  // Helper function to send a direct message
+  function sendDirectMessage(receiverId: number, data: any) {
+    sendToUser(receiverId, data);
+  }
 
   return httpServer;
 }

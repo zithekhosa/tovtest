@@ -1,321 +1,955 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
-import { Property, User } from "@shared/schema";
-import SummaryCard from "@/components/dashboard/SummaryCard";
-import ActivityItem from "@/components/dashboard/ActivityItem";
-import PropertyCard from "@/components/property/PropertyCard";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { DashLayout } from "@/layout/dash-layout";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { MetricsCard, getAgencyMetrics } from "@/components/dashboard/DashboardMetrics";
+import { formatCurrency, formatDate } from "@/lib/utils";
+import { Property, User, Lease } from "@shared/schema";
+
+import { 
+  Tabs, 
+  TabsContent, 
+  TabsList, 
+  TabsTrigger 
+} from "@/components/ui/tabs";
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/hooks/use-toast";
-import { formatCurrency } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Progress } from "@/components/ui/progress";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
 import { 
   Loader2, 
   Building, 
+  Home, 
+  DollarSign, 
   Users, 
-  Calendar, 
+  Calendar,
   MessageSquare, 
-  Plus,
-  Landmark,
+  CheckCircle, 
+  Filter,
   BarChart3,
+  FileText,
+  Clock,
+  ArrowRight,
+  ArrowUpRight,
   TrendingUp,
-  ListFilter
+  EyeIcon,
+  Plus,
+  Search,
+  CalendarDays,
+  LayoutDashboard,
+  ChevronRight,
+  MoreHorizontal,
+  PlusCircle,
+  Phone
 } from "lucide-react";
+import { Link } from "wouter";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+// Sample property listing data with Botswana context
+const activeListings = [
+  {
+    id: 1,
+    title: "Luxury Apartment in CBD",
+    address: "Plot 5419, Queens Road",
+    location: "Gaborone",
+    type: "Apartment",
+    bedrooms: 2,
+    bathrooms: 2,
+    price: 4500,
+    status: "active",
+    views: 247,
+    inquiries: 12,
+    imageUrl: null,
+    listedDate: new Date(2023, 9, 15)
+  },
+  {
+    id: 2,
+    title: "Family Home in Phakalane",
+    address: "Plot 12364, Phakalane Golf Estate",
+    location: "Gaborone",
+    type: "House",
+    bedrooms: 4,
+    bathrooms: 3,
+    price: 8500,
+    status: "active",
+    views: 189,
+    inquiries: 8,
+    imageUrl: null,
+    listedDate: new Date(2023, 10, 2)
+  },
+  {
+    id: 3,
+    title: "Office Space in Main Mall",
+    address: "Plot 1243, Main Mall",
+    location: "Gaborone",
+    type: "Commercial",
+    bedrooms: 0,
+    bathrooms: 2,
+    price: 12000,
+    status: "active",
+    views: 103,
+    inquiries: 5,
+    imageUrl: null,
+    listedDate: new Date(2023, 10, 10)
+  },
+  {
+    id: 4,
+    title: "Bachelor Pad in Extension 9",
+    address: "Plot 7389, Extension 9",
+    location: "Gaborone",
+    type: "Apartment",
+    bedrooms: 1,
+    bathrooms: 1,
+    price: 3200,
+    status: "active",
+    views: 156,
+    inquiries: 9,
+    imageUrl: null,
+    listedDate: new Date(2023, 10, 5)
+  }
+];
+
+// Sample client inquiries
+const recentInquiries = [
+  {
+    id: 1,
+    clientName: "Mpho Khumalo",
+    propertyId: 1,
+    propertyTitle: "Luxury Apartment in CBD",
+    contactInfo: "71234567",
+    email: "mpho.k@example.com",
+    date: new Date(2023, 10, 12),
+    status: "new",
+    notes: "Interested in viewing this weekend"
+  },
+  {
+    id: 2,
+    clientName: "Tebogo Moilwa",
+    propertyId: 2,
+    propertyTitle: "Family Home in Phakalane",
+    contactInfo: "72345678",
+    email: "tebogo.m@example.com",
+    date: new Date(2023, 10, 11),
+    status: "contacted",
+    notes: "Scheduled viewing for Friday"
+  },
+  {
+    id: 3,
+    clientName: "Kagiso Molefe",
+    propertyId: 3,
+    propertyTitle: "Office Space in Main Mall",
+    contactInfo: "73456789",
+    email: "kagiso.m@example.com",
+    date: new Date(2023, 10, 10),
+    status: "viewing_scheduled",
+    notes: "Representing a tech company looking for office space"
+  },
+  {
+    id: 4,
+    clientName: "Naledi Phiri",
+    propertyId: 4,
+    propertyTitle: "Bachelor Pad in Extension 9",
+    contactInfo: "74567890",
+    email: "naledi.p@example.com",
+    date: new Date(2023, 10, 9),
+    status: "negotiating",
+    notes: "Interested in 6-month lease with option to extend"
+  }
+];
+
+// Sample upcoming viewings
+const upcomingViewings = [
+  {
+    id: 1,
+    clientName: "Tebogo Moilwa",
+    propertyId: 2,
+    propertyTitle: "Family Home in Phakalane",
+    date: new Date(2023, 10, 18, 10, 0), // Friday at 10 AM
+    status: "confirmed"
+  },
+  {
+    id: 2,
+    clientName: "Mpho Khumalo",
+    propertyId: 1,
+    propertyTitle: "Luxury Apartment in CBD",
+    date: new Date(2023, 10, 19, 14, 30), // Saturday at 2:30 PM
+    status: "confirmed"
+  },
+  {
+    id: 3,
+    clientName: "Kagiso Molefe",
+    propertyId: 3,
+    propertyTitle: "Office Space in Main Mall",
+    date: new Date(2023, 10, 20, 9, 0), // Monday at 9 AM
+    status: "pending"
+  }
+];
+
+// Sample landlord clients
+const landlordClients = [
+  {
+    id: 1,
+    name: "Kgosi Sebina",
+    email: "kgosi.s@example.com",
+    phone: "75678901",
+    properties: 3,
+    joined: new Date(2023, 6, 15),
+    status: "active"
+  },
+  {
+    id: 2,
+    name: "Masego Tau",
+    email: "masego.t@example.com",
+    phone: "76789012",
+    properties: 2,
+    joined: new Date(2023, 8, 3),
+    status: "active"
+  },
+  {
+    id: 3,
+    name: "Boitumelo Ndlovu",
+    email: "boitumelo.n@example.com",
+    phone: "77890123",
+    properties: 1,
+    joined: new Date(2023, 9, 22),
+    status: "active"
+  },
+  {
+    id: 4,
+    name: "Thabo Moremi",
+    email: "thabo.m@example.com",
+    phone: "78901234",
+    properties: 4,
+    joined: new Date(2023, 5, 7),
+    status: "active"
+  }
+];
+
+// Format time for viewing appointments
+const formatTime = (date: Date) => {
+  return date.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true
+  });
+};
+
+// Format date for cards
+const formatCardDate = (date: Date) => {
+  const options: Intl.DateTimeFormatOptions = {
+    weekday: "short",
+    month: "short",
+    day: "numeric"
+  };
+  return date.toLocaleDateString("en-US", options);
+};
 
 export default function AgencyDashboard() {
   const { user } = useAuth();
-  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("overview");
 
-  // Fetch all properties (for an agency)
-  const { 
+  // Fetch properties managed by the agency
+  const {
     data: properties,
-    isLoading: isLoadingProperties,
+    isLoading: isLoadingProperties
   } = useQuery<Property[]>({
-    queryKey: ["/api/properties"],
+    queryKey: ["/api/properties/agency"],
   });
 
-  // Fetch all landlords
+  // Fetch landlords
   const {
     data: landlords,
     isLoading: isLoadingLandlords
   } = useQuery<User[]>({
-    queryKey: ["/api/users", "landlord"],
+    queryKey: ["/api/users/landlords"],
   });
 
-  const isLoading = isLoadingProperties || isLoadingLandlords;
+  // Fetch leases
+  const {
+    data: leases,
+    isLoading: isLoadingLeases
+  } = useQuery<Lease[]>({
+    queryKey: ["/api/leases/agency"],
+  });
 
-  // Count properties by status
-  const totalProperties = properties?.length || 0;
-  const availableProperties = properties?.filter(p => p.available).length || 0;
+  const isLoading = isLoadingProperties || isLoadingLandlords || isLoadingLeases;
+
+  // Calculate metrics
+  const listedProperties = properties?.length || 0;
+  const activeLeases = leases?.filter(lease => lease.active).length || 0;
   
-  // Total landlords
-  const totalLandlords = landlords?.length || 0;
-  
-  // Calculate total potential commission (2.5% of yearly rent for all properties)
-  const potentialYearlyCommission = (properties?.reduce((sum, property) => {
-    return sum + property.rentAmount;
-  }, 0) || 0) * 12 * 0.025;
+  // Calculate potential commission (10% of annual rent for all active leases)
+  const annualCommission = leases?.reduce((sum, lease) => {
+    if (lease.active) {
+      return sum + (lease.rentAmount * 12 * 0.1);
+    }
+    return sum;
+  }, 0) || 0;
+
+  // Dashboard metrics
+  const dashboardMetrics = getAgencyMetrics(listedProperties, activeLeases, annualCommission);
+
+  // Calculate occupancy rate
+  const occupiedCount = properties?.filter(p => !p.available).length || 0;
+  const occupancyRate = properties?.length ? Math.round((occupiedCount / properties.length) * 100) : 0;
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
+      <DashLayout>
+        <div className="flex justify-center items-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </DashLayout>
     );
   }
 
   return (
-    <div className="animate-fade-in">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold mb-1">Welcome back, {user?.firstName}!</h1>
-        <p className="text-gray-500">Here's an overview of your agency's portfolio.</p>
-      </div>
-
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <SummaryCard
-          title="Properties"
-          subtitle="Total properties"
-          value={`${totalProperties}`}
-          valueSubtext={`${availableProperties} available for rent`}
-          icon={Building}
-          iconBgColor="bg-blue-50"
-          iconColor="text-blue-500"
-          actionLabel="View All Properties"
-          onAction={() => {}}
+    <DashLayout>
+      <div className="space-y-6">
+        <DashboardHeader 
+          title={`Welcome back, ${user?.firstName}`}
+          subtitle="Here's an overview of your agency performance and listed properties"
         />
 
-        <SummaryCard
-          title="Landlords"
-          subtitle="Property owners"
-          value={`${totalLandlords}`}
-          valueSubtext="Active partnerships"
-          icon={Users}
-          iconBgColor="bg-green-50"
-          iconColor="text-green-500"
-          actionLabel="View All Landlords"
-          onAction={() => {}}
-        />
+        {/* Metrics Cards */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {dashboardMetrics.map((metric, index) => (
+            <MetricsCard
+              key={index}
+              title={metric.title}
+              value={metric.value}
+              description={metric.description}
+              icon={metric.icon}
+              trend={metric.trend}
+              progress={metric.progress}
+            />
+          ))}
+        </div>
 
-        <SummaryCard
-          title="Appointments"
-          subtitle="Upcoming viewings"
-          value="5"
-          valueSubtext="Next 7 days"
-          icon={Calendar}
-          iconBgColor="bg-yellow-50"
-          iconColor="text-yellow-500"
-          actionLabel="View Calendar"
-          onAction={() => {}}
-        />
+        <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-4 h-auto">
+            <TabsTrigger value="overview" className="py-2">Overview</TabsTrigger>
+            <TabsTrigger value="properties" className="py-2">Properties</TabsTrigger>
+            <TabsTrigger value="inquiries" className="py-2">Inquiries</TabsTrigger>
+            <TabsTrigger value="landlords" className="py-2">Landlords</TabsTrigger>
+          </TabsList>
 
-        <SummaryCard
-          title="Revenue"
-          subtitle="Potential yearly commission"
-          value={formatCurrency(potentialYearlyCommission)}
-          valueSubtext="Based on current properties"
-          icon={Landmark}
-          iconBgColor="bg-purple-50"
-          iconColor="text-purple-500"
-          actionLabel="View Finances"
-          onAction={() => {}}
-        />
-      </div>
+          {/* OVERVIEW SECTION */}
+          <TabsContent value="overview" className="space-y-4 mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Performance Metrics */}
+              <Card>
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-md font-medium">Agency Performance</CardTitle>
+                    <Button variant="ghost" size="sm" className="h-8 gap-1">
+                      <span className="text-xs">View Reports</span>
+                      <BarChart3 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">Occupancy Rate</span>
+                        <span className="text-sm font-medium">{occupancyRate}%</span>
+                      </div>
+                      <Progress value={occupancyRate} className="h-2" />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">Inquiry Conversion</span>
+                        <span className="text-sm font-medium">28%</span>
+                      </div>
+                      <Progress value={28} className="h-2" />
+                    </div>
 
-      <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="mb-8">
-        <TabsList className="grid w-full md:w-auto grid-cols-3 md:inline-flex mb-4">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="listings">Listings</TabsTrigger>
-          <TabsTrigger value="inquiries">Inquiries</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="overview" className="mt-0">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Performance Metrics */}
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xl flex items-center">
-                  <BarChart3 className="mr-2 h-5 w-5 text-primary" />
-                  Performance Metrics
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Properties Listed</span>
-                    <div className="flex items-center">
-                      <span className="font-medium">{totalProperties}</span>
-                      <TrendingUp className="ml-2 h-4 w-4 text-green-500" />
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">Average Days to Rent</span>
+                        <span className="text-sm font-medium">21 days</span>
+                      </div>
+                      <Progress value={70} className="h-2" />
+                      <p className="text-xs text-muted-foreground">3 days faster than previous quarter</p>
+                    </div>
+
+                    <div className="pt-2">
+                      <h3 className="text-sm font-medium mb-2">Monthly Commission (BWP)</h3>
+                      <div className="bg-slate-50 p-3 rounded-md">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs text-muted-foreground">Target</span>
+                          <span className="text-xs font-medium">{formatCurrency(25000)}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-muted-foreground">Current</span>
+                          <span className="text-xs font-medium">{formatCurrency(annualCommission / 12)}</span>
+                        </div>
+                        <Progress 
+                          value={(annualCommission / 12) / 25000 * 100} 
+                          className="h-2 mt-2" 
+                        />
+                        <div className="flex items-center text-xs mt-1 text-green-600">
+                          <TrendingUp className="h-3 w-3 mr-1" />
+                          <span>5.2% growth this month</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Occupancy Rate</span>
-                    <div className="flex items-center">
-                      <span className="font-medium">{totalProperties ? Math.round(((totalProperties - availableProperties) / totalProperties) * 100) : 0}%</span>
-                      <TrendingUp className="ml-2 h-4 w-4 text-green-500" />
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Avg. Time to Rent</span>
-                    <div className="flex items-center">
-                      <span className="font-medium">21 days</span>
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Client Satisfaction</span>
-                    <div className="flex items-center">
-                      <span className="font-medium">4.8/5</span>
-                      <TrendingUp className="ml-2 h-4 w-4 text-green-500" />
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
 
-            {/* Recent Activity */}
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xl flex items-center">
-                  <MessageSquare className="mr-2 h-5 w-5 text-primary" />
-                  Recent Activity
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <ActivityItem
-                    icon={Building}
-                    iconBgColor="bg-blue-100"
-                    iconColor="text-blue-600"
-                    title="New Property Listed"
-                    description="123 Main St has been added to your listings"
-                    timestamp={new Date()}
-                  />
-                  <ActivityItem
-                    icon={Users}
-                    iconBgColor="bg-green-100"
-                    iconColor="text-green-600"
-                    title="New Landlord Onboarded"
-                    description="John Smith has registered as a landlord"
-                    timestamp={new Date(Date.now() - 86400000)}
-                  />
-                  <ActivityItem
-                    icon={Calendar}
-                    iconBgColor="bg-yellow-100"
-                    iconColor="text-yellow-600"
-                    title="Property Viewing Scheduled"
-                    description="Viewing for 456 Oak Ave at 2:00 PM tomorrow"
-                    timestamp={new Date(Date.now() - 2 * 86400000)}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
+              {/* Upcoming Viewings */}
+              <Card>
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-md font-medium">Upcoming Viewings</CardTitle>
+                    <Button variant="ghost" size="sm" className="h-8 gap-1" asChild>
+                      <Link href="/agency/calendar">
+                        <span className="text-xs">View Calendar</span>
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </Link>
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <ScrollArea className="h-[260px] px-6">
+                    <div className="space-y-4 py-2">
+                      {upcomingViewings.length > 0 ? (
+                        upcomingViewings.map((viewing) => (
+                          <div key={viewing.id} className="flex justify-between p-3 border rounded-lg">
+                            <div className="flex gap-3">
+                              <div className="flex-shrink-0 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                                <Calendar className="h-5 w-5 text-primary" />
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium">{viewing.propertyTitle}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {formatCardDate(viewing.date)} • {formatTime(viewing.date)}
+                                </p>
+                                <p className="text-xs font-medium mt-1">Client: {viewing.clientName}</p>
+                              </div>
+                            </div>
+                            <Badge className={viewing.status === "confirmed" 
+                              ? "bg-green-50 text-green-700"
+                              : "bg-amber-50 text-amber-700"
+                            }>
+                              {viewing.status === "confirmed" ? "Confirmed" : "Pending"}
+                            </Badge>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-center py-6">
+                          <Calendar className="h-8 w-8 mx-auto text-muted-foreground opacity-50 mb-2" />
+                          <p className="text-sm text-muted-foreground">No upcoming viewings</p>
+                          <Button variant="outline" size="sm" className="mt-2">
+                            <Plus className="h-3.5 w-3.5 mr-1" />
+                            Schedule Viewing
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+            </div>
 
-        <TabsContent value="listings" className="mt-0">
-          <div className="bg-white rounded-xl p-6 shadow-card">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-              <h3 className="text-lg font-medium">Available Properties</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Recent Inquiries Summary */}
+              <Card className="md:col-span-2">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-md font-medium">Recent Inquiries</CardTitle>
+                      <CardDescription>Latest client inquiries requiring attention</CardDescription>
+                    </div>
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href="/agency/inquiries">
+                        View All
+                      </Link>
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-0">
+                  {recentInquiries.length > 0 ? (
+                    <ScrollArea className="h-[220px] px-6">
+                      <div className="space-y-4 py-2">
+                        {recentInquiries.map((inquiry) => (
+                          <div key={inquiry.id} className="flex justify-between items-start">
+                            <div className="flex gap-3">
+                              <div className="flex-shrink-0 flex h-9 w-9 items-center justify-center rounded-full bg-blue-100">
+                                <MessageSquare className="h-4 w-4 text-blue-600" />
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium">{inquiry.clientName}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  Interested in: {inquiry.propertyTitle}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {formatDate(inquiry.date)}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center">
+                              <Badge className={
+                                inquiry.status === "new" 
+                                  ? "bg-green-50 text-green-700 mr-2" 
+                                  : inquiry.status === "contacted" 
+                                    ? "bg-blue-50 text-blue-700 mr-2" 
+                                    : inquiry.status === "viewing_scheduled" 
+                                      ? "bg-purple-50 text-purple-700 mr-2"
+                                      : "bg-amber-50 text-amber-700 mr-2"
+                              }>
+                                {inquiry.status === "new" 
+                                  ? "New" 
+                                  : inquiry.status === "contacted" 
+                                    ? "Contacted" 
+                                    : inquiry.status === "viewing_scheduled" 
+                                      ? "Viewing Set"
+                                      : "Negotiating"
+                                }
+                              </Badge>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <Phone className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  ) : (
+                    <div className="px-6 py-8 text-center">
+                      <MessageSquare className="h-8 w-8 mx-auto text-muted-foreground opacity-50 mb-2" />
+                      <p className="text-sm text-muted-foreground">No recent inquiries</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Quick Actions Card */}
+              <Card className="md:col-span-1">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-md font-medium">Quick Actions</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <Button className="w-full justify-start" asChild>
+                      <Link href="/agency/properties/add">
+                        <Building className="h-4 w-4 mr-2" />
+                        Add New Property
+                      </Link>
+                    </Button>
+                    <Button className="w-full justify-start" variant="outline" asChild>
+                      <Link href="/agency/inquiries/new">
+                        <MessageSquare className="h-4 w-4 mr-2" />
+                        Record Inquiry
+                      </Link>
+                    </Button>
+                    <Button className="w-full justify-start" variant="outline" asChild>
+                      <Link href="/agency/calendar/add">
+                        <Calendar className="h-4 w-4 mr-2" />
+                        Schedule Viewing
+                      </Link>
+                    </Button>
+                    <Button className="w-full justify-start" variant="outline" asChild>
+                      <Link href="/agency/landlords/add">
+                        <Users className="h-4 w-4 mr-2" />
+                        Add Landlord
+                      </Link>
+                    </Button>
+                    <Button className="w-full justify-start" variant="outline" asChild>
+                      <Link href="/agency/leases/create">
+                        <FileText className="h-4 w-4 mr-2" />
+                        Generate Lease
+                      </Link>
+                    </Button>
+                    <Button className="w-full justify-start" variant="outline" asChild>
+                      <Link href="/agency/reports">
+                        <BarChart3 className="h-4 w-4 mr-2" />
+                        View Reports
+                      </Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* PROPERTIES SECTION */}
+          <TabsContent value="properties" className="space-y-4 mt-4">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-medium">Listed Properties ({properties?.length || 0})</h3>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm">
-                  <ListFilter className="h-4 w-4 mr-2" />
+                  <Filter className="h-4 w-4 mr-2" />
                   Filter
                 </Button>
-                <Button size="sm" onClick={() => toast({
-                  title: "Coming Soon",
-                  description: "Add property functionality is coming soon",
-                })}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Listing
+                <Button size="sm" asChild>
+                  <Link href="/agency/properties/add">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Property
+                  </Link>
                 </Button>
               </div>
             </div>
-            
-            {properties && properties.filter(p => p.available).length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {properties.filter(p => p.available).map((property) => (
-                  <PropertyCard
-                    key={property.id}
-                    property={property}
-                    showActions={true}
-                    actionLabel="Promote Listing"
-                    onAction={() => toast({
-                      title: "Coming Soon",
-                      description: "Property promotion functionality is coming soon",
-                    })}
-                  />
+
+            {properties && properties.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {properties.map((property) => (
+                  <Card key={property.id} className="overflow-hidden">
+                    <div className="aspect-video bg-muted relative">
+                      {property.images && property.images.length > 0 ? (
+                        <img
+                          src={property.images[0]}
+                          alt={property.address}
+                          className="object-cover w-full h-full"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-muted">
+                          <Building className="h-10 w-10 text-muted-foreground opacity-50" />
+                        </div>
+                      )}
+                      <div className="absolute top-2 right-2">
+                        <Badge className={property.available ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700"}>
+                          {property.available ? "Available" : "Rented"}
+                        </Badge>
+                      </div>
+                    </div>
+                    <CardContent className="p-4">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <h4 className="font-medium truncate">{property.address}</h4>
+                          <p className="text-sm text-muted-foreground">
+                            {property.city}, {property.state}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-medium text-primary">{formatCurrency(property.rentAmount)}</div>
+                          <p className="text-xs text-muted-foreground">per month</p>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-3 gap-2 mt-4 text-sm">
+                        <div>
+                          <p className="text-muted-foreground">Beds</p>
+                          <p className="font-medium">{property.bedrooms}</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground">Baths</p>
+                          <p className="font-medium">{property.bathrooms}</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground">Sq.Ft</p>
+                          <p className="font-medium">{property.squareFeet || "N/A"}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="mt-3 pt-3 border-t flex justify-between items-center">
+                        <div className="text-sm">
+                          <span className="text-muted-foreground mr-1">Listed:</span>
+                          <span>{formatDate(new Date())}</span>
+                        </div>
+                        <div className="flex items-center text-sm">
+                          <EyeIcon className="h-3.5 w-3.5 text-muted-foreground mr-1" />
+                          <span className="text-muted-foreground">24 views</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                    <CardFooter className="flex justify-between p-4 pt-0 gap-2">
+                      <Button className="w-full" asChild>
+                        <Link href={`/agency/properties/${property.id}`}>
+                          View Details
+                        </Link>
+                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" size="icon" className="h-9 w-9">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem>Edit Listing</DropdownMenuItem>
+                          <DropdownMenuItem>Schedule Viewing</DropdownMenuItem>
+                          <DropdownMenuItem>Record Inquiry</DropdownMenuItem>
+                          <DropdownMenuItem>Mark as {property.available ? "Rented" : "Available"}</DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem className="text-red-500">Remove Listing</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </CardFooter>
+                  </Card>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8">
-                <Building className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500">No available properties to list</p>
-                <Button className="mt-4" onClick={() => toast({
-                  title: "Coming Soon",
-                  description: "Add property functionality is coming soon",
-                })}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add New Listing
+              <Card className="py-8">
+                <div className="text-center">
+                  <Building className="h-12 w-12 text-muted-foreground mx-auto opacity-50 mb-4" />
+                  <h3 className="text-lg font-medium">No Properties Listed</h3>
+                  <p className="text-muted-foreground mb-6">
+                    You haven't added any properties to your listings yet.
+                  </p>
+                  <Button asChild>
+                    <Link href="/agency/properties/add">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Your First Property
+                    </Link>
+                  </Button>
+                </div>
+              </Card>
+            )}
+          </TabsContent>
+
+          {/* INQUIRIES SECTION */}
+          <TabsContent value="inquiries" className="space-y-4 mt-4">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-medium">Client Inquiries</h3>
+              <div className="flex gap-2">
+                <div className="relative w-64">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <input
+                    type="search"
+                    placeholder="Search inquiries..."
+                    className="w-full pl-8 py-2 pr-4 rounded-md border border-input bg-background"
+                  />
+                </div>
+                <Button size="sm" asChild>
+                  <Link href="/agency/inquiries/new">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Inquiry
+                  </Link>
                 </Button>
               </div>
-            )}
-          </div>
-        </TabsContent>
+            </div>
 
-        <TabsContent value="inquiries" className="mt-0">
-          <div className="bg-white rounded-xl p-6 shadow-card">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-medium">Recent Inquiries</h3>
+            <div className="grid grid-cols-1 gap-4">
+              <Card>
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-md font-medium">Recent Inquiries</CardTitle>
+                      <CardDescription>Manage and track client inquiries about properties</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="rounded-md border">
+                    <table className="w-full caption-bottom text-sm">
+                      <thead>
+                        <tr className="border-b bg-muted/50">
+                          <th className="h-10 px-4 text-left font-medium text-muted-foreground">Client</th>
+                          <th className="h-10 px-4 text-left font-medium text-muted-foreground">Property</th>
+                          <th className="h-10 px-4 text-left font-medium text-muted-foreground">Date</th>
+                          <th className="h-10 px-4 text-left font-medium text-muted-foreground">Status</th>
+                          <th className="h-10 px-4 text-left font-medium text-muted-foreground">Notes</th>
+                          <th className="h-10 px-4 text-left font-medium text-muted-foreground w-[100px]">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {recentInquiries.map((inquiry) => (
+                          <tr key={inquiry.id} className="border-b transition-colors hover:bg-muted/50">
+                            <td className="p-4 align-middle">
+                              <div>
+                                <div className="font-medium">{inquiry.clientName}</div>
+                                <div className="text-xs text-muted-foreground">{inquiry.email}</div>
+                                <div className="text-xs text-muted-foreground">{inquiry.contactInfo}</div>
+                              </div>
+                            </td>
+                            <td className="p-4 align-middle">
+                              <div className="font-medium">{inquiry.propertyTitle}</div>
+                              <div className="text-xs text-muted-foreground">ID: {inquiry.propertyId}</div>
+                            </td>
+                            <td className="p-4 align-middle">
+                              {formatDate(inquiry.date)}
+                            </td>
+                            <td className="p-4 align-middle">
+                              <Badge className={
+                                inquiry.status === "new" 
+                                  ? "bg-green-50 text-green-700" 
+                                  : inquiry.status === "contacted" 
+                                    ? "bg-blue-50 text-blue-700" 
+                                    : inquiry.status === "viewing_scheduled" 
+                                      ? "bg-purple-50 text-purple-700"
+                                      : "bg-amber-50 text-amber-700"
+                              }>
+                                {inquiry.status === "new" 
+                                  ? "New" 
+                                  : inquiry.status === "contacted" 
+                                    ? "Contacted" 
+                                    : inquiry.status === "viewing_scheduled" 
+                                      ? "Viewing Set"
+                                      : "Negotiating"
+                                }
+                              </Badge>
+                            </td>
+                            <td className="p-4 align-middle">
+                              <div className="max-w-xs truncate">{inquiry.notes}</div>
+                            </td>
+                            <td className="p-4 align-middle">
+                              <div className="flex space-x-1">
+                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                  <Phone className="h-4 w-4" />
+                                </Button>
+                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                  <Calendar className="h-4 w-4" />
+                                </Button>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                                      <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem>View Details</DropdownMenuItem>
+                                    <DropdownMenuItem>Update Status</DropdownMenuItem>
+                                    <DropdownMenuItem>Schedule Viewing</DropdownMenuItem>
+                                    <DropdownMenuItem>Send Email</DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem className="text-red-500">Archive</DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* LANDLORDS SECTION */}
+          <TabsContent value="landlords" className="space-y-4 mt-4">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-medium">Landlord Clients</h3>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm">All</Button>
-                <Button variant="outline" size="sm">New</Button>
-                <Button variant="outline" size="sm">Responded</Button>
+                <Button variant="outline" size="sm">
+                  <Filter className="h-4 w-4 mr-2" />
+                  Filter
+                </Button>
+                <Button size="sm" asChild>
+                  <Link href="/agency/landlords/add">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Landlord
+                  </Link>
+                </Button>
               </div>
             </div>
-            
-            <div className="divide-y">
-              {/* Placeholder inquiries */}
-              <div className="py-4 flex items-start gap-4">
-                <div className="bg-blue-100 p-2 rounded-full">
-                  <MessageSquare className="h-5 w-5 text-blue-600" />
+
+            {landlords && landlords.length > 0 ? (
+              <Card>
+                <CardContent className="p-0 overflow-auto">
+                  <table className="w-full caption-bottom text-sm">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="h-12 px-4 text-left font-medium">Landlord</th>
+                        <th className="h-12 px-4 text-left font-medium">Contact</th>
+                        <th className="h-12 px-4 text-left font-medium">Properties</th>
+                        <th className="h-12 px-4 text-left font-medium">Client Since</th>
+                        <th className="h-12 px-4 text-left font-medium">Status</th>
+                        <th className="h-12 px-4 text-left font-medium w-[100px]"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {landlordClients.map((landlord) => (
+                        <tr key={landlord.id} className="border-b transition-colors hover:bg-muted/50">
+                          <td className="p-4 align-middle">
+                            <div className="flex items-center gap-3">
+                              <Avatar className="h-8 w-8">
+                                <AvatarFallback>{landlord.name.charAt(0)}</AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <div className="font-medium">{landlord.name}</div>
+                                <div className="text-xs text-muted-foreground">ID: {landlord.id}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="p-4 align-middle">
+                            <div className="text-sm">{landlord.email}</div>
+                            <div className="text-xs text-muted-foreground">{landlord.phone}</div>
+                          </td>
+                          <td className="p-4 align-middle">
+                            <div className="text-sm font-medium">{landlord.properties}</div>
+                            <div className="text-xs text-muted-foreground">Listed Properties</div>
+                          </td>
+                          <td className="p-4 align-middle">
+                            {formatDate(landlord.joined)}
+                          </td>
+                          <td className="p-4 align-middle">
+                            <Badge className="bg-green-50 text-green-700">Active</Badge>
+                          </td>
+                          <td className="p-4 align-middle">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem>View Profile</DropdownMenuItem>
+                                <DropdownMenuItem>Contact Landlord</DropdownMenuItem>
+                                <DropdownMenuItem>View Properties</DropdownMenuItem>
+                                <DropdownMenuItem>Add Property</DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem className="text-red-500">Remove Client</DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="py-8">
+                <div className="text-center">
+                  <Users className="h-12 w-12 text-muted-foreground mx-auto opacity-50 mb-4" />
+                  <h3 className="text-lg font-medium">No Landlord Clients</h3>
+                  <p className="text-muted-foreground mb-6">
+                    You haven't added any landlord clients to your account yet.
+                  </p>
+                  <Button asChild>
+                    <Link href="/agency/landlords/add">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Your First Landlord
+                    </Link>
+                  </Button>
                 </div>
-                <div className="flex-1">
-                  <div className="flex justify-between">
-                    <h4 className="font-medium">Inquiry about 123 Main St</h4>
-                    <span className="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-800">New</span>
-                  </div>
-                  <p className="text-sm text-gray-500 mt-1">From: Sarah Johnson (sarahjohnson@example.com)</p>
-                  <p className="text-sm text-gray-600 mt-1">I'm interested in viewing this property. Is it available for a showing this weekend?</p>
-                  <div className="flex gap-2 mt-3">
-                    <Button size="sm" variant="outline">View Details</Button>
-                    <Button size="sm">Respond</Button>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="py-4 flex items-start gap-4">
-                <div className="bg-green-100 p-2 rounded-full">
-                  <MessageSquare className="h-5 w-5 text-green-600" />
-                </div>
-                <div className="flex-1">
-                  <div className="flex justify-between">
-                    <h4 className="font-medium">Inquiry about 456 Oak Ave</h4>
-                    <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-800">Responded</span>
-                  </div>
-                  <p className="text-sm text-gray-500 mt-1">From: Michael Brown (michaelbrown@example.com)</p>
-                  <p className="text-sm text-gray-600 mt-1">Are pets allowed in this property? I have a small dog.</p>
-                  <div className="flex gap-2 mt-3">
-                    <Button size="sm" variant="outline">View Details</Button>
-                    <Button size="sm" variant="outline">Follow Up</Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </TabsContent>
-      </Tabs>
-    </div>
+              </Card>
+            )}
+          </TabsContent>
+        </Tabs>
+      </div>
+    </DashLayout>
   );
 }

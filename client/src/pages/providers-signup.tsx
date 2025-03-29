@@ -106,7 +106,8 @@ export default function ProvidersSignup() {
       lastName: data.lastName,
       email: data.email,
       phone: data.phone,
-      role: data.role
+      role: data.role,
+      confirmPassword: data.confirmPassword // Add confirmPassword to conform to schema
     };
     
     // Register with backend
@@ -287,7 +288,14 @@ export default function ProvidersSignup() {
                                 <FormItem>
                                   <FormLabel>Phone</FormLabel>
                                   <FormControl>
-                                    <Input placeholder="Phone number" {...field} />
+                                    <Input 
+                                      placeholder="Phone number" 
+                                      onChange={field.onChange}
+                                      onBlur={field.onBlur}
+                                      name={field.name}
+                                      ref={field.ref}
+                                      value={typeof field.value === 'string' ? field.value : ""}
+                                    />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
