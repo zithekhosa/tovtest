@@ -3,6 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
 import ProvidersSignup from "@/pages/providers-signup";
+import LandingPage from "@/pages/landing-page";
 import { ProtectedRoute } from "./lib/protected-route";
 
 // Shared pages
@@ -31,11 +32,12 @@ function Router() {
   return (
     <Switch>
       {/* Public routes */}
+      <Route path="/" component={LandingPage} />
       <Route path="/auth" component={AuthPage} />
       <Route path="/providers-signup" component={ProvidersSignup} />
       
-      {/* Default route - redirect to appropriate dashboard based on role */}
-      <ProtectedRoute path="/" component={(props) => {
+      {/* Dashboard route - redirect to appropriate dashboard based on role */}
+      <ProtectedRoute path="/dashboard" component={(props) => {
         const user = props?.user;
         if (user?.role === 'landlord') return <LandlordDashboard />;
         if (user?.role === 'tenant') return <TenantDashboard />;
