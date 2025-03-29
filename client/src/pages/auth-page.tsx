@@ -68,42 +68,8 @@ export default function AuthPage() {
       </header>
 
       <main className="container mx-auto py-12 px-4">
-        <div className="flex flex-col md:flex-row gap-8">
-          <div className="flex-1">
-            <section className="text-center mb-16">
-              <h1 className="text-4xl font-bold mb-4">Simplify Your Property Management</h1>
-              <p className="text-xl mb-8">Streamline your property management tasks with our all-in-one solution</p>
-            </section>
-
-            <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Property Management</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p>Easily manage all your properties in one place</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Financial Tracking</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p>Streamline rent collection and expense management</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Document Management</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p>Centralize all your important documents</p>
-                </CardContent>
-              </Card>
-            </section>
-          </div>
-
-          <div className="flex-1 max-w-md mx-auto">
+        <div className="flex flex-col justify-center items-center">
+          <div className="w-full max-w-md mx-auto">
             <Card>
               <CardHeader>
                 <CardTitle className="text-2xl font-bold">Login</CardTitle>
