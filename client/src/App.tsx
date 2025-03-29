@@ -24,6 +24,7 @@ import AgencyDashboard from "@/pages/agency/dashboard";
 
 // Maintenance pages
 import MaintenanceDashboard from "@/pages/maintenance/dashboard";
+import MaintenanceMarketplace from "@/pages/maintenance/marketplace";
 
 function Router() {
   return (
@@ -73,6 +74,9 @@ function Router() {
       <ProtectedRoute path="/maintenance/jobs" component={Maintenance} role="maintenance" />
       <ProtectedRoute path="/maintenance/messages" component={Messages} role="maintenance" />
       <ProtectedRoute path="/maintenance/documents" component={Documents} role="maintenance" />
+      
+      {/* Maintenance Marketplace - accessible by all users */}
+      <ProtectedRoute path="/maintenance/marketplace" component={MaintenanceMarketplace} />
       
       {/* Fallback to 404 */}
       <Route component={NotFound} />

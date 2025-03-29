@@ -21,6 +21,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // API routes
   // =====================
   
+  // Users by role
+  app.get("/api/users/maintenance", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    try {
+      const maintenanceProviders = await storage.getUsersByRole('maintenance');
+      // Remove sensitive information from the response
+      const providers = maintenanceProviders.map(provider => {
+        const { password, ...safeUser } = provider;
+        return safeUser;
+      });
+      res.json(providers);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching maintenance providers" });
+    }
+  });
+  
   // Properties
   app.get("/api/properties", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);

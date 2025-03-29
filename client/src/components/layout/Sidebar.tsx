@@ -30,6 +30,12 @@ export default function Sidebar({ role }: SidebarProps) {
         active: location.includes("dashboard"),
       },
       {
+        href: "/maintenance/marketplace",
+        icon: Wrench,
+        label: "Maintenance Marketplace",
+        active: location.includes("marketplace"),
+      },
+      {
         href: `/${role}/messages`,
         icon: MessageSquare,
         label: "Messages",

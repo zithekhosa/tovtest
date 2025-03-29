@@ -13,13 +13,8 @@ export function MobileNav() {
   if (!user) return null;
 
   // Get user's initials for avatar
-  const initials = user.name
-    ? user.name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2)
+  const initials = user.firstName && user.lastName
+    ? `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase()
     : user.username.slice(0, 2).toUpperCase();
 
   // Determine navigation items based on user role
@@ -32,16 +27,16 @@ export function MobileNav() {
         active: location === "/dashboard",
       },
       {
+        href: "/maintenance/marketplace",
+        icon: Wrench,
+        label: "Marketplace",
+        active: location.includes("marketplace"),
+      },
+      {
         href: "/messages",
         icon: MessageSquare,
         label: "Messages",
         active: location === "/messages",
-      },
-      {
-        href: "/settings",
-        icon: Settings,
-        label: "Settings",
-        active: location === "/settings",
       },
     ];
 
@@ -164,7 +159,11 @@ export function MobileNav() {
                 <span className="text-primary font-medium">{initials}</span>
               </div>
               <div>
-                <p className="font-medium text-gray-900">{user.name}</p>
+                <p className="font-medium text-gray-900">
+                  {user.firstName && user.lastName
+                    ? `${user.firstName} ${user.lastName}`
+                    : user.username}
+                </p>
                 <p className="text-sm text-gray-500 capitalize">{user.role}</p>
               </div>
             </div>
