@@ -132,7 +132,7 @@ export default function LandingPage() {
                 Join as Provider
               </Button>
               <Button onClick={() => navigate("/auth")}>
-                Sign In
+                Sign In / Register
               </Button>
             </nav>
             <Button className="md:hidden" variant="ghost" size="icon">
@@ -265,6 +265,32 @@ export default function LandingPage() {
                 <Badge variant="outline" className="text-sm py-1 px-3 rounded-full">
                   Botswana Focused
                 </Badge>
+              </div>
+              
+              {/* Quick Login Options */}
+              <div className="mt-8 flex flex-col items-center">
+                <h3 className="text-lg font-medium mb-4">Quick Sign In Options</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-lg">
+                  <Button variant="outline" onClick={() => navigate("/auth")} className="px-2 py-6 h-auto flex flex-col items-center gap-2">
+                    <Home className="h-5 w-5" />
+                    <span>Tenant</span>
+                  </Button>
+                  <Button variant="outline" onClick={() => navigate("/auth")} className="px-2 py-6 h-auto flex flex-col items-center gap-2">
+                    <Building className="h-5 w-5" />
+                    <span>Landlord</span>
+                  </Button>
+                  <Button variant="outline" onClick={() => navigate("/auth")} className="px-2 py-6 h-auto flex flex-col items-center gap-2">
+                    <Users className="h-5 w-5" />
+                    <span>Agency</span>
+                  </Button>
+                  <Button variant="outline" onClick={() => navigate("/auth")} className="px-2 py-6 h-auto flex flex-col items-center gap-2">
+                    <Wrench className="h-5 w-5" />
+                    <span>Maintenance</span>
+                  </Button>
+                </div>
+                <Button variant="link" onClick={() => navigate("/providers-signup")} className="mt-2">
+                  New provider? Sign up here
+                </Button>
               </div>
             </div>
           </div>

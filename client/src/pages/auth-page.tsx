@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Building, Home, Users, Wrench } from "lucide-react";
 import { UserRoleType } from "@shared/schema";
 
 export default function AuthPage() {
@@ -140,20 +141,44 @@ export default function AuthPage() {
                     
                     <div className="space-y-2">
                       <FormLabel>Login as</FormLabel>
-                      <Select 
-                        value={userRole} 
-                        onValueChange={(value) => setUserRole(value as UserRoleType)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select user type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="tenant">Tenant</SelectItem>
-                          <SelectItem value="landlord">Landlord</SelectItem>
-                          <SelectItem value="agency">Agency</SelectItem>
-                          <SelectItem value="maintenance">Maintenance</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <div className="grid grid-cols-2 gap-2 mb-4">
+                        <Button 
+                          type="button"
+                          variant={userRole === "tenant" ? "default" : "outline"}
+                          className={`flex items-center justify-center gap-2 ${userRole === "tenant" ? "border-2 border-primary" : ""}`}
+                          onClick={() => setUserRole("tenant")}
+                        >
+                          <Home className="h-4 w-4" />
+                          <span>Tenant</span>
+                        </Button>
+                        <Button 
+                          type="button"
+                          variant={userRole === "landlord" ? "default" : "outline"}
+                          className={`flex items-center justify-center gap-2 ${userRole === "landlord" ? "border-2 border-primary" : ""}`}
+                          onClick={() => setUserRole("landlord")}
+                        >
+                          <Building className="h-4 w-4" />
+                          <span>Landlord</span>
+                        </Button>
+                        <Button 
+                          type="button"
+                          variant={userRole === "agency" ? "default" : "outline"}
+                          className={`flex items-center justify-center gap-2 ${userRole === "agency" ? "border-2 border-primary" : ""}`}
+                          onClick={() => setUserRole("agency")}
+                        >
+                          <Users className="h-4 w-4" />
+                          <span>Agency</span>
+                        </Button>
+                        <Button 
+                          type="button"
+                          variant={userRole === "maintenance" ? "default" : "outline"}
+                          className={`flex items-center justify-center gap-2 ${userRole === "maintenance" ? "border-2 border-primary" : ""}`}
+                          onClick={() => setUserRole("maintenance")}
+                        >
+                          <Wrench className="h-4 w-4" />
+                          <span>Maintenance</span>
+                        </Button>
+                      </div>
                     </div>
                     
                     <Button 
