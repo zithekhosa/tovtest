@@ -297,7 +297,7 @@ export const addMockupData = async () => {
       email: person.email,
       phone: person.phone,
       role: UserRole.AGENCY,
-      profileImageUrl: null,
+      profileImage: null,
       bio: `Representing ${agencyName}, specializing in property management and lettings across Botswana.`
     };
     
@@ -320,7 +320,7 @@ export const addMockupData = async () => {
       email: person.email,
       phone: person.phone,
       role: UserRole.MAINTENANCE,
-      profileImageUrl: null,
+      profileImage: null,
       bio: `Experienced maintenance professional specializing in ${skills.join(', ')}. Available for residential and commercial properties.`
     };
     
@@ -345,7 +345,7 @@ export const addMockupData = async () => {
       email: person.email,
       phone: person.phone,
       role: UserRole.TENANT,
-      profileImageUrl: null,
+      profileImage: null,
       bio: `${getRandomElement(occupations)} working in ${getRandomElement(botswanaLocations.cities)}. Looking for a comfortable place to call home.`
     };
     
