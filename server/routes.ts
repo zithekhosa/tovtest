@@ -4,6 +4,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { z } from "zod";
+import path from "path";
 import { 
   insertMaintenanceRequestSchema, 
   insertPropertySchema, 
@@ -76,6 +77,124 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(safeUsers);
     } catch (error) {
       res.status(500).json({ message: "Error fetching tenants" });
+    }
+  });
+  
+  // Debug route to list all users (for testing only - does not require authentication)
+  app.get("/api/debug/users", async (req, res) => {
+    try {
+      // Get users by role
+      const landlords = await storage.getUsersByRole('landlord');
+      const tenants = await storage.getUsersByRole('tenant');
+      const agencies = await storage.getUsersByRole('agency');
+      const maintenance = await storage.getUsersByRole('maintenance');
+      
+      // Combine and sanitize (remove passwords)
+      const allUsers = [
+        ...landlords, 
+        ...tenants, 
+        ...agencies, 
+        ...maintenance
+      ].map(user => {
+        const { password, ...safeUser } = user;
+        return safeUser;
+      });
+      
+      res.json({
+        totalCount: allUsers.length,
+        byRole: {
+          landlords: landlords.length,
+          tenants: tenants.length,
+          agencies: agencies.length,
+          maintenance: maintenance.length
+        },
+        users: allUsers
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching users", error: String(error) });
+    }
+  });
+  
+  // Debug route to get system status (for testing only - does not require authentication)
+  app.get("/api/debug/status", async (req, res) => {
+    try {
+      // Gather counts from all entities
+      const landlords = await storage.getUsersByRole('landlord');
+      const tenants = await storage.getUsersByRole('tenant');
+      const agencies = await storage.getUsersByRole('agency');
+      const maintenance = await storage.getUsersByRole('maintenance');
+      const properties = await storage.getProperties();
+      
+      // Get leases for all properties
+      const propertyIds = properties.map(p => p.id);
+      const leasePromises = propertyIds.map(id => storage.getLeasesByProperty(id));
+      const leaseGroups = await Promise.all(leasePromises);
+      const allLeases = leaseGroups.flat();
+      
+      // Get all maintenance requests from different statuses and combine them
+      const openRequests = await storage.getMaintenanceRequestsByStatus('open');
+      const inProgressRequests = await storage.getMaintenanceRequestsByStatus('in_progress');
+      const completedRequests = await storage.getMaintenanceRequestsByStatus('completed');
+      const maintenanceRequests = [...openRequests, ...inProgressRequests, ...completedRequests];
+      
+      // Get all messages
+      const messages = [];
+      for (const user of [...landlords, ...tenants, ...agencies, ...maintenance]) {
+        const userMessages = await storage.getMessagesBySender(user.id);
+        messages.push(...userMessages);
+      }
+      
+      // Get all documents
+      const documents = [];
+      for (const property of properties) {
+        const propertyDocs = await storage.getDocumentsByProperty(property.id);
+        documents.push(...propertyDocs);
+      }
+      
+      // Get all payments
+      const payments = [];
+      for (const lease of allLeases) {
+        const leasePayments = await storage.getPaymentsByLease(lease.id);
+        payments.push(...leasePayments);
+      }
+      
+      res.json({
+        systemStatus: "operational",
+        entityCounts: {
+          users: {
+            total: landlords.length + tenants.length + agencies.length + maintenance.length,
+            landlords: landlords.length,
+            tenants: tenants.length,
+            agencies: agencies.length,
+            maintenance: maintenance.length
+          },
+          properties: properties.length,
+          leases: {
+            total: allLeases.length,
+            active: allLeases.filter(lease => lease.active).length,
+            expired: allLeases.filter(lease => !lease.active).length
+          },
+          maintenanceRequests: {
+            total: maintenanceRequests.length,
+            open: maintenanceRequests.filter(req => req.status === 'open').length,
+            inProgress: maintenanceRequests.filter(req => req.status === 'in_progress').length,
+            completed: maintenanceRequests.filter(req => req.status === 'completed').length
+          },
+          messages: messages.length,
+          documents: documents.length,
+          payments: payments.length
+        },
+        databaseHealth: "good",
+        storageType: "In-Memory Database",
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        message: "Error fetching system status", 
+        error: String(error),
+        systemStatus: "error",
+        timestamp: new Date().toISOString()
+      });
     }
   });
   
@@ -1166,6 +1285,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   function sendDirectMessage(receiverId: number, data: any) {
     sendToUser(receiverId, data);
   }
+  
+  // Serve debug HTML files directly (outside the React router)
+  app.get('/test-debug.html', (req, res) => {
+    res.sendFile(path.resolve(process.cwd(), 'test-debug.html'));
+  });
+  
+  app.get('/test-websocket.html', (req, res) => {
+    res.sendFile(path.resolve(process.cwd(), 'test-websocket.html'));
+  });
 
   return httpServer;
 }

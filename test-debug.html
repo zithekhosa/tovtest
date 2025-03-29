@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TOV Platform Debug Console</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      margin: 0;
+      padding: 20px;
+      line-height: 1.6;
+      color: #333;
+      background-color: #f5f5f5;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #2563eb;
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 10px;
+      margin-top: 0;
+    }
+    h2 {
+      color: #1e40af;
+      margin-top: 20px;
+    }
+    button {
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-right: 8px;
+      margin-bottom: 8px;
+    }
+    button:hover {
+      background-color: #1d4ed8;
+    }
+    pre {
+      background-color: #f3f4f6;
+      padding: 15px;
+      border-radius: 4px;
+      overflow: auto;
+      margin-top: 10px;
+      font-size: 14px;
+      max-height: 400px;
+    }
+    .panel {
+      margin-bottom: 20px;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .panel-header {
+      background-color: #f9fafb;
+      padding: 10px 15px;
+      border-bottom: 1px solid #e5e7eb;
+      font-weight: 600;
+    }
+    .panel-body {
+      padding: 15px;
+    }
+    .loading {
+      color: #6b7280;
+      font-style: italic;
+    }
+    .error {
+      color: #dc2626;
+      font-weight: 500;
+    }
+    .success {
+      color: #16a34a;
+      font-weight: 500;
+    }
+    .info {
+      color: #0284c7;
+      font-style: italic;
+      font-size: 14px;
+    }
+    .tab-container {
+      display: flex;
+      border-bottom: 1px solid #e5e7eb;
+      margin-bottom: 15px;
+    }
+    .tab {
+      padding: 10px 15px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+    .tab.active {
+      border-bottom: 2px solid #2563eb;
+      font-weight: 600;
+      color: #2563eb;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 15px;
+      font-size: 14px;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    th {
+      background-color: #f9fafb;
+      font-weight: 600;
+    }
+    tr:hover {
+      background-color: #f9fafb;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>TOV Platform Debug Console</h1>
+    
+    <!-- Tab Navigation -->
+    <div class="tab-container">
+      <div class="tab active" data-tab="users">Users</div>
+      <div class="tab" data-tab="status">System Status</div>
+      <div class="tab" data-tab="websocket">WebSocket</div>
+      <div class="tab" data-tab="api">API Tests</div>
+    </div>
+    
+    <!-- Users Tab -->
+    <div class="tab-content active" id="users-tab">
+      <div class="panel">
+        <div class="panel-header">System Users</div>
+        <div class="panel-body">
+          <button id="fetchUsers">Fetch All Users</button>
+          <div id="usersResult"></div>
+        </div>
+      </div>
+      
+      <div class="panel">
+        <div class="panel-header">Test Users</div>
+        <div class="panel-body">
+          <table>
+            <thead>
+              <tr>
+                <th>Role</th>
+                <th>Username</th>
+                <th>Password</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Landlord</td>
+                <td>landlord</td>
+                <td>password123</td>
+                <td>Property owner with access to manage properties and view leases</td>
+              </tr>
+              <tr>
+                <td>Tenant</td>
+                <td>tenant</td>
+                <td>password123</td>
+                <td>Renter with access to maintenance requests and payments</td>
+              </tr>
+              <tr>
+                <td>Agency</td>
+                <td>agency</td>
+                <td>password123</td>
+                <td>Real estate agency with property management capabilities</td>
+              </tr>
+              <tr>
+                <td>Maintenance</td>
+                <td>maintenance</td>
+                <td>password123</td>
+                <td>Maintenance provider who can respond to service requests</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="info">Note: After server restart, test users are automatically recreated. Visit this page to confirm they exist.</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- System Status Tab -->
+    <div class="tab-content" id="status-tab">
+      <div class="panel">
+        <div class="panel-header">System Health</div>
+        <div class="panel-body">
+          <button id="checkStatus">Check System Status</button>
+          <div id="statusResult"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- WebSocket Tab -->
+    <div class="tab-content" id="websocket-tab">
+      <div class="panel">
+        <div class="panel-header">WebSocket Testing</div>
+        <div class="panel-body">
+          <button id="connectSocket">Connect</button>
+          <button id="disconnectSocket" disabled>Disconnect</button>
+          <div id="connectionStatus" class="loading">Not connected</div>
+          
+          <h3>Send Message</h3>
+          <select id="messageType">
+            <option value="maintenance_update">Maintenance Update</option>
+            <option value="property_notification">Property Notification</option>
+            <option value="chat_message">Chat Message</option>
+          </select>
+          <input type="text" id="messageContent" placeholder="Message content">
+          <input type="number" id="targetId" placeholder="Request/Property/User ID">
+          <button id="sendMessage" disabled>Send</button>
+          
+          <h3>Received Messages</h3>
+          <pre id="receivedMessages">No messages received yet</pre>
+        </div>
+      </div>
+    </div>
+    
+    <!-- API Tests Tab -->
+    <div class="tab-content" id="api-tab">
+      <div class="panel">
+        <div class="panel-header">Authentication Tests</div>
+        <div class="panel-body">
+          <h3>Login</h3>
+          <select id="loginRole">
+            <option value="landlord">Landlord</option>
+            <option value="tenant">Tenant</option>
+            <option value="agency">Agency</option>
+            <option value="maintenance">Maintenance</option>
+          </select>
+          <button id="loginBtn">Login</button>
+          <button id="logoutBtn">Logout</button>
+          <pre id="authResult">Not logged in</pre>
+          
+          <h3>API Endpoints</h3>
+          <button class="endpoint-btn" data-endpoint="/api/properties">Get Properties</button>
+          <button class="endpoint-btn" data-endpoint="/api/properties/user">Get User Properties</button>
+          <button class="endpoint-btn" data-endpoint="/api/leases/tenant">Get Tenant Leases</button>
+          <button class="endpoint-btn" data-endpoint="/api/leases/landlord">Get Landlord Leases</button>
+          <button class="endpoint-btn" data-endpoint="/api/maintenance/tenant">Get Tenant Maintenance</button>
+          <button class="endpoint-btn" data-endpoint="/api/maintenance/provider">Get Provider Maintenance</button>
+          <pre id="endpointResult">Select an endpoint to test</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        // Remove active class from all tabs and content
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        
+        // Add active class to clicked tab and corresponding content
+        tab.classList.add('active');
+        document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
+      });
+    });
+    
+    // System Status tab functionality
+    document.getElementById('checkStatus').addEventListener('click', async () => {
+      const statusResult = document.getElementById('statusResult');
+      statusResult.innerHTML = '<div class="loading">Checking system status...</div>';
+      
+      try {
+        const response = await fetch('/api/debug/status');
+        const data = await response.json();
+        
+        // Create status display
+        const statusClass = data.systemStatus === 'operational' ? 'success' : 'error';
+        let html = `
+          <div class="${statusClass}">System Status: ${data.systemStatus}</div>
+          <p>Database: ${data.databaseHealth} (${data.storageType})</p>
+          <p>Last Updated: ${new Date(data.timestamp).toLocaleString()}</p>
+          
+          <h3>Entity Counts</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Entity Type</th>
+                <th>Count</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Users</td>
+                <td>${data.entityCounts.users.total}</td>
+                <td>
+                  Landlords: ${data.entityCounts.users.landlords}, 
+                  Tenants: ${data.entityCounts.users.tenants}, 
+                  Agencies: ${data.entityCounts.users.agencies}, 
+                  Maintenance: ${data.entityCounts.users.maintenance}
+                </td>
+              </tr>
+              <tr>
+                <td>Properties</td>
+                <td>${data.entityCounts.properties}</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>Leases</td>
+                <td>${data.entityCounts.leases.total}</td>
+                <td>
+                  Active: ${data.entityCounts.leases.active}, 
+                  Expired: ${data.entityCounts.leases.expired}
+                </td>
+              </tr>
+              <tr>
+                <td>Maintenance Requests</td>
+                <td>${data.entityCounts.maintenanceRequests.total}</td>
+                <td>
+                  Open: ${data.entityCounts.maintenanceRequests.open}, 
+                  In Progress: ${data.entityCounts.maintenanceRequests.inProgress}, 
+                  Completed: ${data.entityCounts.maintenanceRequests.completed}
+                </td>
+              </tr>
+              <tr>
+                <td>Messages</td>
+                <td>${data.entityCounts.messages}</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>Documents</td>
+                <td>${data.entityCounts.documents}</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>Payments</td>
+                <td>${data.entityCounts.payments}</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+          
+          <div class="info" style="margin-top: 15px">
+            Note: This is an in-memory database. Data will be reset when the server restarts.
+            Default test users are automatically recreated on startup.
+          </div>
+        `;
+        
+        statusResult.innerHTML = html;
+      } catch (error) {
+        statusResult.innerHTML = `<div class="error">Error checking system status: ${error.message}</div>`;
+      }
+    });
+    
+    // Users tab functionality
+    document.getElementById('fetchUsers').addEventListener('click', async () => {
+      const usersResult = document.getElementById('usersResult');
+      usersResult.innerHTML = '<div class="loading">Loading users...</div>';
+      
+      try {
+        const response = await fetch('/api/debug/users');
+        const data = await response.json();
+        
+        // Create a summary table
+        let html = `
+          <div class="success">Successfully retrieved ${data.totalCount} users</div>
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Name</th>
+                <th>Role</th>
+                <th>Email</th>
+                <th>Phone</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+        
+        data.users.forEach(user => {
+          html += `
+            <tr>
+              <td>${user.id}</td>
+              <td>${user.username}</td>
+              <td>${user.firstName} ${user.lastName}</td>
+              <td>${user.role}</td>
+              <td>${user.email}</td>
+              <td>${user.phone || 'N/A'}</td>
+            </tr>
+          `;
+        });
+        
+        html += `
+            </tbody>
+          </table>
+          <h3>Role Distribution</h3>
+          <ul>
+            <li>Landlords: ${data.byRole.landlords}</li>
+            <li>Tenants: ${data.byRole.tenants}</li>
+            <li>Agencies: ${data.byRole.agencies}</li>
+            <li>Maintenance Providers: ${data.byRole.maintenance}</li>
+          </ul>
+        `;
+        
+        usersResult.innerHTML = html;
+      } catch (error) {
+        usersResult.innerHTML = `<div class="error">Error fetching users: ${error.message}</div>`;
+      }
+    });
+    
+    // WebSocket tab functionality
+    let socket;
+    const connectBtn = document.getElementById('connectSocket');
+    const disconnectBtn = document.getElementById('disconnectSocket');
+    const sendBtn = document.getElementById('sendMessage');
+    const connectionStatus = document.getElementById('connectionStatus');
+    const receivedMessages = document.getElementById('receivedMessages');
+    
+    connectBtn.addEventListener('click', () => {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${protocol}//${window.location.host}/ws`;
+      
+      connectionStatus.innerHTML = `<div class="loading">Connecting to ${wsUrl}...</div>`;
+      
+      try {
+        socket = new WebSocket(wsUrl);
+        
+        socket.onopen = () => {
+          connectionStatus.innerHTML = `<div class="success">Connected to WebSocket server</div>`;
+          connectBtn.disabled = true;
+          disconnectBtn.disabled = false;
+          sendBtn.disabled = false;
+        };
+        
+        socket.onmessage = (event) => {
+          let message;
+          try {
+            message = JSON.parse(event.data);
+          } catch (e) {
+            message = event.data;
+          }
+          
+          // Add timestamp to message display
+          const timestamp = new Date().toLocaleTimeString();
+          const formattedMessage = typeof message === 'object' 
+            ? JSON.stringify(message, null, 2) 
+            : message.toString();
+          
+          receivedMessages.textContent = `[${timestamp}] Received:\n${formattedMessage}\n\n${receivedMessages.textContent}`;
+        };
+        
+        socket.onerror = (error) => {
+          connectionStatus.innerHTML = `<div class="error">WebSocket error: ${error.message || 'Unknown error'}</div>`;
+        };
+        
+        socket.onclose = () => {
+          connectionStatus.innerHTML = `<div class="loading">Connection closed</div>`;
+          connectBtn.disabled = false;
+          disconnectBtn.disabled = true;
+          sendBtn.disabled = true;
+        };
+      } catch (error) {
+        connectionStatus.innerHTML = `<div class="error">Error creating WebSocket: ${error.message}</div>`;
+      }
+    });
+    
+    disconnectBtn.addEventListener('click', () => {
+      if (socket) {
+        socket.close();
+      }
+    });
+    
+    sendBtn.addEventListener('click', () => {
+      if (!socket || socket.readyState !== WebSocket.OPEN) {
+        connectionStatus.innerHTML = `<div class="error">WebSocket not connected</div>`;
+        return;
+      }
+      
+      const messageType = document.getElementById('messageType').value;
+      const messageContent = document.getElementById('messageContent').value;
+      const targetId = parseInt(document.getElementById('targetId').value, 10);
+      
+      if (!messageContent) {
+        alert('Please enter a message');
+        return;
+      }
+      
+      if (isNaN(targetId) || targetId <= 0) {
+        alert('Please enter a valid ID');
+        return;
+      }
+      
+      let message;
+      
+      switch(messageType) {
+        case 'maintenance_update':
+          message = {
+            type: 'maintenance_update',
+            requestId: targetId,
+            message: messageContent,
+            status: 'updated'
+          };
+          break;
+        case 'property_notification':
+          message = {
+            type: 'property_notification',
+            propertyId: targetId,
+            message: messageContent
+          };
+          break;
+        case 'chat_message':
+          message = {
+            type: 'chat_message',
+            receiverId: targetId,
+            content: messageContent
+          };
+          break;
+      }
+      
+      try {
+        socket.send(JSON.stringify(message));
+        const timestamp = new Date().toLocaleTimeString();
+        receivedMessages.textContent = `[${timestamp}] Sent:\n${JSON.stringify(message, null, 2)}\n\n${receivedMessages.textContent}`;
+      } catch (error) {
+        connectionStatus.innerHTML = `<div class="error">Error sending message: ${error.message}</div>`;
+      }
+    });
+    
+    // API Tests tab functionality
+    document.getElementById('loginBtn').addEventListener('click', async () => {
+      const role = document.getElementById('loginRole').value;
+      const authResult = document.getElementById('authResult');
+      
+      authResult.textContent = `Logging in as ${role}...`;
+      
+      try {
+        const response = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: role,
+            password: 'password123'
+          })
+        });
+        
+        if (response.ok) {
+          const user = await response.json();
+          authResult.textContent = `Logged in as ${role}:\n${JSON.stringify(user, null, 2)}`;
+        } else {
+          const error = await response.text();
+          authResult.textContent = `Login failed: ${error}`;
+        }
+      } catch (error) {
+        authResult.textContent = `Error: ${error.message}`;
+      }
+    });
+    
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      const authResult = document.getElementById('authResult');
+      
+      try {
+        const response = await fetch('/api/logout', { method: 'POST' });
+        if (response.ok) {
+          authResult.textContent = 'Logged out successfully';
+        } else {
+          const error = await response.text();
+          authResult.textContent = `Logout failed: ${error}`;
+        }
+      } catch (error) {
+        authResult.textContent = `Error: ${error.message}`;
+      }
+    });
+    
+    document.querySelectorAll('.endpoint-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const endpoint = btn.dataset.endpoint;
+        const resultElem = document.getElementById('endpointResult');
+        
+        resultElem.textContent = `Fetching ${endpoint}...`;
+        
+        try {
+          const response = await fetch(endpoint);
+          
+          if (response.ok) {
+            const data = await response.json();
+            resultElem.textContent = JSON.stringify(data, null, 2);
+          } else {
+            if (response.status === 401) {
+              resultElem.textContent = `Authentication required. Please login first.`;
+            } else {
+              const error = await response.text();
+              resultElem.textContent = `Error (${response.status}): ${error}`;
+            }
+          }
+        } catch (error) {
+          resultElem.textContent = `Error: ${error.message}`;
+        }
+      });
+    });
+  </script>
+</body>
+</html>

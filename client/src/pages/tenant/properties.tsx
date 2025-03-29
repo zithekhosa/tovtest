@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { Loader2, Building, MapPin, Calendar, User, DollarSign, Home, Phone, Mail, Tag } from "lucide-react";
+import { Loader2, Building, MapPin, Calendar, User, DollarSign, Home, Phone, Mail, Tag, MessageSquare, Wrench } from "lucide-react";
 
 export default function TenantProperties() {
   const { user } = useAuth();
@@ -78,9 +78,9 @@ export default function TenantProperties() {
 
         <div className="bg-white rounded-xl overflow-hidden shadow-md">
           <div className="h-48 bg-gray-200 relative">
-            {property.imageUrl ? (
+            {property.images && property.images.length > 0 ? (
               <img 
-                src={property.imageUrl} 
+                src={property.images[0]} 
                 alt={property.address} 
                 className="w-full h-full object-cover"
               />
@@ -110,7 +110,7 @@ export default function TenantProperties() {
                 <div className="space-y-4">
                   <div>
                     <h3 className="text-sm font-medium text-gray-500">Property Type</h3>
-                    <p className="font-medium">{property.type || "Residential"}</p>
+                    <p className="font-medium">{property.propertyType || "Residential"}</p>
                   </div>
                   <div>
                     <h3 className="text-sm font-medium text-gray-500">Bedrooms</h3>
@@ -122,26 +122,18 @@ export default function TenantProperties() {
                   </div>
                   <div>
                     <h3 className="text-sm font-medium text-gray-500">Size</h3>
-                    <p className="font-medium">{property.squareFootage} sq ft</p>
+                    <p className="font-medium">{property.squareFeet || 0} sq ft</p>
                   </div>
                 </div>
                 <div className="space-y-4">
                   <div>
                     <h3 className="text-sm font-medium text-gray-500">Year Built</h3>
-                    <p className="font-medium">{property.yearBuilt || "Not specified"}</p>
+                    <p className="font-medium">Not specified</p>
                   </div>
                   <div>
                     <h3 className="text-sm font-medium text-gray-500">Amenities</h3>
                     <div className="flex flex-wrap gap-2 mt-1">
-                      {property.amenities?.length > 0 ? (
-                        property.amenities.map((amenity, i) => (
-                          <span key={i} className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
-                            {amenity}
-                          </span>
-                        ))
-                      ) : (
-                        <p className="text-gray-500">No amenities listed</p>
-                      )}
+                      <p className="text-gray-500">No amenities listed</p>
                     </div>
                   </div>
                   <div>

@@ -6,6 +6,7 @@ import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { MetricsCard, getMaintenanceMetrics } from "@/components/dashboard/DashboardMetrics";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { MaintenanceRequest } from "@shared/schema";
+import { Download } from "lucide-react";
 
 import { 
   Tabs, 
