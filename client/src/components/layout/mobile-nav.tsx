@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Home, Building, Users, Wrench as Tool, FileText, MessageSquare, Settings, LogOut } from "lucide-react";
+import { Menu, X, Home, Building, Users, Wrench, FileText, MessageSquare, Settings, LogOut } from "lucide-react";
 
 export function MobileNav() {
   const [isOpen, setIsOpen] = useState(false);
