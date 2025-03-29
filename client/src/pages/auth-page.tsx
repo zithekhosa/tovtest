@@ -190,6 +190,18 @@ export default function AuthPage() {
                     </Button>
                     
                     <div className="text-center mt-4 space-y-2">
+                      <div className="p-3 bg-primary/5 rounded-md border border-primary/20 mb-3">
+                        <h4 className="font-medium text-sm mb-1">Demo Login Credentials</h4>
+                        <p className="text-xs text-gray-600 mb-1">
+                          All demo accounts use: <span className="font-semibold">password123</span>
+                        </p>
+                        <div className="grid grid-cols-2 gap-x-4 text-xs text-left">
+                          <p>Tenant: <span className="font-mono">tenant</span></p>
+                          <p>Landlord: <span className="font-mono">landlord</span></p>
+                          <p>Agency: <span className="font-mono">agency</span></p>
+                          <p>Maintenance: <span className="font-mono">maintenance</span></p>
+                        </div>
+                      </div>
                       <p className="text-sm text-gray-600">
                         Don't have an account? Contact your property manager to create one.
                       </p>
