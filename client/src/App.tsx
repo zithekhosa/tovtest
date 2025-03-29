@@ -2,6 +2,7 @@ import { Switch, Route } from "wouter";
 import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
+import ProvidersSignup from "@/pages/providers-signup";
 import { ProtectedRoute } from "./lib/protected-route";
 
 // Shared pages
@@ -29,8 +30,9 @@ import MaintenanceMarketplace from "@/pages/maintenance/marketplace";
 function Router() {
   return (
     <Switch>
-      {/* Auth page (public) */}
+      {/* Public routes */}
       <Route path="/auth" component={AuthPage} />
+      <Route path="/providers-signup" component={ProvidersSignup} />
       
       {/* Default route - redirect to appropriate dashboard based on role */}
       <ProtectedRoute path="/" component={(props) => {

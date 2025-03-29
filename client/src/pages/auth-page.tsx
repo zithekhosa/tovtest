@@ -57,8 +57,8 @@ export default function AuthPage() {
               <h1 className="text-xl font-bold text-gray-900 ml-2">TOV</h1>
             </div>
             <nav className="hidden md:flex space-x-4">
-              <Button variant="ghost">Features</Button>
-              <Button variant="ghost">Pricing</Button>
+              <Button variant="ghost" onClick={() => navigate("/maintenance/marketplace")}>Marketplace</Button>
+              <Button variant="ghost" onClick={() => navigate("/providers-signup")}>Provider Signup</Button>
               <Button variant="ghost">About</Button>
               <Button variant="ghost">Contact</Button>
             </nav>
@@ -164,9 +164,18 @@ export default function AuthPage() {
                       {loginMutation.isPending ? "Signing in..." : "Login"}
                     </Button>
                     
-                    <div className="text-center mt-4">
+                    <div className="text-center mt-4 space-y-2">
                       <p className="text-sm text-gray-600">
                         Don't have an account? Contact your property manager to create one.
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        Are you a service provider or agency? <Button 
+                          variant="link" 
+                          className="p-0 h-auto text-primary" 
+                          onClick={() => navigate("/providers-signup")}
+                        >
+                          Sign up here
+                        </Button>
                       </p>
                     </div>
                   </form>
