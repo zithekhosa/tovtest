@@ -297,153 +297,6 @@ export default function LandingPage() {
         </section>
 
         {/* User Paths Section */}
-        <section className="py-16 bg-white">
-          <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center mb-12">How TOV Works For You</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {/* Tenant Path */}
-              <Card className="border-2 hover:border-primary transition-all">
-                <CardHeader className="pb-4">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                    <Home className="h-6 w-6 text-primary" />
-                  </div>
-                  <CardTitle>For Tenants</CardTitle>
-                </CardHeader>
-                <CardContent className="pb-4 pt-0">
-                  <ul className="space-y-2 text-gray-600">
-                    <li className="flex items-start">
-                      <ArrowRight className="h-4 w-4 mr-2 mt-1 text-primary" />
-                      <span>Find and apply for your ideal rental</span>
-                    </li>
-                    <li className="flex items-start">
-                      <ArrowRight className="h-4 w-4 mr-2 mt-1 text-primary" />
-                      <span>Manage rent payments online</span>
-                    </li>
-                    <li className="flex items-start">
-                      <ArrowRight className="h-4 w-4 mr-2 mt-1 text-primary" />
-                      <span>Request maintenance services</span>
-                    </li>
-                    <li className="flex items-start">
-                      <ArrowRight className="h-4 w-4 mr-2 mt-1 text-primary" />
-                      <span>Communicate with landlord/agency</span>
-                    </li>
-                  </ul>
-                </CardContent>
-                <CardFooter>
-                  <Button variant="outline" className="w-full" onClick={() => navigate("/auth")}>
-                    Find a Home
-                  </Button>
-                </CardFooter>
-              </Card>
-              
-              {/* Landlord Path */}
-              <Card className="border-2 hover:border-primary transition-all">
-                <CardHeader className="pb-4">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                    <Building className="h-6 w-6 text-primary" />
-                  </div>
-                  <CardTitle>For Landlords</CardTitle>
-                </CardHeader>
-                <CardContent className="pb-4 pt-0">
-                  <ul className="space-y-2 text-gray-600">
-                    <li className="flex items-start">
-                      <ArrowRight className="h-4 w-4 mr-2 mt-1 text-primary" />
-                      <span>List and manage your properties</span>
-                    </li>
-                    <li className="flex items-start">
-                      <ArrowRight className="h-4 w-4 mr-2 mt-1 text-primary" />
-                      <span>Screen and approve tenants</span>
-                    </li>
-                    <li className="flex items-start">
-                      <ArrowRight className="h-4 w-4 mr-2 mt-1 text-primary" />
-                      <span>Collect rent automatically</span>
-                    </li>
-                    <li className="flex items-start">
-                      <ArrowRight className="h-4 w-4 mr-2 mt-1 text-primary" />
-                      <span>Track maintenance and expenses</span>
-                    </li>
-                  </ul>
-                </CardContent>
-                <CardFooter>
-                  <Button variant="outline" className="w-full" onClick={() => navigate("/auth")}>
-                    List Property
-                  </Button>
-                </CardFooter>
-              </Card>
-              
-              {/* Agent Path */}
-              <Card className="border-2 hover:border-primary transition-all">
-                <CardHeader className="pb-4">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                    <Users className="h-6 w-6 text-primary" />
-                  </div>
-                  <CardTitle>For Agencies</CardTitle>
-                </CardHeader>
-                <CardContent className="pb-4 pt-0">
-                  <ul className="space-y-2 text-gray-600">
-                    <li className="flex items-start">
-                      <ArrowRight className="h-4 w-4 mr-2 mt-1 text-primary" />
-                      <span>Market properties for landlords</span>
-                    </li>
-                    <li className="flex items-start">
-                      <ArrowRight className="h-4 w-4 mr-2 mt-1 text-primary" />
-                      <span>Manage client portfolios</span>
-                    </li>
-                    <li className="flex items-start">
-                      <ArrowRight className="h-4 w-4 mr-2 mt-1 text-primary" />
-                      <span>Track commissions and leads</span>
-                    </li>
-                    <li className="flex items-start">
-                      <ArrowRight className="h-4 w-4 mr-2 mt-1 text-primary" />
-                      <span>Streamline tenant placement</span>
-                    </li>
-                  </ul>
-                </CardContent>
-                <CardFooter>
-                  <Button variant="outline" className="w-full" onClick={() => navigate("/providers-signup")}>
-                    Join as Agency
-                  </Button>
-                </CardFooter>
-              </Card>
-              
-              {/* Maintenance Path */}
-              <Card className="border-2 hover:border-primary transition-all">
-                <CardHeader className="pb-4">
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                    <Wrench className="h-6 w-6 text-primary" />
-                  </div>
-                  <CardTitle>For Maintenance</CardTitle>
-                </CardHeader>
-                <CardContent className="pb-4 pt-0">
-                  <ul className="space-y-2 text-gray-600">
-                    <li className="flex items-start">
-                      <ArrowRight className="h-4 w-4 mr-2 mt-1 text-primary" />
-                      <span>Find new maintenance jobs</span>
-                    </li>
-                    <li className="flex items-start">
-                      <ArrowRight className="h-4 w-4 mr-2 mt-1 text-primary" />
-                      <span>Showcase your services</span>
-                    </li>
-                    <li className="flex items-start">
-                      <ArrowRight className="h-4 w-4 mr-2 mt-1 text-primary" />
-                      <span>Manage appointments</span>
-                    </li>
-                    <li className="flex items-start">
-                      <ArrowRight className="h-4 w-4 mr-2 mt-1 text-primary" />
-                      <span>Get paid through the platform</span>
-                    </li>
-                  </ul>
-                </CardContent>
-                <CardFooter>
-                  <Button variant="outline" className="w-full" onClick={() => navigate("/providers-signup")}>
-                    Offer Services
-                  </Button>
-                </CardFooter>
-              </Card>
-            </div>
-          </div>
-        </section>
 
         {/* Featured Properties Section */}
         <section id="properties" className="py-16 bg-gray-50">
@@ -631,6 +484,154 @@ export default function LandingPage() {
                     Secure transactions, verified service providers, and data protection.
                   </p>
                 </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+        {/* User Paths Section */}
+        <section className="py-16 bg-white">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-bold text-center mb-12">How TOV Works For You</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {/* Tenant Path */}
+              <Card className="border-2 hover:border-primary transition-all">
+                <CardHeader className="pb-4">
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                    <Home className="h-6 w-6 text-primary" />
+                  </div>
+                  <CardTitle>For Tenants</CardTitle>
+                </CardHeader>
+                <CardContent className="pb-4 pt-0">
+                  <ul className="space-y-2 text-gray-600">
+                    <li className="flex items-start">
+                      <ArrowRight className="h-4 w-4 mr-2 mt-1 text-primary" />
+                      <span>Find and apply for your ideal rental</span>
+                    </li>
+                    <li className="flex items-start">
+                      <ArrowRight className="h-4 w-4 mr-2 mt-1 text-primary" />
+                      <span>Manage rent payments online</span>
+                    </li>
+                    <li className="flex items-start">
+                      <ArrowRight className="h-4 w-4 mr-2 mt-1 text-primary" />
+                      <span>Request maintenance services</span>
+                    </li>
+                    <li className="flex items-start">
+                      <ArrowRight className="h-4 w-4 mr-2 mt-1 text-primary" />
+                      <span>Communicate with landlord/agency</span>
+                    </li>
+                  </ul>
+                </CardContent>
+                <CardFooter>
+                  <Button variant="outline" className="w-full" onClick={() => navigate("/auth")}>
+                    Find a Home
+                  </Button>
+                </CardFooter>
+              </Card>
+              
+              {/* Landlord Path */}
+              <Card className="border-2 hover:border-primary transition-all">
+                <CardHeader className="pb-4">
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                    <Building className="h-6 w-6 text-primary" />
+                  </div>
+                  <CardTitle>For Landlords</CardTitle>
+                </CardHeader>
+                <CardContent className="pb-4 pt-0">
+                  <ul className="space-y-2 text-gray-600">
+                    <li className="flex items-start">
+                      <ArrowRight className="h-4 w-4 mr-2 mt-1 text-primary" />
+                      <span>List and manage your properties</span>
+                    </li>
+                    <li className="flex items-start">
+                      <ArrowRight className="h-4 w-4 mr-2 mt-1 text-primary" />
+                      <span>Screen and approve tenants</span>
+                    </li>
+                    <li className="flex items-start">
+                      <ArrowRight className="h-4 w-4 mr-2 mt-1 text-primary" />
+                      <span>Collect rent automatically</span>
+                    </li>
+                    <li className="flex items-start">
+                      <ArrowRight className="h-4 w-4 mr-2 mt-1 text-primary" />
+                      <span>Track maintenance and expenses</span>
+                    </li>
+                  </ul>
+                </CardContent>
+                <CardFooter>
+                  <Button variant="outline" className="w-full" onClick={() => navigate("/auth")}>
+                    List Property
+                  </Button>
+                </CardFooter>
+              </Card>
+              
+              {/* Agent Path */}
+              <Card className="border-2 hover:border-primary transition-all">
+                <CardHeader className="pb-4">
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                    <Users className="h-6 w-6 text-primary" />
+                  </div>
+                  <CardTitle>For Agencies</CardTitle>
+                </CardHeader>
+                <CardContent className="pb-4 pt-0">
+                  <ul className="space-y-2 text-gray-600">
+                    <li className="flex items-start">
+                      <ArrowRight className="h-4 w-4 mr-2 mt-1 text-primary" />
+                      <span>Market properties for landlords</span>
+                    </li>
+                    <li className="flex items-start">
+                      <ArrowRight className="h-4 w-4 mr-2 mt-1 text-primary" />
+                      <span>Manage client portfolios</span>
+                    </li>
+                    <li className="flex items-start">
+                      <ArrowRight className="h-4 w-4 mr-2 mt-1 text-primary" />
+                      <span>Track commissions and leads</span>
+                    </li>
+                    <li className="flex items-start">
+                      <ArrowRight className="h-4 w-4 mr-2 mt-1 text-primary" />
+                      <span>Streamline tenant placement</span>
+                    </li>
+                  </ul>
+                </CardContent>
+                <CardFooter>
+                  <Button variant="outline" className="w-full" onClick={() => navigate("/providers-signup")}>
+                    Join as Agency
+                  </Button>
+                </CardFooter>
+              </Card>
+              
+              {/* Maintenance Path */}
+              <Card className="border-2 hover:border-primary transition-all">
+                <CardHeader className="pb-4">
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                    <Wrench className="h-6 w-6 text-primary" />
+                  </div>
+                  <CardTitle>For Maintenance</CardTitle>
+                </CardHeader>
+                <CardContent className="pb-4 pt-0">
+                  <ul className="space-y-2 text-gray-600">
+                    <li className="flex items-start">
+                      <ArrowRight className="h-4 w-4 mr-2 mt-1 text-primary" />
+                      <span>Find new maintenance jobs</span>
+                    </li>
+                    <li className="flex items-start">
+                      <ArrowRight className="h-4 w-4 mr-2 mt-1 text-primary" />
+                      <span>Showcase your services</span>
+                    </li>
+                    <li className="flex items-start">
+                      <ArrowRight className="h-4 w-4 mr-2 mt-1 text-primary" />
+                      <span>Manage appointments</span>
+                    </li>
+                    <li className="flex items-start">
+                      <ArrowRight className="h-4 w-4 mr-2 mt-1 text-primary" />
+                      <span>Get paid through the platform</span>
+                    </li>
+                  </ul>
+                </CardContent>
+                <CardFooter>
+                  <Button variant="outline" className="w-full" onClick={() => navigate("/providers-signup")}>
+                    Offer Services
+                  </Button>
+                </CardFooter>
               </Card>
             </div>
           </div>
