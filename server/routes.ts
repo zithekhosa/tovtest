@@ -3,7 +3,16 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { z } from "zod";
-import { insertMaintenanceRequestSchema, insertPropertySchema, insertLeaseSchema, insertPaymentSchema, insertDocumentSchema, insertMessageSchema } from "@shared/schema";
+import { 
+  insertMaintenanceRequestSchema, 
+  insertPropertySchema, 
+  insertLeaseSchema, 
+  insertPaymentSchema, 
+  insertDocumentSchema, 
+  insertMessageSchema,
+  Property,
+  MaintenanceRequest
+} from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes
@@ -21,6 +30,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(properties);
     } catch (error) {
       res.status(500).json({ message: "Error fetching properties" });
+    }
+  });
+  
+  // Get properties based on user role
+  app.get("/api/properties/user", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    try {
+      let properties = [];
+      
+      // Return properties based on user role
+      if (req.user.role === 'landlord') {
+        properties = await storage.getPropertiesByLandlord(req.user.id);
+      } else if (req.user.role === 'tenant') {
+        // For tenants, get properties they are leasing
+        const leases = await storage.getLeasesByTenant(req.user.id);
+        const activeLeases = leases.filter(lease => lease.active);
+        
+        // Get property details for each leased property
+        const propertyPromises = activeLeases.map(lease => 
+          storage.getProperty(lease.propertyId)
+        );
+        
+        // Filter out any undefined properties (in case some don't exist)
+        const propertyResults = await Promise.all(propertyPromises);
+        properties = propertyResults.filter(Boolean);
+      } else if (req.user.role === 'agency') {
+        // Agencies can see all properties
+        properties = await storage.getProperties();
+      } else if (req.user.role === 'maintenance') {
+        // Maintenance providers see properties with their assigned maintenance requests
+        const requests = await storage.getMaintenanceRequestsByAssignee(req.user.id);
+        
+        // Get unique property IDs from maintenance requests
+        const propertyIds = [...new Set(requests.map(r => r.propertyId))];
+        
+        // Get property details for each property
+        const propertyPromises = propertyIds.map(id => storage.getProperty(id));
+        
+        // Filter out any undefined properties
+        const propertyResults = await Promise.all(propertyPromises);
+        properties = propertyResults.filter(Boolean);
+      }
+      
+      res.json(properties);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching user properties" });
     }
   });
   
@@ -98,7 +154,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Only landlord of the property or agency can update it
-      if (req.user.role === 'landlord' && property.landlordId !== req.user.id && req.user.role !== 'agency') {
+      if ((req.user.role === 'landlord' && property.landlordId !== req.user.id) && req.user.role !== 'agency') {
         return res.status(403).json({ message: "Access denied" });
       }
       
@@ -140,7 +196,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Only landlord of the property or agency can view its leases
-      if (req.user.role === 'landlord' && property.landlordId !== req.user.id && req.user.role !== 'agency') {
+      if ((req.user.role === 'landlord' && property.landlordId !== req.user.id) && req.user.role !== 'agency') {
         return res.status(403).json({ message: "Access denied" });
       }
       
@@ -302,6 +358,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Maintenance Requests
+  // Get all maintenance requests (based on user role)
+  app.get("/api/maintenance-requests", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    try {
+      let requests = [];
+      
+      // Based on user role, get appropriate maintenance requests
+      if (req.user.role === 'tenant') {
+        requests = await storage.getMaintenanceRequestsByTenant(req.user.id);
+      } else if (req.user.role === 'landlord') {
+        // Find properties owned by this landlord
+        const properties = await storage.getPropertiesByLandlord(req.user.id);
+        const propertyIds = properties.map(p => p.id);
+        
+        // For each property, get maintenance requests
+        const requestPromises = propertyIds.map(id => 
+          storage.getMaintenanceRequestsByProperty(id)
+        );
+        
+        // Flatten the results
+        const requestGroups = await Promise.all(requestPromises);
+        requests = requestGroups.flat();
+      } else if (req.user.role === 'maintenance') {
+        requests = await storage.getMaintenanceRequestsByAssignee(req.user.id);
+        // Also get unassigned requests for maintenance providers
+        const unassignedRequests = await storage.getMaintenanceRequestsByStatus('pending');
+        requests = [...requests, ...unassignedRequests];
+      } else if (req.user.role === 'agency') {
+        // Agencies can see all maintenance requests
+        const pendingRequests = await storage.getMaintenanceRequestsByStatus('pending');
+        const assignedRequests = await storage.getMaintenanceRequestsByStatus('assigned');
+        const inProgressRequests = await storage.getMaintenanceRequestsByStatus('in_progress');
+        const completedRequests = await storage.getMaintenanceRequestsByStatus('completed');
+        requests = [...pendingRequests, ...assignedRequests, ...inProgressRequests, ...completedRequests];
+      }
+      
+      res.json(requests);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching maintenance requests" });
+    }
+  });
+  
   app.get("/api/maintenance/tenant", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     
