@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { 
   User, Home, Building, Users, Wrench, FileText, 
-  MessageSquare, Settings, LogOut, BarChart3, DollarSign 
+  MessageSquare, Settings, LogOut, BarChart3, DollarSign,
+  CalendarDays, Target, LineChart, Clock, Star, UserPlus
 } from "lucide-react";
 import { UserRoleType } from "@shared/schema";
 
@@ -101,10 +102,34 @@ export default function Sidebar({ role }: SidebarProps) {
       ],
       agency: [
         {
+          href: "/agency/property-listings",
+          icon: Building,
+          label: "Property Listings",
+          active: location.includes("property-listings"),
+        },
+        {
+          href: "/agency/leads-management",
+          icon: UserPlus,
+          label: "Leads Management",
+          active: location.includes("leads-management"),
+        },
+        {
+          href: "/agency/commission-tracker",
+          icon: DollarSign,
+          label: "Commission Tracker",
+          active: location.includes("commission-tracker"),
+        },
+        {
+          href: "/agency/expiring-leases",
+          icon: Clock,
+          label: "Expiring Leases",
+          active: location.includes("expiring-leases"),
+        },
+        {
           href: "/agency/properties",
           icon: Building,
           label: "Properties",
-          active: location.includes("properties"),
+          active: location === "/agency/properties",
         },
         {
           href: "/agency/tenants",

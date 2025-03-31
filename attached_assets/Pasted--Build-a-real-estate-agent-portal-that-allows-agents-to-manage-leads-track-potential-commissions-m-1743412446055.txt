@@ -1,0 +1,54 @@
+"Build a real estate agent portal that allows agents to manage leads, track potential commissions, market rental properties, access premium expiring lease data, and post properties on a Zillow-like marketplace. The portal should include:
+
+1️⃣ Leads Management
+Add, edit, delete, and categorize leads (New, Contacted, Interested, Negotiating, Closed, Lost).
+
+Assign follow-up reminders and track lead sources.
+
+2️⃣ Commission Tracking
+Automatically calculate potential commissions based on deal value and agent commission rates.
+
+Show a dashboard summary of total earnings and pending payments.
+
+3️⃣ Property Posting & Marketing (Zillow-Like Feature)
+Agents can post properties for sale or rent with images, descriptions, pricing, and location.
+
+Listings should be visible to website visitors.
+
+Agents can promote properties for increased visibility (paid feature).
+
+Track engagement metrics (views, inquiries, saved properties).
+
+4️⃣ Expiring Lease Alerts (Premium Feature)
+Agents can pay to see leases expiring in the next 30-90 days before competitors.
+
+Subscription-based or pay-per-view access to early lease expiry data.
+
+Automated notifications for subscribed agents when a lease is nearing expiration.
+
+5️⃣ Document Management
+Securely store and access rental agreements and contracts.
+
+Support digital signatures for lease agreements.
+
+Notify agents of expiring documents.
+
+6️⃣ Agent Dashboard
+Overview of leads, commissions, active listings, expiring leases, and property engagement.
+
+Performance analytics (response rates, closed deals, and earnings trends).
+
+7️⃣ User Authentication & Payments
+Agents sign up, log in, and manage their profiles.
+
+Payment system for premium features (Stripe or another method).
+
+Different access levels for free and premium users.
+
+8️⃣ Property Search for Buyers & Renters
+Public users can search for properties by location, price, and type (sale/rent).
+
+Agents receive inquiries from potential buyers/tenants.
+
+The system should be user-friendly, responsive, and secure."
+
