@@ -37,26 +37,26 @@ export function MetricsCard({ title, value, description, icon, trend, progress, 
   }
 
   return (
-    <Card className={`tov-metrics-card bg-white border border-gray-100 shadow-md hover:shadow-lg transition-shadow ${className || ''}`}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-6 pt-6">
+    <Card className={`tov-metrics-card bg-white border border-gray-100 shadow-md hover:shadow-lg transition-all min-h-[180px] ${className || ''}`}>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 px-8 pt-8">
         <CardTitle className="text-sm font-medium tov-truncate-text">{title}</CardTitle>
-        <div className={`h-10 w-10 rounded-full ${bgColorClass} flex items-center justify-center shrink-0`}>
+        <div className={`h-12 w-12 rounded-full ${bgColorClass} flex items-center justify-center shrink-0`}>
           {icon}
         </div>
       </CardHeader>
-      <CardContent className="px-6 pb-6">
+      <CardContent className="px-8 pb-8">
         <div className="text-2xl font-bold tov-truncate-text">{value}</div>
         
         {description && (
-          <p className="text-xs text-muted-foreground tov-text-ellipsis mt-1">{description}</p>
+          <p className="text-xs text-muted-foreground tov-text-ellipsis mt-2">{description}</p>
         )}
         
         {trend && (
-          <div className="flex items-center text-xs mt-3">
+          <div className="flex items-center text-xs mt-4">
             {trend.isPositive ? (
-              <TrendingUp className="mr-1 h-3 w-3 text-green-500 shrink-0" />
+              <TrendingUp className="mr-2 h-4 w-4 text-green-500 shrink-0" />
             ) : (
-              <TrendingDown className="mr-1 h-3 w-3 text-red-500 shrink-0" />
+              <TrendingDown className="mr-2 h-4 w-4 text-red-500 shrink-0" />
             )}
             <span className={`${trend.isPositive ? "text-green-500" : "text-red-500"} tov-text-ellipsis`}>
               {trend.value}% {trend.text || (trend.isPositive ? "increase" : "decrease")}
@@ -65,9 +65,9 @@ export function MetricsCard({ title, value, description, icon, trend, progress, 
         )}
         
         {progress && (
-          <div className="mt-3">
-            <Progress value={(progress.value / progress.max) * 100} className="h-1.5" />
-            <p className="text-xs text-muted-foreground mt-1 tov-text-ellipsis">
+          <div className="mt-4">
+            <Progress value={(progress.value / progress.max) * 100} className="h-2" />
+            <p className="text-xs text-muted-foreground mt-2 tov-text-ellipsis">
               {progress.value} of {progress.max}
             </p>
           </div>
