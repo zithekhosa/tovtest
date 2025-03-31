@@ -852,87 +852,51 @@ export default function LandlordDashboard() {
           </TabsContent>
 
           {/* FEATURE SHOWCASE SECTION */}
-          <div className="mt-12 space-y-6">
-            <h2 className="text-2xl font-semibold tracking-tight">Premium Features</h2>
-            <p className="text-muted-foreground">Enhance your property management experience with these powerful tools</p>
+          <div className="mt-12 space-y-4">
+            <h2 className="text-2xl font-semibold tracking-tight text-center">Premium Features</h2>
+            <p className="text-muted-foreground text-center">Enhance your property management experience with these powerful tools</p>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
               {/* Financial Analytics */}
               <Card className="shadow-sm">
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                        <BarChart3 className="h-5 w-5 text-primary" />
-                      </div>
-                      <CardTitle className="text-lg">Financial Analytics</CardTitle>
-                    </div>
+                <CardContent className="p-6 text-center">
+                  <div className="mb-4 mx-auto bg-blue-100 h-12 w-12 flex items-center justify-center rounded-full">
+                    <BarChart3 className="h-6 w-6 text-blue-600" />
                   </div>
-                </CardHeader>
-                <CardContent className="pb-2">
+                  <CardTitle className="mb-2">Financial Analytics</CardTitle>
                   <p className="text-sm text-muted-foreground">
                     Advanced financial reporting and analytics to track your rental income,
                     expenses, and ROI across your property portfolio.
                   </p>
                 </CardContent>
-                <CardFooter>
-                  <Button variant="outline" className="w-full gap-2">
-                    <TrendingUp className="h-4 w-4" />
-                    <span>Explore Analytics</span>
-                  </Button>
-                </CardFooter>
               </Card>
 
               {/* Tenant Verification */}
               <Card className="shadow-sm">
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
-                        <UserCheck className="h-5 w-5 text-green-600" />
-                      </div>
-                      <CardTitle className="text-lg">Tenant Verification</CardTitle>
-                    </div>
+                <CardContent className="p-6 text-center">
+                  <div className="mb-4 mx-auto bg-green-100 h-12 w-12 flex items-center justify-center rounded-full">
+                    <UserCheck className="h-6 w-6 text-green-600" />
                   </div>
-                </CardHeader>
-                <CardContent className="pb-2">
+                  <CardTitle className="mb-2">Tenant Verification</CardTitle>
                   <p className="text-sm text-muted-foreground">
                     Comprehensive background checks, credit reports, and rental history verification for
                     potential tenants to minimize risk.
                   </p>
                 </CardContent>
-                <CardFooter>
-                  <Button variant="outline" className="w-full gap-2">
-                    <CheckCircle className="h-4 w-4" />
-                    <span>Verify Tenants</span>
-                  </Button>
-                </CardFooter>
               </Card>
 
               {/* Smart Pricing */}
               <Card className="shadow-sm">
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
-                        <BadgePercent className="h-5 w-5 text-blue-600" />
-                      </div>
-                      <CardTitle className="text-lg">Smart Pricing</CardTitle>
-                    </div>
+                <CardContent className="p-6 text-center">
+                  <div className="mb-4 mx-auto bg-indigo-100 h-12 w-12 flex items-center justify-center rounded-full">
+                    <BadgePercent className="h-6 w-6 text-indigo-600" />
                   </div>
-                </CardHeader>
-                <CardContent className="pb-2">
+                  <CardTitle className="mb-2">Smart Pricing</CardTitle>
                   <p className="text-sm text-muted-foreground">
                     AI-powered rent pricing recommendations based on market data, property features, 
                     and local trends to maximize your rental income.
                   </p>
                 </CardContent>
-                <CardFooter>
-                  <Button variant="outline" className="w-full gap-2">
-                    <DollarSign className="h-4 w-4" />
-                    <span>Optimize Pricing</span>
-                  </Button>
-                </CardFooter>
               </Card>
             </div>
           </div>
