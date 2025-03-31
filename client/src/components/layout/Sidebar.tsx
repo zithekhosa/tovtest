@@ -16,7 +16,7 @@ interface SidebarProps {
 
 export default function Sidebar({ role }: SidebarProps) {
   const { user, logoutMutation } = useAuth();
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
 
   if (!user) return null;
 
@@ -203,6 +203,7 @@ export default function Sidebar({ role }: SidebarProps) {
 
   const handleLogout = async () => {
     await logoutMutation.mutateAsync();
+    navigate('/'); // Redirect to the landing page after logout
   };
 
   return (
