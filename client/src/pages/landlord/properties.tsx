@@ -100,10 +100,10 @@ export default function LandlordProperties() {
               />
             </div>
             <Tabs defaultValue="all" value={propertyFilter} onValueChange={setPropertyFilter} className="w-full sm:w-auto">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="occupied">Occupied</TabsTrigger>
-                <TabsTrigger value="available">Vacant</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-3 min-w-[240px]">
+                <TabsTrigger value="all" className="px-4 py-2">All</TabsTrigger>
+                <TabsTrigger value="occupied" className="px-4 py-2">Occupied</TabsTrigger>
+                <TabsTrigger value="available" className="px-4 py-2">Vacant</TabsTrigger>
               </TabsList>
             </Tabs>
             <div className="flex items-center gap-2 ml-auto">
