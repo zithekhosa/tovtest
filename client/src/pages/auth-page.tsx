@@ -9,13 +9,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Building, Home, Users, Wrench } from "lucide-react";
+import { Building, Eye, EyeOff, Home, Users, Wrench } from "lucide-react";
 import { UserRoleType } from "@shared/schema";
 
 export default function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [userRole, setUserRole] = useState<UserRoleType>("tenant");
   const { user, loginMutation, registerMutation, userRoles } = useAuth();
   const [location, navigate] = useLocation();
@@ -104,9 +106,24 @@ export default function AuthPage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Password</FormLabel>
-                          <FormControl>
-                            <Input type="password" placeholder="••••••••" {...field} />
-                          </FormControl>
+                          <div className="relative">
+                            <FormControl>
+                              <Input 
+                                type={showPassword ? "text" : "password"} 
+                                placeholder="••••••••" 
+                                {...field} 
+                              />
+                            </FormControl>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="absolute right-0 top-0 h-full px-3"
+                              onClick={() => setShowPassword(!showPassword)}
+                            >
+                              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </Button>
+                          </div>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -168,11 +185,14 @@ export default function AuthPage() {
                         <p className="text-xs text-gray-600 mb-1">
                           All demo accounts use: <span className="font-semibold">password123</span>
                         </p>
-                        <div className="grid grid-cols-2 gap-x-4 text-xs text-left">
-                          <p>Tenant: <span className="font-mono">tenant</span></p>
-                          <p>Landlord: <span className="font-mono">landlord</span></p>
-                          <p>Agency: <span className="font-mono">agency</span></p>
-                          <p>Maintenance: <span className="font-mono">maintenance</span></p>
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-left">
+                          <p>Tenant: <span className="font-mono bg-gray-100 px-1 py-0.5 rounded">demo-tenant</span></p>
+                          <p>Landlord: <span className="font-mono bg-gray-100 px-1 py-0.5 rounded">demo-landlord</span></p>
+                          <p>Agency: <span className="font-mono bg-gray-100 px-1 py-0.5 rounded">demo-agency</span></p>
+                          <p>Maintenance: <span className="font-mono bg-gray-100 px-1 py-0.5 rounded">demo-maintenance</span></p>
+                        </div>
+                        <div className="mt-1 text-xs text-gray-600">
+                          <p>You can also use <span className="font-mono">tenant</span>, <span className="font-mono">landlord</span>, <span className="font-mono">agency</span>, <span className="font-mono">maintenance</span></p>
                         </div>
                       </div>
                       <p className="text-sm text-gray-600">
