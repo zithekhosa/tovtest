@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
+import { useLocation } from "wouter";
 import { DashLayout } from "@/layout/dash-layout";
 import { Button } from "@/components/ui/button";
-import { Loader2, UserPlus, Search, Filter, MoreHorizontal, Mail, Phone, ExternalLink } from "lucide-react";
+import { Loader2, UserPlus, Search, Filter, MoreHorizontal, Mail, Phone, ExternalLink, User } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -29,6 +30,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Link } from "wouter";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // Sample tenant data structure (would come from the API)
 interface Tenant {
@@ -185,7 +187,18 @@ export default function Tenants() {
                 {filteredTenants.length > 0 ? (
                   filteredTenants.map((tenant) => (
                     <TableRow key={tenant.id}>
-                      <TableCell className="font-medium">{tenant.name}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Avatar className="h-8 w-8">
+                            <AvatarFallback><User className="h-4 w-4" /></AvatarFallback>
+                          </Avatar>
+                          <Link href={`/tenant/${tenant.id}`}>
+                            <div className="font-medium hover:text-primary hover:underline cursor-pointer">
+                              {tenant.name}
+                            </div>
+                          </Link>
+                        </div>
+                      </TableCell>
                       <TableCell>
                         {tenant.property}, Unit {tenant.unit}
                       </TableCell>
@@ -217,7 +230,14 @@ export default function Tenants() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem>View Details</DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                              <Link href={`/tenant/${tenant.id}`}>
+                                <div className="flex items-center">
+                                  <User className="mr-2 h-4 w-4" />
+                                  View Profile
+                                </div>
+                              </Link>
+                            </DropdownMenuItem>
                             <DropdownMenuItem>Edit Tenant</DropdownMenuItem>
                             <DropdownMenuItem>Manage Lease</DropdownMenuItem>
                             <DropdownMenuItem>View Payment History</DropdownMenuItem>

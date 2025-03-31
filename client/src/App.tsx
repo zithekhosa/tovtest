@@ -14,6 +14,12 @@ import Maintenance from "@/pages/maintenance";
 import Tenants from "@/pages/tenants";
 import Properties from "@/pages/properties";
 
+// Profile pages
+import LandlordProfile from "@/pages/landlord-profile";
+import TenantProfile from "@/pages/tenant-profile";
+import AgencyProfile from "@/pages/agency-profile";
+import MaintenanceProfile from "@/pages/maintenance-profile";
+
 // Tenant pages
 import TenantDashboard from "@/pages/tenant/dashboard";
 import TenantMaintenance from "@/pages/tenant/maintenance";
@@ -107,6 +113,12 @@ function Router() {
       
       {/* Maintenance Marketplace - accessible by all users */}
       <ProtectedRoute path="/maintenance/marketplace" component={MaintenanceMarketplace} />
+      
+      {/* Profile Pages - accessible to appropriate roles */}
+      <ProtectedRoute path="/landlord/:id" component={LandlordProfile} />
+      <ProtectedRoute path="/tenant/:id" component={TenantProfile} />
+      <ProtectedRoute path="/agency/:id" component={AgencyProfile} />
+      <ProtectedRoute path="/maintenance/:id" component={MaintenanceProfile} />
       
       {/* Fallback to 404 */}
       <Route component={NotFound} />

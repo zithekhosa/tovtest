@@ -1,334 +1,456 @@
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useMutation } from '@tanstack/react-query';
-import { Loader2, Star } from 'lucide-react';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { useQuery } from "@tanstack/react-query";
+import { z } from "zod";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
-import { apiRequest } from '@/lib/queryClient';
-import { useToast } from '@/hooks/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
 
-// Star rating component
-const StarRating = ({ value, onChange, disabled = false }: { 
-  value: number; 
-  onChange: (value: number) => void;
-  disabled?: boolean;
-}) => {
-  const [hoverRating, setHoverRating] = React.useState(0);
-  
-  return (
-    <div className="flex">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <button
-          key={star}
-          type="button"
-          className={`p-1 ${disabled ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}`}
-          onClick={() => !disabled && onChange(star)}
-          onMouseEnter={() => !disabled && setHoverRating(star)}
-          onMouseLeave={() => !disabled && setHoverRating(0)}
-          disabled={disabled}
-        >
-          <Star 
-            className={`h-6 w-6 ${
-              (hoverRating ? star <= hoverRating : star <= value)
-                ? 'fill-yellow-400 text-yellow-400'
-                : 'text-muted-foreground'
-            }`} 
-          />
-        </button>
-      ))}
-    </div>
-  );
-};
-
-// Define form schemas for different rating types
-const landlordRatingSchema = z.object({
-  rating: z.number().min(1, "Please provide an overall rating").max(5),
-  review: z.string().optional(),
-  communicationRating: z.number().min(1, "Please rate communication").max(5),
-  maintenanceRating: z.number().min(1, "Please rate maintenance").max(5),
-  valueRating: z.number().min(1, "Please rate value for money").max(5),
-});
-
-const tenantRatingSchema = z.object({
-  rating: z.number().min(1, "Please provide an overall rating").max(5),
-  review: z.string().optional(),
-  communicationRating: z.number().min(1, "Please rate communication").max(5),
-  paymentRating: z.number().min(1, "Please rate payment timeliness").max(5),
-  propertyRespectRating: z.number().min(1, "Please rate property respect").max(5),
-});
-
-type RatingFormProps = {
+interface RatingFormProps {
   type: 'landlord' | 'tenant';
   targetId: number;
   propertyId?: number;
-  onSuccess?: () => void;
-  existingRating?: any; // For editing existing ratings
-};
+  existingRating?: any; // The existing rating to edit if any
+  onSuccess: () => void;
+}
 
-export function RatingForm({ 
-  type, 
-  targetId, 
-  propertyId, 
-  onSuccess, 
-  existingRating 
-}: RatingFormProps) {
+// Rating form schema
+const landlordRatingSchema = z.object({
+  rating: z.number().min(1).max(5),
+  review: z.string().optional(),
+  communicationRating: z.number().min(1).max(5).optional(),
+  maintenanceRating: z.number().min(1).max(5).optional(),
+  valueRating: z.number().min(1).max(5).optional(),
+  propertyId: z.number(),
+});
+
+const tenantRatingSchema = z.object({
+  rating: z.number().min(1).max(5),
+  review: z.string().optional(),
+  communicationRating: z.number().min(1).max(5).optional(),
+  paymentRating: z.number().min(1).max(5).optional(),
+  propertyRespectRating: z.number().min(1).max(5).optional(),
+  propertyId: z.number(),
+});
+
+export function RatingForm({ type, targetId, propertyId, existingRating, onSuccess }: RatingFormProps) {
+  const { user } = useAuth();
   const { toast } = useToast();
-  const [selectedPropertyId, setSelectedPropertyId] = React.useState<number | undefined>(propertyId);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedPropertyId, setSelectedPropertyId] = useState<number | undefined>(propertyId);
   
-  // Define form based on type
-  const schema = type === 'landlord' ? landlordRatingSchema : tenantRatingSchema;
+  // Determine if editing or creating
+  const isEditing = !!existingRating;
   
-  const form = useForm<z.infer<typeof schema>>({
-    resolver: zodResolver(schema),
-    defaultValues: existingRating || {
-      rating: 0,
-      review: '',
-      communicationRating: 0,
-      ...(type === 'landlord' 
-        ? { maintenanceRating: 0, valueRating: 0 } 
-        : { paymentRating: 0, propertyRespectRating: 0 })
+  // Get schema based on rating type
+  const ratingSchema = type === 'landlord' ? landlordRatingSchema : tenantRatingSchema;
+  
+  // Get properties for dropdown
+  const { data: properties, isLoading: isLoadingProperties } = useQuery({
+    queryKey: ["/api/properties"],
+    queryFn: async ({ signal }) => {
+      const url = type === 'landlord' 
+        ? `/api/properties/tenant/${user?.id}`
+        : `/api/properties/landlord/${user?.id}`;
+      const response = await fetch(url, { signal });
+      if (!response.ok) throw new Error("Failed to fetch properties");
+      return await response.json();
     },
+    enabled: !propertyId && !!user,
   });
   
-  // Create rating mutation
-  const createMutation = useMutation({
-    mutationFn: async (values: z.infer<typeof schema>) => {
-      if (!selectedPropertyId) {
-        throw new Error("Please select a property");
+  // Initialize form
+  const form = useForm<z.infer<typeof ratingSchema>>({
+    resolver: zodResolver(ratingSchema),
+    defaultValues: existingRating
+      ? {
+          rating: existingRating.rating || 3,
+          review: existingRating.review || "",
+          communicationRating: existingRating.communicationRating || 3,
+          ...(type === 'landlord'
+            ? {
+                maintenanceRating: existingRating.maintenanceRating || 3,
+                valueRating: existingRating.valueRating || 3,
+              }
+            : {
+                paymentRating: existingRating.paymentRating || 3,
+                propertyRespectRating: existingRating.propertyRespectRating || 3,
+              }),
+          propertyId: existingRating.propertyId,
+        }
+      : {
+          rating: 3,
+          review: "",
+          communicationRating: 3,
+          ...(type === 'landlord'
+            ? {
+                maintenanceRating: 3,
+                valueRating: 3,
+              }
+            : {
+                paymentRating: 3,
+                propertyRespectRating: 3,
+              }),
+          propertyId: propertyId || 0,
+        },
+  });
+
+  // Update property ID when it's provided or selected
+  useEffect(() => {
+    if (propertyId) {
+      form.setValue('propertyId', propertyId);
+      setSelectedPropertyId(propertyId);
+    }
+  }, [propertyId, form]);
+  
+  // Handle form submission
+  const onSubmit = async (data: z.infer<typeof ratingSchema>) => {
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to submit a rating.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    try {
+      let url = "";
+      let method = "POST";
+      
+      // Prepare request URL and method based on rating type and whether editing
+      if (type === 'landlord') {
+        if (isEditing) {
+          url = `/api/landlord-ratings/${existingRating.id}`;
+          method = "PATCH";
+        } else {
+          url = "/api/landlord-ratings";
+        }
+      } else {
+        if (isEditing) {
+          url = `/api/tenant-ratings/${existingRating.id}`;
+          method = "PATCH";
+        } else {
+          url = "/api/tenant-ratings";
+        }
       }
       
-      const endpoint = type === 'landlord' 
-        ? '/api/landlord-ratings'
-        : '/api/tenant-ratings';
-        
-      const data = {
-        ...values,
+      // Prepare rating data
+      const ratingData = {
+        ...data,
         [type === 'landlord' ? 'landlordId' : 'tenantId']: targetId,
-        propertyId: selectedPropertyId
+        [type === 'landlord' ? 'tenantId' : 'landlordId']: user.id,
       };
       
-      const res = await apiRequest('POST', endpoint, data);
-      return res.json();
-    },
-    onSuccess: () => {
-      form.reset();
-      if (onSuccess) onSuccess();
-    },
-    onError: (error: any) => {
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to submit rating',
-        variant: 'destructive'
-      });
-    }
-  });
-  
-  // Update rating mutation
-  const updateMutation = useMutation({
-    mutationFn: async (values: z.infer<typeof schema>) => {
-      if (!existingRating?.id) {
-        throw new Error("Rating ID is required for updating");
+      // Submit the rating
+      const response = await apiRequest(method, url, ratingData);
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to submit rating');
       }
       
-      const endpoint = type === 'landlord' 
-        ? `/api/landlord-ratings/${existingRating.id}`
-        : `/api/tenant-ratings/${existingRating.id}`;
-        
-      const res = await apiRequest('PUT', endpoint, values);
-      return res.json();
-    },
-    onSuccess: () => {
-      if (onSuccess) onSuccess();
-    },
-    onError: (error: any) => {
+      // Success handling
       toast({
-        title: 'Error',
-        description: error.message || 'Failed to update rating',
-        variant: 'destructive'
+        title: isEditing ? "Rating Updated" : "Rating Submitted",
+        description: isEditing 
+          ? "Your rating has been successfully updated." 
+          : "Your rating has been successfully submitted.",
       });
+      
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: [`/api/${type}-ratings`] });
+      
+      // Call success callback
+      onSuccess();
+      
+    } catch (error) {
+      console.error('Error submitting rating:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to submit rating",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
-  });
+  };
   
-  const isSubmitting = createMutation.isPending || updateMutation.isPending;
-  
-  function onSubmit(values: z.infer<typeof schema>) {
-    if (existingRating?.id) {
-      updateMutation.mutate(values);
-    } else {
-      createMutation.mutate(values);
-    }
+  if (isLoadingProperties && !propertyId) {
+    return (
+      <div className="flex justify-center p-6">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
   }
   
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        {/* This would be a property selector if propertyId wasn't provided */}
-        {!propertyId && !existingRating?.propertyId && (
-          <div className="mb-4">
-            <FormLabel>Property</FormLabel>
-            <p className="text-sm text-muted-foreground mb-2">
-              For this demo, we're assuming property ID 1 since property selection UI would require fetching all properties.
-            </p>
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => setSelectedPropertyId(1)}
-              className={`${selectedPropertyId === 1 ? 'border-primary' : ''}`}
-            >
-              Select Sample Property (ID: 1)
-            </Button>
-          </div>
+        {/* Property selection if not provided and options are available */}
+        {!propertyId && properties && properties.length > 0 && (
+          <FormField
+            control={form.control}
+            name="propertyId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Select Property</FormLabel>
+                <Select
+                  onValueChange={(value) => {
+                    field.onChange(parseInt(value));
+                    setSelectedPropertyId(parseInt(value));
+                  }}
+                  defaultValue={field.value?.toString() || ""}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a property" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {properties.map((property: any) => (
+                      <SelectItem key={property.id} value={property.id.toString()}>
+                        {property.title || property.address}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  Choose the property this rating is for.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         )}
-      
-        {/* Overall Rating */}
+        
+        {/* Main rating */}
         <FormField
           control={form.control}
           name="rating"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Overall Rating</FormLabel>
-              <FormControl>
-                <StarRating 
-                  value={field.value || 0} 
-                  onChange={field.onChange}
-                  disabled={isSubmitting}
-                />
-              </FormControl>
+              <div className="flex flex-col space-y-2">
+                <div className="flex justify-between pl-1 pr-1">
+                  {[1, 2, 3, 4, 5].map((num) => (
+                    <span key={num} className="text-xs">{num}</span>
+                  ))}
+                </div>
+                <FormControl>
+                  <Slider
+                    min={1}
+                    max={5}
+                    step={1}
+                    value={[field.value]}
+                    onValueChange={(values) => field.onChange(values[0])}
+                    className="w-full"
+                  />
+                </FormControl>
+                <div className="flex justify-between">
+                  <span className="text-xs text-muted-foreground">Poor</span>
+                  <span className="text-xs text-muted-foreground">Excellent</span>
+                </div>
+              </div>
               <FormMessage />
             </FormItem>
           )}
         />
         
-        {/* Review text */}
+        {/* Written review */}
         <FormField
           control={form.control}
           name="review"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Review (Optional)</FormLabel>
+              <FormLabel>Review</FormLabel>
               <FormControl>
-                <Textarea
-                  placeholder="Share your experience..."
-                  className="resize-none"
-                  {...field}
-                  value={field.value || ''}
-                  disabled={isSubmitting}
+                <Textarea 
+                  placeholder="Write your review here..." 
+                  {...field} 
+                  className="min-h-24 resize-y"
                 />
               </FormControl>
               <FormDescription>
-                Your honest feedback helps others make informed decisions.
+                Provide details about your experience. This will help others make informed decisions.
               </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
         
-        {/* Communication Rating */}
+        {/* Communication rating */}
         <FormField
           control={form.control}
           name="communicationRating"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Communication</FormLabel>
-              <FormControl>
-                <StarRating 
-                  value={field.value || 0} 
-                  onChange={field.onChange}
-                  disabled={isSubmitting}
-                />
-              </FormControl>
+              <div className="flex flex-col space-y-2">
+                <div className="flex justify-between pl-1 pr-1">
+                  {[1, 2, 3, 4, 5].map((num) => (
+                    <span key={num} className="text-xs">{num}</span>
+                  ))}
+                </div>
+                <FormControl>
+                  <Slider
+                    min={1}
+                    max={5}
+                    step={1}
+                    value={[field.value || 3]}
+                    onValueChange={(values) => field.onChange(values[0])}
+                    className="w-full"
+                  />
+                </FormControl>
+                <FormDescription className="flex justify-between pt-1">
+                  <span className="text-xs text-muted-foreground">Poor</span>
+                  <span className="text-xs text-muted-foreground">Excellent</span>
+                </FormDescription>
+              </div>
               <FormMessage />
             </FormItem>
           )}
         />
         
-        {/* Type-specific ratings */}
+        {/* Type-specific rating fields */}
         {type === 'landlord' ? (
+          // Landlord-specific ratings
           <>
-            {/* Maintenance Rating */}
             <FormField
               control={form.control}
               name="maintenanceRating"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Maintenance & Repairs</FormLabel>
-                  <FormControl>
-                    <StarRating 
-                      value={field.value || 0} 
-                      onChange={field.onChange}
-                      disabled={isSubmitting}
-                    />
-                  </FormControl>
+                  <div className="flex flex-col space-y-2">
+                    <div className="flex justify-between pl-1 pr-1">
+                      {[1, 2, 3, 4, 5].map((num) => (
+                        <span key={num} className="text-xs">{num}</span>
+                      ))}
+                    </div>
+                    <FormControl>
+                      <Slider
+                        min={1}
+                        max={5}
+                        step={1}
+                        value={[field.value || 3]}
+                        onValueChange={(values) => field.onChange(values[0])}
+                        className="w-full"
+                      />
+                    </FormControl>
+                    <FormDescription className="flex justify-between pt-1">
+                      <span className="text-xs text-muted-foreground">Poor</span>
+                      <span className="text-xs text-muted-foreground">Excellent</span>
+                    </FormDescription>
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
             />
             
-            {/* Value Rating */}
             <FormField
               control={form.control}
               name="valueRating"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Value for Money</FormLabel>
-                  <FormControl>
-                    <StarRating 
-                      value={field.value || 0} 
-                      onChange={field.onChange}
-                      disabled={isSubmitting}
-                    />
-                  </FormControl>
+                  <div className="flex flex-col space-y-2">
+                    <div className="flex justify-between pl-1 pr-1">
+                      {[1, 2, 3, 4, 5].map((num) => (
+                        <span key={num} className="text-xs">{num}</span>
+                      ))}
+                    </div>
+                    <FormControl>
+                      <Slider
+                        min={1}
+                        max={5}
+                        step={1}
+                        value={[field.value || 3]}
+                        onValueChange={(values) => field.onChange(values[0])}
+                        className="w-full"
+                      />
+                    </FormControl>
+                    <FormDescription className="flex justify-between pt-1">
+                      <span className="text-xs text-muted-foreground">Poor</span>
+                      <span className="text-xs text-muted-foreground">Excellent</span>
+                    </FormDescription>
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </>
         ) : (
+          // Tenant-specific ratings
           <>
-            {/* Payment Rating */}
             <FormField
               control={form.control}
               name="paymentRating"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Payment Timeliness</FormLabel>
-                  <FormControl>
-                    <StarRating 
-                      value={field.value || 0} 
-                      onChange={field.onChange}
-                      disabled={isSubmitting}
-                    />
-                  </FormControl>
+                  <FormLabel>Payment Reliability</FormLabel>
+                  <div className="flex flex-col space-y-2">
+                    <div className="flex justify-between pl-1 pr-1">
+                      {[1, 2, 3, 4, 5].map((num) => (
+                        <span key={num} className="text-xs">{num}</span>
+                      ))}
+                    </div>
+                    <FormControl>
+                      <Slider
+                        min={1}
+                        max={5}
+                        step={1}
+                        value={[field.value || 3]}
+                        onValueChange={(values) => field.onChange(values[0])}
+                        className="w-full"
+                      />
+                    </FormControl>
+                    <FormDescription className="flex justify-between pt-1">
+                      <span className="text-xs text-muted-foreground">Poor</span>
+                      <span className="text-xs text-muted-foreground">Excellent</span>
+                    </FormDescription>
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
             />
             
-            {/* Property Respect Rating */}
             <FormField
               control={form.control}
               name="propertyRespectRating"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Property Respect</FormLabel>
-                  <FormControl>
-                    <StarRating 
-                      value={field.value || 0} 
-                      onChange={field.onChange}
-                      disabled={isSubmitting}
-                    />
-                  </FormControl>
+                  <FormLabel>Property Care & Respect</FormLabel>
+                  <div className="flex flex-col space-y-2">
+                    <div className="flex justify-between pl-1 pr-1">
+                      {[1, 2, 3, 4, 5].map((num) => (
+                        <span key={num} className="text-xs">{num}</span>
+                      ))}
+                    </div>
+                    <FormControl>
+                      <Slider
+                        min={1}
+                        max={5}
+                        step={1}
+                        value={[field.value || 3]}
+                        onValueChange={(values) => field.onChange(values[0])}
+                        className="w-full"
+                      />
+                    </FormControl>
+                    <FormDescription className="flex justify-between pt-1">
+                      <span className="text-xs text-muted-foreground">Poor</span>
+                      <span className="text-xs text-muted-foreground">Excellent</span>
+                    </FormDescription>
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
@@ -336,14 +458,15 @@ export function RatingForm({
           </>
         )}
         
-        {/* Submit button */}
-        <Button 
-          type="submit" 
-          className="w-full" 
-          disabled={isSubmitting || (!propertyId && !selectedPropertyId && !existingRating?.propertyId)}
-        >
-          {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {existingRating?.id ? 'Update Rating' : 'Submit Rating'}
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              {isEditing ? "Updating..." : "Submitting..."}
+            </>
+          ) : (
+            isEditing ? "Update Rating" : "Submit Rating"
+          )}
         </Button>
       </form>
     </Form>

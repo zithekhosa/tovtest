@@ -1,298 +1,217 @@
 import { useState } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { Star, Edit, Trash2, CheckCheck, X, Loader2 } from 'lucide-react';
-import { format } from 'date-fns';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogHeader, 
-  DialogTitle,
-  DialogFooter,
-  DialogClose
-} from "@/components/ui/dialog";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/use-auth";
-import { RatingForm } from "./RatingForm";
-import type { LandlordRating, TenantRating } from "@shared/schema";
+import { Star, Edit, Trash2, User, AlertTriangle } from 'lucide-react';
+import { useAuth } from '@/hooks/use-auth';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { toast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Separator } from '@/components/ui/separator';
+import { Progress } from '@/components/ui/progress';
+import { apiRequest, queryClient } from '@/lib/queryClient';
+import { RatingForm } from './RatingForm';
+import { formatDistanceToNow } from 'date-fns';
 
-type RatingCardProps = {
-  rating: LandlordRating | TenantRating;
+interface RatingCardProps {
+  rating: any; // Use LandlordRating | TenantRating here once types are available
   type: 'landlord' | 'tenant';
-  onUpdate?: () => void;
-  compact?: boolean;
-};
+  onUpdate: () => void;
+}
 
-export default function RatingCard({ 
-  rating, 
-  type, 
-  onUpdate, 
-  compact = false 
-}: RatingCardProps) {
-  const { toast } = useToast();
+export default function RatingCard({ rating, type, onUpdate }: RatingCardProps) {
   const { user } = useAuth();
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const isOwner = type === 'landlord' 
+    ? user?.id === rating.tenantId 
+    : user?.id === rating.landlordId;
   
-  // Determine IDs for the type of rating
-  const reviewerId = type === 'landlord' 
-    ? (rating as LandlordRating).tenantId 
-    : (rating as TenantRating).landlordId;
-    
-  const targetId = type === 'landlord'
-    ? (rating as LandlordRating).landlordId
-    : (rating as TenantRating).tenantId;
+  // Format dates
+  const formattedDate = rating.createdAt 
+    ? formatDistanceToNow(new Date(rating.createdAt), { addSuffix: true })
+    : '';
   
-  // Fetch reviewer details
-  const { data: reviewer } = useQuery({
-    queryKey: ['/api/users', reviewerId],
-    queryFn: async () => {
-      const res = await fetch(`/api/users/${reviewerId}`);
-      if (!res.ok) throw new Error('Failed to fetch reviewer');
-      return res.json();
-    },
-  });
-  
-  // Deletion mutation
-  const deleteMutation = useMutation({
-    mutationFn: async () => {
-      const endpoint = type === 'landlord'
-        ? `/api/landlord-ratings/${rating.id}`
+  // Delete rating
+  const handleDelete = async () => {
+    try {
+      const endpoint = type === 'landlord' 
+        ? `/api/landlord-ratings/${rating.id}` 
         : `/api/tenant-ratings/${rating.id}`;
-        
-      await apiRequest('DELETE', endpoint);
-    },
-    onSuccess: () => {
-      setIsDeleteModalOpen(false);
+      
+      const response = await apiRequest('DELETE', endpoint);
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete rating');
+      }
+      
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: [`/api/${type}-ratings`] });
+      
       toast({
-        title: 'Success',
-        description: 'Rating deleted successfully',
+        title: 'Rating Deleted',
+        description: 'Your rating has been successfully deleted.',
       });
       
-      // Invalidate queries to refresh the data
-      queryClient.invalidateQueries({ 
-        queryKey: [type === 'landlord' 
-          ? '/api/landlord-ratings/landlord' 
-          : '/api/tenant-ratings/tenant', targetId] 
-      });
-      
-      if (onUpdate) onUpdate();
-    },
-    onError: (error: any) => {
+      onUpdate();
+      setIsDeleting(false);
+    } catch (error) {
+      console.error('Error deleting rating:', error);
       toast({
         title: 'Error',
-        description: error.message || 'Failed to delete rating',
-        variant: 'destructive'
+        description: 'Failed to delete rating. Please try again.',
+        variant: 'destructive',
       });
     }
-  });
+  };
   
-  // Check if the current user is the one who wrote this review
-  const isReviewer = user?.id === reviewerId;
+  // Calculate detailed rating items based on type
+  const detailedRatings = type === 'landlord' 
+    ? [
+        { name: 'Communication', value: rating.communicationRating },
+        { name: 'Maintenance', value: rating.maintenanceRating },
+        { name: 'Value for Money', value: rating.valueRating },
+      ]
+    : [
+        { name: 'Communication', value: rating.communicationRating },
+        { name: 'Payment Reliability', value: rating.paymentRating },
+        { name: 'Property Respect', value: rating.propertyRespectRating },
+      ];
   
-  // Format date
-  const formattedDate = rating.createdAt 
-    ? format(new Date(rating.createdAt), 'PPP')
-    : 'Unknown date';
-    
-  // Calculate overall rating for specific categories
-  let categoryRatings: { label: string; value: number }[] = [];
-  
-  if (type === 'landlord') {
-    const landlordRating = rating as LandlordRating;
-    categoryRatings = [
-      { label: 'Communication', value: landlordRating.communicationRating || 0 },
-      { label: 'Maintenance', value: landlordRating.maintenanceRating || 0 },
-      { label: 'Value', value: landlordRating.valueRating || 0 }
-    ];
-  } else {
-    const tenantRating = rating as TenantRating;
-    categoryRatings = [
-      { label: 'Communication', value: tenantRating.communicationRating || 0 },
-      { label: 'Payment', value: tenantRating.paymentRating || 0 },
-      { label: 'Property Respect', value: tenantRating.propertyRespectRating || 0 }
-    ];
-  }
+  const handleEditComplete = () => {
+    setIsEditing(false);
+    onUpdate();
+  };
   
   return (
     <>
-      <Card className={`${compact ? 'bg-muted/50' : ''}`}>
-        <CardHeader className={`${compact ? 'p-4' : ''} flex flex-row items-start justify-between`}>
-          <div className="flex items-start gap-3">
-            {!compact && (
-              <Avatar className="h-10 w-10">
-                <AvatarImage src={reviewer?.profileImage || undefined} alt={reviewer?.username} />
-                <AvatarFallback>
-                  {reviewer?.firstName?.[0]}{reviewer?.lastName?.[0] || ''}
-                </AvatarFallback>
+      <Card className="mb-4 w-full">
+        <CardHeader className="pb-2">
+          <div className="flex justify-between items-start">
+            <div className="flex items-center gap-2">
+              <Avatar className="h-8 w-8">
+                <AvatarFallback><User className="h-4 w-4" /></AvatarFallback>
+                {rating.userProfileImage && <AvatarImage src={rating.userProfileImage} alt="User" />}
               </Avatar>
-            )}
-            <div>
-              <CardTitle className={`${compact ? 'text-base' : 'text-lg'} flex items-center gap-2`}>
-                {compact ? (
-                  <span className="font-medium">Rating:</span>
-                ) : (
-                  <span>{reviewer?.firstName} {reviewer?.lastName}</span>
-                )}
-                <div className="flex items-center ml-1">
-                  <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                  <span className="ml-1">{rating.rating}</span>
-                </div>
-              </CardTitle>
-              <CardDescription className="space-x-1">
-                <span>{formattedDate}</span>
-                {type === 'landlord' && compact && (
-                  <Badge variant="outline" className="ml-2 text-xs py-0 px-2">
-                    Landlord Rating
-                  </Badge>
-                )}
-                {type === 'tenant' && compact && (
-                  <Badge variant="outline" className="ml-2 text-xs py-0 px-2">
-                    Tenant Rating
-                  </Badge>
-                )}
-              </CardDescription>
+              <div>
+                <CardTitle className="text-base">
+                  {type === 'landlord' ? rating.tenantName : rating.landlordName}
+                </CardTitle>
+                <p className="text-xs text-muted-foreground">{formattedDate}</p>
+              </div>
+            </div>
+            <div className="flex items-center">
+              <div className="flex mr-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star
+                    key={star}
+                    className={`h-4 w-4 ${
+                      star <= rating.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
+                    }`}
+                  />
+                ))}
+              </div>
+              <Badge variant="outline" className="text-xs">
+                {rating.rating}/5
+              </Badge>
             </div>
           </div>
-          
-          {isReviewer && !compact && (
-            <div className="flex gap-2">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => setIsEditModalOpen(true)}
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => setIsDeleteModalOpen(true)}
-              >
-                <Trash2 className="h-4 w-4 text-destructive" />
-              </Button>
-            </div>
-          )}
         </CardHeader>
-        
-        <CardContent className={`${compact ? 'px-4 pt-0 pb-4' : ''}`}>
-          {/* Review text */}
-          {rating.review && (
-            <p className={`${compact ? 'text-sm line-clamp-2' : 'mb-4'}`}>
-              {rating.review}
-            </p>
+        <CardContent>
+          {rating.review ? (
+            <p className="text-sm">{rating.review}</p>
+          ) : (
+            <p className="text-sm text-muted-foreground italic">No written review provided.</p>
           )}
           
-          {/* Category ratings */}
-          {!compact && (
-            <div className="grid grid-cols-3 gap-2 mt-4">
-              {categoryRatings.map((category, idx) => (
-                <div key={idx} className="flex flex-col items-center p-2 bg-muted/50 rounded-md">
-                  <span className="text-xs text-muted-foreground mb-1">{category.label}</span>
-                  <div className="flex items-center">
-                    <Star className={`h-4 w-4 ${category.value > 0 ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground'}`} />
-                    <span className="ml-1 text-sm">{category.value || 'N/A'}</span>
+          <div className="mt-4 space-y-2">
+            {detailedRatings.map((item) => (
+              item.value ? (
+                <div key={item.name} className="space-y-1">
+                  <div className="flex justify-between text-xs">
+                    <span>{item.name}</span>
+                    <span>{item.value}/5</span>
                   </div>
+                  <Progress value={item.value * 20} className="h-1" />
                 </div>
-              ))}
-            </div>
+              ) : null
+            ))}
+          </div>
+          
+          {rating.propertyAddress && (
+            <>
+              <Separator className="my-3" />
+              <div className="text-xs text-muted-foreground">
+                <span>Property: {rating.propertyAddress}</span>
+              </div>
+            </>
           )}
         </CardContent>
         
-        {isReviewer && compact && (
-          <CardFooter className="pt-0 px-4 pb-4">
-            <div className="flex gap-2">
+        {isOwner && (
+          <CardFooter className="pt-0 flex justify-end gap-2">
+            <Dialog open={isEditing} onOpenChange={setIsEditing}>
               <Button 
                 variant="outline" 
                 size="sm" 
                 className="h-8"
-                onClick={() => setIsEditModalOpen(true)}
+                onClick={() => setIsEditing(true)}
               >
-                <Edit className="h-3 w-3 mr-1" /> Edit
+                <Edit className="h-3.5 w-3.5 mr-1" />
+                Edit
               </Button>
+              <DialogContent className="sm:max-w-[550px]">
+                <DialogHeader>
+                  <DialogTitle>Edit your rating</DialogTitle>
+                </DialogHeader>
+                <RatingForm 
+                  type={type} 
+                  targetId={type === 'landlord' ? rating.landlordId : rating.tenantId} 
+                  propertyId={rating.propertyId}
+                  existingRating={rating}
+                  onSuccess={handleEditComplete}
+                />
+              </DialogContent>
+            </Dialog>
+            
+            <AlertDialog open={isDeleting} onOpenChange={setIsDeleting}>
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="h-8 text-destructive border-destructive hover:bg-destructive/90 hover:text-destructive-foreground"
-                onClick={() => setIsDeleteModalOpen(true)}
+                className="h-8 text-destructive"
+                onClick={() => setIsDeleting(true)}
               >
-                <Trash2 className="h-3 w-3 mr-1" /> Delete
+                <Trash2 className="h-3.5 w-3.5 mr-1" />
+                Delete
               </Button>
-            </div>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will permanently delete your rating. This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </CardFooter>
         )}
       </Card>
-      
-      {/* Edit Rating Dialog */}
-      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Edit Rating</DialogTitle>
-            <DialogDescription>
-              Update your rating and review.
-            </DialogDescription>
-          </DialogHeader>
-          <RatingForm
-            type={type}
-            targetId={targetId}
-            propertyId={rating.propertyId}
-            existingRating={rating}
-            onSuccess={() => {
-              setIsEditModalOpen(false);
-              if (onUpdate) onUpdate();
-              toast({
-                title: 'Success',
-                description: 'Rating updated successfully',
-              });
-            }}
-          />
-        </DialogContent>
-      </Dialog>
-      
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Delete Rating</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete this rating? This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <DialogFooter className="flex items-center justify-between">
-            <DialogClose asChild>
-              <Button variant="outline" className="gap-1">
-                <X className="h-4 w-4" /> Cancel
-              </Button>
-            </DialogClose>
-            <Button 
-              variant="destructive" 
-              onClick={() => deleteMutation.mutate()}
-              disabled={deleteMutation.isPending}
-              className="gap-1"
-            >
-              {deleteMutation.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <CheckCheck className="h-4 w-4" />
-              )}
-              Confirm Delete
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </>
   );
 }
