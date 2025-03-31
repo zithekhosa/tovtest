@@ -771,6 +771,155 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Get tenant lease history (both active and inactive leases)
+  app.get("/api/leases/history", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    if (req.user.role !== 'tenant') {
+      return res.status(403).json({ message: "Access denied" });
+    }
+    
+    try {
+      const leases = await storage.getLeasesByTenant(req.user.id);
+      
+      // For each lease, fetch property details
+      const leasesWithProperties = await Promise.all(
+        leases.map(async (lease) => {
+          const property = await storage.getProperty(lease.propertyId);
+          return { ...lease, property };
+        })
+      );
+      
+      res.json(leasesWithProperties);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching lease history" });
+    }
+  });
+  
+  // Get available properties for tenant to browse
+  app.get("/api/properties/available", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    try {
+      const properties = await storage.getAvailableProperties();
+      res.json(properties);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching available properties" });
+    }
+  });
+  
+  // Get tenant payment history
+  app.get("/api/payments/history", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    if (req.user.role !== 'tenant') {
+      return res.status(403).json({ message: "Access denied" });
+    }
+    
+    try {
+      const payments = await storage.getPaymentsByTenant(req.user.id);
+      
+      // Include lease and property information with each payment
+      const paymentsWithDetails = await Promise.all(
+        payments.map(async (payment) => {
+          const lease = await storage.getLease(payment.leaseId);
+          const property = lease ? await storage.getProperty(lease.propertyId) : null;
+          return { ...payment, lease, property };
+        })
+      );
+      
+      res.json(paymentsWithDetails);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching payment history" });
+    }
+  });
+  
+  // Submit a rental application
+  app.post("/api/applications", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    if (req.user.role !== 'tenant') {
+      return res.status(403).json({ message: "Access denied" });
+    }
+    
+    try {
+      // In a real application, this would create an application record
+      // For now, we'll simulate this by creating a pending lease
+      const { propertyId, startDate, endDate, documents } = req.body;
+      
+      const property = await storage.getProperty(propertyId);
+      if (!property) {
+        return res.status(404).json({ message: "Property not found" });
+      }
+      
+      // Create a pending lease as a placeholder for the application
+      const lease = await storage.createLease({
+        propertyId,
+        tenantId: req.user.id,
+        startDate: new Date(startDate),
+        endDate: new Date(endDate),
+        rentAmount: property.rentAmount,
+        securityDeposit: property.rentAmount,
+        active: false,
+        status: "pending_approval",
+        createdAt: new Date(),
+      });
+      
+      res.status(201).json(lease);
+    } catch (error) {
+      res.status(500).json({ message: "Error submitting application" });
+    }
+  });
+  
+  // Get tenant's submitted applications (pending leases)
+  app.get("/api/applications", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    if (req.user.role !== 'tenant') {
+      return res.status(403).json({ message: "Access denied" });
+    }
+    
+    try {
+      const leases = await storage.getLeasesByTenant(req.user.id);
+      const pendingApplications = leases.filter(lease => lease.status === "pending_approval");
+      
+      // Include property information with each application
+      const applicationsWithProperties = await Promise.all(
+        pendingApplications.map(async (application) => {
+          const property = await storage.getProperty(application.propertyId);
+          return { ...application, property };
+        })
+      );
+      
+      res.json(applicationsWithProperties);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching applications" });
+    }
+  });
+  
+  // Get maintenance marketplace listings
+  app.get("/api/maintenance/marketplace", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    try {
+      // Get all maintenance requests that are open for bidding
+      const allRequests = await storage.getMaintenanceRequestsByStatus("open_for_bids");
+      
+      // If user is a tenant, only show their requests and public requests
+      if (req.user.role === 'tenant') {
+        const requests = allRequests.filter(request => 
+          request.tenantId === req.user.id || request.isPublic === true
+        );
+        return res.json(requests);
+      }
+      
+      // Otherwise show all requests
+      res.json(allRequests);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching marketplace listings" });
+    }
+  });
+  
   app.get("/api/maintenance/landlord", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     

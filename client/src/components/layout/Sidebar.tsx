@@ -82,22 +82,52 @@ export default function Sidebar({ role }: SidebarProps) {
       ],
       tenant: [
         {
+          href: "/tenant/lease-history",
+          icon: CalendarDays,
+          label: "Lease History",
+          active: location.includes("lease-history"),
+        },
+        {
           href: "/tenant/properties",
           icon: Building,
           label: "My Rental",
-          active: location.includes("properties"),
+          active: location === "/tenant/properties",
+        },
+        {
+          href: "/tenant/property-search",
+          icon: Home,
+          label: "Find Properties",
+          active: location.includes("property-search"),
+        },
+        {
+          href: "/tenant/payments",
+          icon: DollarSign,
+          label: "Payments",
+          active: location.includes("payments"),
         },
         {
           href: "/tenant/maintenance",
           icon: Wrench,
           label: "Maintenance",
-          active: location.includes("maintenance"),
+          active: location === "/tenant/maintenance",
+        },
+        {
+          href: "/tenant/marketplace",
+          icon: Star,
+          label: "Marketplace",
+          active: location.includes("marketplace"),
         },
         {
           href: "/tenant/documents",
           icon: FileText,
           label: "Documents",
           active: location.includes("documents"),
+        },
+        {
+          href: "/tenant/applications",
+          icon: FileText,
+          label: "My Applications",
+          active: location.includes("applications"),
         },
       ],
       agency: [

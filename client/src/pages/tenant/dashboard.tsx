@@ -245,9 +245,11 @@ export default function TenantDashboard() {
                       <Progress value={(30 - daysUntilRentDue) / 30 * 100} className="h-2" />
                     </div>
                     
-                    <Button className="w-full gap-2">
-                      <CreditCard className="h-4 w-4" />
-                      Pay Now
+                    <Button className="w-full gap-2" asChild>
+                      <Link href="/tenant/payments">
+                        <CreditCard className="h-4 w-4" />
+                        Pay Now
+                      </Link>
                     </Button>
                     
                     <div className="text-xs text-center text-muted-foreground pt-2">
@@ -408,60 +410,79 @@ export default function TenantDashboard() {
                     </div>
                     
                     <div>
-                      <h3 className="text-sm font-medium text-muted-foreground">Payment Due Date</h3>
-                      <p className="font-medium">1st of each month</p>
+                      <h3 className="text-sm font-medium text-muted-foreground">Lease Document</h3>
+                      {activeLease.documentUrl ? (
+                        <Button variant="outline" size="sm" className="mt-1">
+                          <FileText className="h-3.5 w-3.5 mr-1" />
+                          View Document
+                        </Button>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">No document available</p>
+                      )}
                     </div>
                   </div>
                   
                   <div className="space-y-4">
                     <div>
-                      <h3 className="text-sm font-medium text-muted-foreground">Property Manager</h3>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback>
-                            {landlord?.firstName?.charAt(0)}{landlord?.lastName?.charAt(0)}
+                      <h3 className="text-sm font-medium text-muted-foreground">Landlord</h3>
+                      <div className="flex items-center mt-1">
+                        <Avatar className="h-8 w-8 mr-2">
+                          <AvatarFallback className="bg-primary/10 text-primary">
+                            {landlord?.firstName?.charAt(0) || "L"}
                           </AvatarFallback>
                         </Avatar>
-                        <div>
-                          <p className="text-sm font-medium">{landlord?.firstName} {landlord?.lastName}</p>
-                          <p className="text-xs text-muted-foreground">{landlord?.email}</p>
-                        </div>
+                        <p className="font-medium">
+                          {landlord ? `${landlord.firstName} ${landlord.lastName}` : "Property Owner"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="text-sm font-medium text-muted-foreground">Contact Info</h3>
+                      <div className="mt-1">
+                        <p className="text-sm">Email: {landlord?.email || "Not available"}</p>
+                        <p className="text-sm">Phone: {landlord?.phone || "Not available"}</p>
                       </div>
                     </div>
                     
                     <div>
-                      <h3 className="text-sm font-medium text-muted-foreground">Lease Document</h3>
-                      {activeLease.documentUrl ? (
-                        <Button variant="outline" size="sm" className="mt-1 gap-1">
-                          <FileText className="h-4 w-4" />
-                          <span>View Lease Agreement</span>
+                      <h3 className="text-sm font-medium text-muted-foreground">Quick Actions</h3>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        <Button size="sm" variant="outline" asChild>
+                          <Link href="/tenant/messages">
+                            <MessageSquare className="h-3.5 w-3.5 mr-1" />
+                            Message
+                          </Link>
                         </Button>
-                      ) : (
-                        <p className="text-sm">No document available</p>
-                      )}
-                    </div>
-                    
-                    <div className="pt-4">
-                      <Button variant="outline" className="gap-1" asChild>
-                        <Link href="/messages">
-                          <MessageSquare className="h-4 w-4" />
-                          <span>Contact Landlord</span>
-                        </Link>
-                      </Button>
+                        <Button size="sm" variant="outline" asChild>
+                          <Link href="/tenant/maintenance">
+                            <Wrench className="h-3.5 w-3.5 mr-1" />
+                            Report Issue
+                          </Link>
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
               </CardContent>
+              <CardFooter className="pt-0">
+                <Button variant="outline" className="w-full" asChild>
+                  <Link href="/tenant/lease-history">
+                    <CalendarDays className="h-4 w-4 mr-2" />
+                    View Lease History
+                  </Link>
+                </Button>
+              </CardFooter>
             </Card>
           </TabsContent>
 
           {/* PAYMENTS SECTION */}
           <TabsContent value="payments" className="space-y-4 mt-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Current Payment */}
+              {/* Next Payment Card */}
               <Card className="md:col-span-1">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-md font-medium">Current Payment</CardTitle>
+                  <CardTitle className="text-md font-medium">Next Payment</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
@@ -484,87 +505,38 @@ export default function TenantDashboard() {
                       <Progress value={(30 - daysUntilRentDue) / 30 * 100} className="h-2" />
                     </div>
                     
-                    <Button className="w-full gap-2">
-                      <CreditCard className="h-4 w-4" />
-                      Pay Now
+                    <Button className="w-full gap-2" asChild>
+                      <Link href="/tenant/payments">
+                        <CreditCard className="h-4 w-4" />
+                        Pay Now
+                      </Link>
                     </Button>
-                    
-                    <div className="text-xs text-center text-muted-foreground pt-2">
-                      Payment methods: Credit Card, Bank Transfer, Mobile Money
-                    </div>
                   </div>
                 </CardContent>
               </Card>
-
-              {/* Payment Breakdown */}
-              <Card className="md:col-span-1">
+              
+              {/* Payment Stats */}
+              <Card className="md:col-span-2">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-md font-medium">Payment Breakdown</CardTitle>
+                  <CardTitle className="text-md font-medium">Payment Stats</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Base Rent</span>
-                      <span className="font-medium">{formatCurrency(activeLease.rentAmount * 0.9)}</span>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="bg-gray-50 rounded-md p-3 text-center">
+                      <p className="text-sm text-muted-foreground">Total Paid</p>
+                      <p className="text-xl font-bold text-primary">{formatCurrency(activeLease.rentAmount * 3)}</p>
+                      <p className="text-xs text-muted-foreground">Last 3 months</p>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Utilities</span>
-                      <span className="font-medium">{formatCurrency(activeLease.rentAmount * 0.1)}</span>
+                    <div className="bg-gray-50 rounded-md p-3 text-center">
+                      <p className="text-sm text-muted-foreground">Monthly Rent</p>
+                      <p className="text-xl font-bold">{formatCurrency(activeLease.rentAmount)}</p>
+                      <p className="text-xs text-muted-foreground">Fixed amount</p>
                     </div>
-                    <Separator />
-                    <div className="flex justify-between">
-                      <span className="text-sm font-medium">Total Monthly Rent</span>
-                      <span className="font-bold">{formatCurrency(activeLease.rentAmount)}</span>
+                    <div className="bg-gray-50 rounded-md p-3 text-center">
+                      <p className="text-sm text-muted-foreground">Security Deposit</p>
+                      <p className="text-xl font-bold">{formatCurrency(activeLease.securityDeposit)}</p>
+                      <p className="text-xs text-muted-foreground">Refundable</p>
                     </div>
-                    
-                    <div className="pt-4">
-                      <h3 className="text-sm font-medium pb-2">Auto-Pay Status</h3>
-                      <Badge variant="outline" className="bg-amber-50 text-amber-700">Not Enrolled</Badge>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        Set up auto-pay to automatically process your rent payment each month
-                      </p>
-                      <Button variant="outline" size="sm" className="mt-2 w-full">
-                        <CheckCircle className="h-4 w-4 mr-2" />
-                        Set Up Auto-Pay
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Token Rewards */}
-              <Card className="md:col-span-1">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-md font-medium">Rent Rewards</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="bg-primary/10 rounded-md p-4 text-center">
-                      <p className="text-2xl font-bold text-primary">{formatCurrency(358)}</p>
-                      <p className="text-sm text-primary/80">Available to use toward rent</p>
-                    </div>
-
-                    <div className="space-y-2">
-                      <h3 className="text-sm font-medium">How to earn more</h3>
-                      <ul className="text-sm space-y-1">
-                        <li className="flex items-start gap-2">
-                          <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                          <span>Shop at partner merchants to earn tokens</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                          <span>Pay rent on time for bonus rewards</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                          <span>Refer friends to earn additional tokens</span>
-                        </li>
-                      </ul>
-                    </div>
-
-                    <Button className="w-full">
-                      Apply Rewards to Next Rent
-                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -576,232 +548,222 @@ export default function TenantDashboard() {
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="text-md font-medium">Payment History</CardTitle>
-                    <CardDescription>Record of your past rent payments</CardDescription>
+                    <CardDescription>Your recent payment transactions</CardDescription>
                   </div>
-                  <Button variant="outline" size="sm" className="h-8 gap-1">
-                    <Download className="h-3.5 w-3.5 mr-1" />
-                    <span className="text-xs">Download Records</span>
+                  <Button variant="outline" size="sm" className="h-8" asChild>
+                    <Link href="/tenant/payments">View All</Link>
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent className="p-0">
-                <div className="rounded-md border">
-                  <table className="w-full caption-bottom text-sm">
-                    <thead>
-                      <tr className="border-b bg-muted/50">
-                        <th className="h-10 px-4 text-left font-medium text-muted-foreground">Date</th>
-                        <th className="h-10 px-4 text-left font-medium text-muted-foreground">Description</th>
-                        <th className="h-10 px-4 text-left font-medium text-muted-foreground">Amount</th>
-                        <th className="h-10 px-4 text-left font-medium text-muted-foreground">Status</th>
-                        <th className="h-10 px-4 text-left font-medium text-muted-foreground">Method</th>
-                        <th className="h-10 px-4 text-left font-medium text-muted-foreground w-[80px]"></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {paymentHistory.map((payment) => (
-                        <tr key={payment.id} className="border-b transition-colors hover:bg-muted/50">
-                          <td className="p-4 align-middle">{formatDate(payment.paymentDate)}</td>
-                          <td className="p-4 align-middle">Monthly Rent</td>
-                          <td className="p-4 align-middle font-medium">{formatCurrency(payment.amount)}</td>
-                          <td className="p-4 align-middle">
-                            <Badge className="bg-green-50 text-green-700">Paid</Badge>
-                          </td>
-                          <td className="p-4 align-middle">{payment.paymentMethod}</td>
-                          <td className="p-4 align-middle">
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <Receipt className="h-4 w-4" />
+              <CardContent>
+                <ScrollArea className="h-[300px]">
+                  <div className="space-y-4">
+                    {paymentHistory.length > 0 ? (
+                      paymentHistory.map((payment) => (
+                        <div key={payment.id} className="flex items-center justify-between pb-3 border-b last:border-0">
+                          <div className="flex items-center">
+                            <div className="bg-primary/10 w-10 h-10 rounded-full flex items-center justify-center mr-3">
+                              <Receipt className="h-5 w-5 text-primary" />
+                            </div>
+                            <div>
+                              <p className="font-medium">{formatCurrency(payment.amount)}</p>
+                              <p className="text-sm text-muted-foreground">{formatDate(payment.paymentDate)}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center">
+                            <Badge variant="outline" className="mr-2 bg-green-50 text-green-700">
+                              {payment.status}
+                            </Badge>
+                            <Button variant="ghost" size="icon">
+                              <Download className="h-4 w-4" />
                             </Button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-10">
+                        <Receipt className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
+                        <p className="text-muted-foreground">No payment history available</p>
+                      </div>
+                    )}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
+
+            {/* Payment Methods */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-md font-medium">Payment Methods</CardTitle>
+                <CardDescription>Available methods to pay your rent</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-4 border rounded-md flex items-center">
+                    <CreditCard className="h-8 w-8 text-primary mr-3" />
+                    <div>
+                      <h3 className="font-medium">Credit/Debit Card</h3>
+                      <p className="text-sm text-muted-foreground">Fast and secure</p>
+                    </div>
+                  </div>
+                  <div className="p-4 border rounded-md flex items-center">
+                    <Building className="h-8 w-8 text-primary mr-3" />
+                    <div>
+                      <h3 className="font-medium">Bank Transfer</h3>
+                      <p className="text-sm text-muted-foreground">Direct to landlord</p>
+                    </div>
+                  </div>
+                  <div className="p-4 border rounded-md flex items-center">
+                    <DollarSign className="h-8 w-8 text-primary mr-3" />
+                    <div>
+                      <h3 className="font-medium">Mobile Money</h3>
+                      <p className="text-sm text-muted-foreground">Quick mobile payments</p>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
+              <CardFooter>
+                <Button className="w-full gap-2" asChild>
+                  <Link href="/tenant/payments">
+                    <DollarSign className="h-4 w-4" />
+                    Go to Payments
+                  </Link>
+                </Button>
+              </CardFooter>
             </Card>
           </TabsContent>
 
           {/* MAINTENANCE SECTION */}
           <TabsContent value="maintenance" className="space-y-4 mt-4">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-medium">Maintenance Requests</h3>
-              <Button asChild>
-                <Link href="/tenant/maintenance">
-                  <Plus className="h-4 w-4 mr-2" />
-                  New Request
-                </Link>
-              </Button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-md font-medium flex items-center">
-                    <AlertCircle className="h-4 w-4 text-amber-500 mr-2" />
-                    Pending
-                  </CardTitle>
-                  <CardDescription>{pendingMaintenanceCount} requests</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {pendingMaintenanceCount > 0 ? (
-                    <ScrollArea className="h-[250px] pr-4">
-                      <div className="space-y-4">
-                        {getPendingMaintenance().map(request => (
-                          <div key={request.id} className="p-3 border rounded-lg">
-                            <div className="flex justify-between">
-                              <h4 className="font-medium text-sm">{request.title}</h4>
-                              <Badge className="bg-amber-50 text-amber-700">Pending</Badge>
-                            </div>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              Submitted {formatDate(request.createdAt)}
-                            </p>
-                            <p className="text-sm line-clamp-2 mt-2">{request.description}</p>
-                            <div className="flex justify-between mt-3 pt-2 border-t">
-                              <Badge variant="outline" className={
-                                request.priority === "urgent" 
-                                  ? "bg-red-50 text-red-700" 
-                                  : request.priority === "high" 
-                                    ? "bg-orange-50 text-orange-700" 
-                                    : "bg-blue-50 text-blue-700"
-                              }>
-                                {request.priority.charAt(0).toUpperCase() + request.priority.slice(1)} Priority
-                              </Badge>
-                              <Button variant="ghost" size="sm" className="h-7" asChild>
-                                <Link href={`/tenant/maintenance/${request.id}`}>
-                                  <Eye className="h-3.5 w-3.5 mr-1" />
-                                  <span className="text-xs">View</span>
-                                </Link>
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </ScrollArea>
-                  ) : (
-                    <div className="py-8 text-center">
-                      <AlertCircle className="h-8 w-8 mx-auto text-muted-foreground opacity-50 mb-2" />
-                      <p className="text-sm text-muted-foreground">No pending requests</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-md font-medium flex items-center">
-                    <Clock className="h-4 w-4 text-blue-500 mr-2" />
-                    In Progress
-                  </CardTitle>
-                  <CardDescription>{inProgressMaintenanceCount} requests</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {inProgressMaintenanceCount > 0 ? (
-                    <ScrollArea className="h-[250px] pr-4">
-                      <div className="space-y-4">
-                        {getInProgressMaintenance().map(request => (
-                          <div key={request.id} className="p-3 border rounded-lg">
-                            <div className="flex justify-between">
-                              <h4 className="font-medium text-sm">{request.title}</h4>
-                              <Badge className="bg-blue-50 text-blue-700">In Progress</Badge>
-                            </div>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              Started {request.updatedAt ? formatDate(request.updatedAt) : formatDate(request.createdAt)}
-                            </p>
-                            <p className="text-sm line-clamp-2 mt-2">{request.description}</p>
-                            <div className="flex justify-between mt-3 pt-2 border-t">
-                              <Badge variant="outline" className={
-                                request.priority === "urgent" 
-                                  ? "bg-red-50 text-red-700" 
-                                  : request.priority === "high" 
-                                    ? "bg-orange-50 text-orange-700" 
-                                    : "bg-blue-50 text-blue-700"
-                              }>
-                                {request.priority.charAt(0).toUpperCase() + request.priority.slice(1)} Priority
-                              </Badge>
-                              <Button variant="ghost" size="sm" className="h-7" asChild>
-                                <Link href={`/tenant/maintenance/${request.id}`}>
-                                  <Eye className="h-3.5 w-3.5 mr-1" />
-                                  <span className="text-xs">View</span>
-                                </Link>
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </ScrollArea>
-                  ) : (
-                    <div className="py-8 text-center">
-                      <Clock className="h-8 w-8 mx-auto text-muted-foreground opacity-50 mb-2" />
-                      <p className="text-sm text-muted-foreground">No in-progress requests</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-md font-medium flex items-center">
-                    <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                    Completed
-                  </CardTitle>
-                  <CardDescription>{completedMaintenanceCount} requests</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {completedMaintenanceCount > 0 ? (
-                    <ScrollArea className="h-[250px] pr-4">
-                      <div className="space-y-4">
-                        {getCompletedMaintenance().map(request => (
-                          <div key={request.id} className="p-3 border rounded-lg">
-                            <div className="flex justify-between">
-                              <h4 className="font-medium text-sm">{request.title}</h4>
-                              <Badge className="bg-green-50 text-green-700">Completed</Badge>
-                            </div>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              Completed {request.updatedAt ? formatDate(request.updatedAt) : formatDate(request.createdAt)}
-                            </p>
-                            <p className="text-sm line-clamp-2 mt-2">{request.description}</p>
-                            <div className="flex justify-between mt-3 pt-2 border-t">
-                              <Button variant="ghost" size="sm" className="h-7" asChild>
-                                <Link href={`/tenant/maintenance/${request.id}`}>
-                                  <Eye className="h-3.5 w-3.5 mr-1" />
-                                  <span className="text-xs">View</span>
-                                </Link>
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </ScrollArea>
-                  ) : (
-                    <div className="py-8 text-center">
-                      <CheckCircle className="h-8 w-8 mx-auto text-muted-foreground opacity-50 mb-2" />
-                      <p className="text-sm text-muted-foreground">No completed requests</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-
+            {/* Maintenance Status Overview */}
             <Card>
               <CardHeader className="pb-2">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <CardTitle className="text-md font-medium">Need Professional Help?</CardTitle>
-                    <CardDescription>Find qualified maintenance providers in our marketplace</CardDescription>
-                  </div>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-md font-medium">Maintenance Overview</CardTitle>
+                  <Button asChild variant="outline" size="sm" className="h-8 gap-1">
+                    <Link href="/tenant/maintenance">
+                      <Plus className="h-3.5 w-3.5 mr-1" />
+                      New Request
+                    </Link>
+                  </Button>
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-col md:flex-row items-center gap-4 md:justify-between">
-                  <div className="max-w-md">
-                    <p className="text-sm text-muted-foreground">
-                      Browse our marketplace of verified maintenance professionals for plumbing, electrical, 
-                      cleaning, and other services. Get quotes and book appointments directly.
-                    </p>
-                  </div>
-                  <Button variant="outline" className="w-full md:w-auto" asChild>
-                    <Link href="/maintenance/marketplace">
-                      <Wrench className="h-4 w-4 mr-2" />
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Card className="bg-amber-50 hover:bg-amber-100 transition-colors cursor-pointer">
+                    <CardContent className="p-4 text-center">
+                      <AlertCircle className="h-8 w-8 text-amber-500 mx-auto mb-2" />
+                      <p className="text-xl font-bold text-amber-700">{pendingMaintenanceCount}</p>
+                      <p className="text-sm font-medium text-amber-800">Pending</p>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className="bg-blue-50 hover:bg-blue-100 transition-colors cursor-pointer">
+                    <CardContent className="p-4 text-center">
+                      <Clock className="h-8 w-8 text-blue-500 mx-auto mb-2" />
+                      <p className="text-xl font-bold text-blue-700">{inProgressMaintenanceCount}</p>
+                      <p className="text-sm font-medium text-blue-800">In Progress</p>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className="bg-green-50 hover:bg-green-100 transition-colors cursor-pointer">
+                    <CardContent className="p-4 text-center">
+                      <CheckCircle className="h-8 w-8 text-green-500 mx-auto mb-2" />
+                      <p className="text-xl font-bold text-green-700">{completedMaintenanceCount}</p>
+                      <p className="text-sm font-medium text-green-800">Completed</p>
+                    </CardContent>
+                  </Card>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Pending Maintenance */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-md font-medium">Pending Requests</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {getPendingMaintenance().length > 0 ? (
+                    getPendingMaintenance().map(request => (
+                      <div key={request.id} className="border p-3 rounded-md hover:border-primary transition-colors">
+                        <div className="flex justify-between mb-2">
+                          <h3 className="font-medium">{request.title}</h3>
+                          <Badge className="bg-amber-50 text-amber-700">Pending</Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{request.description}</p>
+                        <div className="flex justify-between items-center text-sm">
+                          <p className="text-muted-foreground">
+                            <Calendar className="h-3.5 w-3.5 inline mr-1" />
+                            {formatDate(request.createdAt)}
+                          </p>
+                          <Button variant="ghost" size="sm" asChild>
+                            <Link href={`/tenant/maintenance?id=${request.id}`}>
+                              View Details
+                            </Link>
+                          </Button>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center p-6">
+                      <CheckCircle className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
+                      <p className="text-muted-foreground">No pending maintenance requests</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* In Progress Maintenance */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-md font-medium">In Progress</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {getInProgressMaintenance().length > 0 ? (
+                    getInProgressMaintenance().map(request => (
+                      <div key={request.id} className="border p-3 rounded-md hover:border-primary transition-colors">
+                        <div className="flex justify-between mb-2">
+                          <h3 className="font-medium">{request.title}</h3>
+                          <Badge className="bg-blue-50 text-blue-700">In Progress</Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{request.description}</p>
+                        <div className="flex justify-between items-center text-sm">
+                          <p className="text-muted-foreground">
+                            <Calendar className="h-3.5 w-3.5 inline mr-1" />
+                            {formatDate(request.createdAt)}
+                          </p>
+                          <Button variant="ghost" size="sm" asChild>
+                            <Link href={`/tenant/maintenance?id=${request.id}`}>
+                              View Details
+                            </Link>
+                          </Button>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center p-6">
+                      <Clock className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
+                      <p className="text-muted-foreground">No in-progress maintenance requests</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-md font-medium">Find Service Providers</CardTitle>
+                <CardDescription>Browse the maintenance marketplace for service providers</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-4">
+                  <Wrench className="h-12 w-12 text-primary mx-auto mb-4 opacity-50" />
+                  <p className="mb-4">Need maintenance help? Find qualified professionals in our marketplace.</p>
+                  <Button asChild>
+                    <Link href="/tenant/marketplace">
                       Browse Marketplace
                     </Link>
                   </Button>

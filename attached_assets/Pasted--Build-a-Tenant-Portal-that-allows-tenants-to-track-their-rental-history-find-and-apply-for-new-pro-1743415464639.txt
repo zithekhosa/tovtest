@@ -1,0 +1,59 @@
+"Build a Tenant Portal that allows tenants to track their rental history, find and apply for new properties, manage maintenance requests, communicate with landlords, and access additional rental services. The portal should include:
+
+1️⃣ Rental History & Lease Management
+View past and current leases, including rental payments and due dates.
+
+Track payment history and outstanding balances.
+
+Download lease agreements and related documents.
+
+2️⃣ Property Search & Rental Applications
+Browse available rental properties by location, price, and features.
+
+Apply for a rental directly from the platform.
+
+Submit required documents (ID, proof of income, references).
+
+Track application status and receive responses from landlords.
+
+3️⃣ Maintenance Marketplace
+Tenants can post maintenance jobs (plumbing, electrical, cleaning, etc.).
+
+Service providers (contractors, handymen) can bid on jobs.
+
+Tenants can choose the best provider based on price, ratings, and reviews.
+
+Secure payment system for completed jobs.
+
+4️⃣ Maintenance Requests & Repairs
+Submit maintenance requests with photos and descriptions.
+
+Track request progress (Pending, In Progress, Completed).
+
+Communicate with the landlord or assigned service provider.
+
+5️⃣ Tenant-Landlord Communication
+Direct messaging system to communicate with landlords.
+
+Request lease extensions, discuss issues, and get updates.
+
+Send automated reminders for late payments.
+
+6️⃣ Rent Payment & Subsidy Integration
+Secure online rent payments via mobile money, credit/debit cards, or bank transfer.
+
+Track payment history and upcoming due dates.
+
+Earn and redeem rent discounts through a rewards system.
+
+7️⃣ Moving & Relocation Assistance
+Partner with moving services to help tenants relocate easily.
+
+Option to book transport, packing, and moving companies.
+
+8️⃣ Legal & Tenant Support
+Provide resources on tenant rights and lease agreements.
+
+AI-powered assistant to help tenants understand lease terms.
+
+The portal should be secure, mobile-friendly, and easy to use."

@@ -16,6 +16,11 @@ import Properties from "@/pages/properties";
 // Tenant pages
 import TenantDashboard from "@/pages/tenant/dashboard";
 import TenantMaintenance from "@/pages/tenant/maintenance";
+import TenantPayments from "@/pages/tenant/payments";
+import TenantApplications from "@/pages/tenant/applications";
+import TenantPropertySearch from "@/pages/tenant/property-search";
+import TenantMarketplace from "@/pages/tenant/marketplace";
+import TenantLeaseHistory from "@/pages/tenant/lease-history";
 
 // Landlord pages
 import LandlordDashboard from "@/pages/landlord/dashboard";
@@ -59,6 +64,11 @@ function Router() {
       {/* Tenant routes */}
       <ProtectedRoute path="/tenant/dashboard" component={TenantDashboard} role="tenant" />
       <ProtectedRoute path="/tenant/maintenance" component={TenantMaintenance} role="tenant" />
+      <ProtectedRoute path="/tenant/payments" component={TenantPayments} role="tenant" />
+      <ProtectedRoute path="/tenant/applications" component={TenantApplications} role="tenant" />
+      <ProtectedRoute path="/tenant/property-search" component={TenantPropertySearch} role="tenant" />
+      <ProtectedRoute path="/tenant/marketplace" component={TenantMarketplace} role="tenant" />
+      <ProtectedRoute path="/tenant/lease-history" component={TenantLeaseHistory} role="tenant" />
       <ProtectedRoute path="/tenant/messages" component={Messages} role="tenant" />
       <ProtectedRoute path="/tenant/documents" component={Documents} role="tenant" />
       <ProtectedRoute path="/tenant/properties" component={Properties} role="tenant" />
