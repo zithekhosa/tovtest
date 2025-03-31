@@ -12,8 +12,14 @@ import {
   insertPaymentSchema, 
   insertDocumentSchema, 
   insertMessageSchema,
+  insertMarketDataSchema,
+  insertMarketForecastSchema,
+  insertMarketReportSchema,
   Property,
-  MaintenanceRequest
+  MaintenanceRequest,
+  MarketData,
+  MarketForecast,
+  MarketReport
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -1273,6 +1279,337 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create HTTP server
+  // Market Intelligence API Routes
+  // =====================
+  
+  // Get market data
+  app.get("/api/market-intelligence", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    if (req.user.role !== 'landlord' && req.user.role !== 'agency') {
+      return res.status(403).json({ message: "Access denied" });
+    }
+    
+    try {
+      // Get query parameters
+      const region = req.query.region as string || 'Gaborone';
+      const propertyType = req.query.propertyType as string || 'all';
+      const period = req.query.period as string || '12m';
+      
+      // Query database for market data
+      // For now returning placeholder data since we haven't populated the market data yet
+      
+      // Calculate response format based on request
+      const response = {
+        region,
+        propertyType,
+        period,
+        summary: {
+          averageRentalYield: 7.4,
+          priceChange: 5.8,
+          averageDaysOnMarket: 46,
+          occupancyRate: 94.2,
+          averageRentAmount: propertyType === 'apartment' ? 4500 : 10000,
+          rentalMarketGrowth: 3.2
+        },
+        trends: {
+          rental: [
+            // Monthly data points for the requested period
+            { month: "Jan", value: propertyType === 'apartment' ? 4100 : 8900 },
+            { month: "Feb", value: propertyType === 'apartment' ? 4150 : 9000 },
+            { month: "Mar", value: propertyType === 'apartment' ? 4200 : 9100 },
+            { month: "Apr", value: propertyType === 'apartment' ? 4250 : 9200 },
+            { month: "May", value: propertyType === 'apartment' ? 4300 : 9300 },
+            { month: "Jun", value: propertyType === 'apartment' ? 4350 : 9400 },
+            { month: "Jul", value: propertyType === 'apartment' ? 4400 : 9500 },
+            { month: "Aug", value: propertyType === 'apartment' ? 4450 : 9600 },
+            { month: "Sep", value: propertyType === 'apartment' ? 4500 : 9700 },
+            { month: "Oct", value: propertyType === 'apartment' ? 4550 : 9800 },
+            { month: "Nov", value: propertyType === 'apartment' ? 4600 : 9900 },
+            { month: "Dec", value: propertyType === 'apartment' ? 4650 : 10000 }
+          ],
+          occupancy: [
+            { month: "Jan", value: 92.5 },
+            { month: "Feb", value: 93.0 },
+            { month: "Mar", value: 93.5 },
+            { month: "Apr", value: 94.0 },
+            { month: "May", value: 94.2 },
+            { month: "Jun", value: 94.5 },
+            { month: "Jul", value: 94.8 },
+            { month: "Aug", value: 95.0 },
+            { month: "Sep", value: 95.2 },
+            { month: "Oct", value: 95.5 },
+            { month: "Nov", value: 95.8 },
+            { month: "Dec", value: 96.0 }
+          ],
+          priceChange: [
+            { month: "Jan", value: 1.0 },
+            { month: "Feb", value: 1.2 },
+            { month: "Mar", value: 1.3 },
+            { month: "Apr", value: 1.5 },
+            { month: "May", value: 1.7 },
+            { month: "Jun", value: 1.9 },
+            { month: "Jul", value: 2.1 },
+            { month: "Aug", value: 2.3 },
+            { month: "Sep", value: 2.4 },
+            { month: "Oct", value: 2.6 },
+            { month: "Nov", value: 2.8 },
+            { month: "Dec", value: 3.0 }
+          ],
+          daysOnMarket: [
+            { month: "Jan", value: 55 },
+            { month: "Feb", value: 54 },
+            { month: "Mar", value: 52 },
+            { month: "Apr", value: 51 },
+            { month: "May", value: 50 },
+            { month: "Jun", value: 49 },
+            { month: "Jul", value: 48 },
+            { month: "Aug", value: 47 },
+            { month: "Sep", value: 46 },
+            { month: "Oct", value: 45 },
+            { month: "Nov", value: 44 },
+            { month: "Dec", value: 42 }
+          ]
+        },
+        hotspots: [
+          // Areas with significant price movements
+          { 
+            area: "Gaborone Central", 
+            change: 5.2, 
+            direction: "up", 
+            volume: 32,
+            averagePrice: 8500,
+            pricePerSqm: 950
+          },
+          { 
+            area: "Phakalane", 
+            change: 7.8, 
+            direction: "up", 
+            volume: 28,
+            averagePrice: 12500,
+            pricePerSqm: 1200
+          },
+          { 
+            area: "Block 7", 
+            change: 3.1, 
+            direction: "up", 
+            volume: 19,
+            averagePrice: 7500,
+            pricePerSqm: 850
+          },
+          { 
+            area: "Extension 12", 
+            change: -1.2, 
+            direction: "down", 
+            volume: 15,
+            averagePrice: 6800,
+            pricePerSqm: 750
+          },
+          { 
+            area: "Tlokweng", 
+            change: 6.5, 
+            direction: "up", 
+            volume: 23,
+            averagePrice: 5500,
+            pricePerSqm: 650
+          },
+          { 
+            area: "Mogoditshane", 
+            change: 4.2, 
+            direction: "up", 
+            volume: 35,
+            averagePrice: 4500,
+            pricePerSqm: 580
+          },
+          { 
+            area: "Broadhurst", 
+            change: 2.8, 
+            direction: "up", 
+            volume: 41,
+            averagePrice: 5800,
+            pricePerSqm: 680
+          }
+        ],
+        insights: [
+          "Demand for 2-3 bedroom apartments in CBD increased by 12% in Q1 2025",
+          "New developments in Block 10 driving 8% premium on rental prices",
+          "Commercial rentals seeing recovery with 5.2% growth year-over-year",
+          "Phakalane estate properties command 15% premium over similar properties",
+          "Student housing near UB shows consistent 98% occupancy rates"
+        ],
+        forecast: {
+          rental: {
+            projected: 4.2,
+            confidence: 85,
+            factors: ["Economic growth", "University expansion", "Infrastructure development"]
+          },
+          price: {
+            projected: 6.7,
+            confidence: 82,
+            factors: ["Limited land availability", "Foreign investment", "Growing middle class"]
+          },
+          demand: {
+            index: 76,
+            trend: "increasing",
+            factors: ["Urbanization", "Population growth", "Business expansion"]
+          },
+          supply: {
+            index: 59,
+            trend: "stable",
+            factors: ["Construction delays", "Limited financing", "Material costs"]
+          }
+        }
+      };
+      
+      res.json(response);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching market intelligence data" });
+    }
+  });
+  
+  // Get market reports
+  app.get("/api/market-reports", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    if (req.user.role !== 'landlord' && req.user.role !== 'agency') {
+      return res.status(403).json({ message: "Access denied" });
+    }
+    
+    try {
+      const reports = [
+        {
+          id: 1,
+          title: "Botswana Property Market Quarterly Review",
+          summary: "Overview of the Botswana property market for Q1 2025 with focus on emerging trends, opportunities, and challenges.",
+          region: "National",
+          reportType: "market overview",
+          period: "Q1 2025",
+          reportDate: new Date("2025-03-15T00:00:00.000Z"),
+          insights: [
+            "Urban property values increased by average of 5.8%",
+            "Commercial property vacancy rates down to 7.2% from 9.1%",
+            "Land prices in Gaborone suburbs appreciated by 12.3%",
+            "New infrastructure projects driving growth in Francistown"
+          ],
+          fileUrl: "/reports/botswana-property-market-q1-2025.pdf"
+        },
+        {
+          id: 2,
+          title: "Gaborone Rental Market Analysis",
+          summary: "In-depth analysis of rental yields, tenant demographics, and market opportunities in Gaborone's residential sector.",
+          region: "Gaborone",
+          reportType: "trend analysis",
+          period: "2024-2025",
+          reportDate: new Date("2025-02-22T00:00:00.000Z"),
+          insights: [
+            "Student rentals near UB showing 8.2% higher yields",
+            "1-2 bedroom apartments experiencing highest demand growth",
+            "Premium on furnished apartments increased to 15%",
+            "Phakalane and Extension 9 remain top-performing suburbs"
+          ],
+          fileUrl: "/reports/gaborone-rental-market-analysis-2025.pdf"
+        },
+        {
+          id: 3,
+          title: "Investment Outlook: Botswana Commercial Property",
+          summary: "Strategic investment analysis for commercial property investors in Botswana's major urban centers.",
+          region: "National",
+          reportType: "investment outlook",
+          period: "2025-2026",
+          reportDate: new Date("2025-01-10T00:00:00.000Z"),
+          insights: [
+            "Office spaces in CBD projected to appreciate 7.5% annually",
+            "Retail properties show strong recovery after 2023 slowdown",
+            "Industrial warehousing demand increases near transport hubs",
+            "Mixed-use developments offering highest returns on investment"
+          ],
+          fileUrl: "/reports/botswana-commercial-investment-outlook-2025.pdf"
+        }
+      ];
+      
+      res.json(reports);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching market reports" });
+    }
+  });
+  
+  // Get market forecast
+  app.get("/api/market-forecast", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    if (req.user.role !== 'landlord' && req.user.role !== 'agency') {
+      return res.status(403).json({ message: "Access denied" });
+    }
+    
+    try {
+      const region = req.query.region as string || 'Gaborone';
+      const propertyType = req.query.propertyType as string || 'all';
+      const forecastType = req.query.forecastType as string || 'price';
+      const period = req.query.period as string || '1y';
+      
+      // Sample forecast data structure
+      const forecast = {
+        region,
+        propertyType,
+        forecastType,
+        period,
+        startDate: new Date(),
+        endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+        forecastValue: forecastType === 'price' ? 6.7 : 4.2, // percentage increase
+        confidenceLevel: 85,
+        methodology: "Time series analysis with economic indicators",
+        dataPoints: [
+          { date: new Date(2025, 3, 1), value: forecastType === 'price' ? 1.5 : 1.0 },
+          { date: new Date(2025, 4, 1), value: forecastType === 'price' ? 3.2 : 2.1 },
+          { date: new Date(2025, 5, 1), value: forecastType === 'price' ? 4.1 : 2.7 },
+          { date: new Date(2025, 6, 1), value: forecastType === 'price' ? 4.8 : 3.2 },
+          { date: new Date(2025, 7, 1), value: forecastType === 'price' ? 5.3 : 3.5 },
+          { date: new Date(2025, 8, 1), value: forecastType === 'price' ? 5.8 : 3.7 },
+          { date: new Date(2025, 9, 1), value: forecastType === 'price' ? 6.2 : 3.9 },
+          { date: new Date(2025, 10, 1), value: forecastType === 'price' ? 6.4 : 4.0 },
+          { date: new Date(2025, 11, 1), value: forecastType === 'price' ? 6.6 : 4.1 },
+          { date: new Date(2025, 12, 1), value: forecastType === 'price' ? 6.7 : 4.2 }
+        ],
+        factors: [
+          {
+            name: "Economic Growth",
+            impact: "positive",
+            weight: 0.35,
+            description: "Botswana's GDP growth expected to reach 4.5% in 2025"
+          },
+          {
+            name: "Population Growth",
+            impact: "positive",
+            weight: 0.25,
+            description: "Urban population growing at 3.2% annually"
+          },
+          {
+            name: "Infrastructure Development",
+            impact: "positive",
+            weight: 0.20,
+            description: "Major road and utility expansions in urban areas"
+          },
+          {
+            name: "Interest Rates",
+            impact: "negative",
+            weight: 0.15,
+            description: "Potential increase in lending rates in Q3 2025"
+          },
+          {
+            name: "Construction Costs",
+            impact: "negative",
+            weight: 0.05,
+            description: "Rising material costs affecting new development"
+          }
+        ]
+      };
+      
+      res.json(forecast);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching market forecast" });
+    }
+  });
+  
   const httpServer = createServer(app);
   
   // Initialize WebSocket server on the same HTTP server

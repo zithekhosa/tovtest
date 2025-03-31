@@ -68,6 +68,12 @@ export default function Sidebar({ role }: SidebarProps) {
           active: location.includes("financial-management"),
         },
         {
+          href: "/landlord/market-intelligence",
+          icon: BarChart3,
+          label: "Market Intelligence",
+          active: location.includes("market-intelligence"),
+        },
+        {
           href: "/landlord/maintenance",
           icon: Wrench,
           label: "Maintenance",

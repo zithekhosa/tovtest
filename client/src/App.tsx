@@ -27,6 +27,7 @@ import LandlordDashboard from "@/pages/landlord/dashboard";
 import LandlordProperties from "@/pages/landlord/properties";
 import FinancialManagement from "@/pages/landlord/financial-management";
 import DocumentManagement from "@/pages/landlord/document-management";
+import MarketIntelligence from "@/pages/landlord/market-intelligence";
 
 // Agency pages
 import AgencyDashboard from "@/pages/agency/dashboard";
@@ -83,6 +84,7 @@ function Router() {
       <ProtectedRoute path="/landlord/documents" component={Documents} role="landlord" />
       <ProtectedRoute path="/landlord/document-management" component={DocumentManagement} role="landlord" />
       <ProtectedRoute path="/landlord/financial-management" component={FinancialManagement} role="landlord" />
+      <ProtectedRoute path="/landlord/market-intelligence" component={MarketIntelligence} role="landlord" />
       
       {/* Agency routes */}
       <ProtectedRoute path="/agency/dashboard" component={AgencyDashboard} role="agency" />

@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, jsonb, date } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, jsonb, date, numeric, real } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
@@ -440,6 +440,115 @@ export type Document = typeof documents.$inferSelect;
 
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
 export type Message = typeof messages.$inferSelect;
+
+// Market Analytics
+export const marketData = pgTable("market_data", {
+  id: serial("id").primaryKey(),
+  region: text("region").notNull(),
+  propertyType: text("property_type").notNull(),
+  bedrooms: integer("bedrooms"),
+  period: text("period").notNull(), // monthly, quarterly, yearly
+  date: timestamp("date").notNull(),
+  averagePrice: integer("average_price").notNull(), // in local currency (BWP)
+  medianPrice: integer("median_price").notNull(),
+  priceChangePct: real("price_change_pct"), // percentage change from previous period
+  inventory: integer("inventory"), // number of available properties
+  daysOnMarket: integer("days_on_market"), // average days on market
+  occupancyRate: real("occupancy_rate"), // occupancy rate percentage
+  rentalYield: real("rental_yield"), // rental yield percentage
+  transactionVolume: integer("transaction_volume"), // number of transactions
+  additionalMetrics: jsonb("additional_metrics"), // flexible JSON for additional metrics
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at"),
+});
+
+export const insertMarketDataSchema = createInsertSchema(marketData).pick({
+  region: true,
+  propertyType: true,
+  bedrooms: true,
+  period: true,
+  date: true,
+  averagePrice: true,
+  medianPrice: true,
+  priceChangePct: true,
+  inventory: true,
+  daysOnMarket: true,
+  occupancyRate: true,
+  rentalYield: true,
+  transactionVolume: true,
+  additionalMetrics: true,
+});
+
+export type InsertMarketData = z.infer<typeof insertMarketDataSchema>;
+export type MarketData = typeof marketData.$inferSelect;
+
+// Market Forecasts
+export const marketForecasts = pgTable("market_forecasts", {
+  id: serial("id").primaryKey(),
+  region: text("region").notNull(),
+  propertyType: text("property_type").notNull(),
+  forecastType: text("forecast_type").notNull(), // price, rent, yield, etc.
+  period: text("period").notNull(), // 3m, 6m, 1y, 2y, 5y
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  forecastValue: numeric("forecast_value").notNull(),
+  confidenceLevel: real("confidence_level"), // statistical confidence
+  methodology: text("methodology").notNull(), // how the forecast was calculated
+  authorId: integer("author_id"), // user who created the forecast (if applicable)
+  dataPoints: jsonb("data_points"), // array of forecast data points
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at"),
+});
+
+export const insertMarketForecastSchema = createInsertSchema(marketForecasts).pick({
+  region: true,
+  propertyType: true,
+  forecastType: true,
+  period: true,
+  startDate: true,
+  endDate: true,
+  forecastValue: true,
+  confidenceLevel: true,
+  methodology: true,
+  authorId: true,
+  dataPoints: true
+});
+
+export type InsertMarketForecast = z.infer<typeof insertMarketForecastSchema>;
+export type MarketForecast = typeof marketForecasts.$inferSelect;
+
+// Market Reports
+export const marketReports = pgTable("market_reports", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  summary: text("summary").notNull(),
+  region: text("region").notNull(),
+  reportType: text("report_type").notNull(), // market overview, trend analysis, investment outlook
+  period: text("period").notNull(), // period covered
+  reportDate: timestamp("report_date").notNull(),
+  content: text("content").notNull(),
+  fileUrl: text("file_url"),
+  authorId: integer("author_id"),
+  insights: jsonb("insights"), // key market insights
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at"),
+});
+
+export const insertMarketReportSchema = createInsertSchema(marketReports).pick({
+  title: true,
+  summary: true,
+  region: true,
+  reportType: true,
+  period: true,
+  reportDate: true,
+  content: true,
+  fileUrl: true,
+  authorId: true,
+  insights: true
+});
+
+export type InsertMarketReport = z.infer<typeof insertMarketReportSchema>;
+export type MarketReport = typeof marketReports.$inferSelect;
 
 // Now that all tables are defined, we can add user relations
 export const usersRelations = relations(users, ({ many }) => ({
