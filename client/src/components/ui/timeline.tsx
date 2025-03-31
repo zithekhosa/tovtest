@@ -1,81 +1,109 @@
-import { ReactNode } from "react";
+import * as React from "react";
 import { cn } from "@/lib/utils";
 
-interface TimelineItemProps {
-  title: string;
-  description?: string;
-  icon?: ReactNode;
-  isActive?: boolean;
-  isFirst?: boolean;
-  isLast?: boolean;
-  children?: ReactNode;
+export interface TimelineProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode;
 }
 
-export function TimelineItem({
-  title,
-  description,
-  icon,
-  isActive = false,
-  isFirst = false,
-  isLast = false,
-  children,
-}: TimelineItemProps) {
+export function Timeline({ children, className, ...props }: TimelineProps) {
   return (
-    <div className="relative pb-8">
-      {!isLast && (
-        <div
-          className={cn(
-            "absolute left-4 top-5 -ml-px h-full w-0.5 -translate-x-1/2",
-            isActive ? "bg-primary" : "bg-gray-200"
-          )}
-          aria-hidden="true"
-        />
-      )}
-      <div className="relative flex items-start space-x-3">
-        <div>
-          <div
-            className={cn(
-              "flex h-8 w-8 items-center justify-center rounded-full",
-              isActive
-                ? "bg-primary text-primary-foreground"
-                : "bg-gray-100 text-gray-500"
-            )}
-          >
-            {icon || (
-              <div className="h-2.5 w-2.5 rounded-full bg-current" />
-            )}
-          </div>
-        </div>
-        <div className="flex-1 space-y-1">
-          <div className="flex items-center justify-between">
-            <h3 className={cn("font-medium", isActive && "text-primary")}>
-              {title}
-            </h3>
-            {isActive && (
-              <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
-                Active
-              </span>
-            )}
-          </div>
-          {description && (
-            <p className="text-sm text-muted-foreground">{description}</p>
-          )}
-          {children && <div className="pt-2">{children}</div>}
-        </div>
-      </div>
+    <div className={cn("space-y-4", className)} {...props}>
+      {children}
     </div>
   );
 }
 
-interface TimelineProps {
-  children: ReactNode;
-  className?: string;
+export interface TimelineItemProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode;
+  active?: boolean;
+  completed?: boolean;
 }
 
-export function Timeline({ children, className }: TimelineProps) {
+export function TimelineItem({ 
+  children, 
+  active = false,
+  completed = false,
+  className, 
+  ...props 
+}: TimelineItemProps) {
   return (
-    <div className={cn("space-y-0", className)}>
+    <div className={cn("relative pl-8", className)} {...props}>
+      <span
+        className={cn(
+          "absolute left-0 flex h-6 w-6 items-center justify-center rounded-full border",
+          active ? "border-primary bg-primary/10" : 
+          completed ? "border-primary bg-primary text-primary-foreground" : 
+          "border-gray-300 bg-white"
+        )}
+      >
+        {completed && (
+          <svg
+            className="h-3 w-3 text-white"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        )}
+      </span>
+      <div className={cn(
+        "h-full border-l border-gray-200 absolute left-3 top-6 bottom-0",
+        completed ? "border-primary" : "border-gray-200",
+      )}>
+      </div>
       {children}
     </div>
+  );
+}
+
+export interface TimelineContentProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode;
+}
+
+export function TimelineContent({ children, className, ...props }: TimelineContentProps) {
+  return (
+    <div className={cn("pt-1 pb-6", className)} {...props}>
+      {children}
+    </div>
+  );
+}
+
+export interface TimelineTitleProps extends React.HTMLAttributes<HTMLHeadingElement> {
+  children: React.ReactNode;
+}
+
+export function TimelineTitle({ children, className, ...props }: TimelineTitleProps) {
+  return (
+    <h3 className={cn("text-lg font-semibold", className)} {...props}>
+      {children}
+    </h3>
+  );
+}
+
+export interface TimelineDescriptionProps extends React.HTMLAttributes<HTMLParagraphElement> {
+  children: React.ReactNode;
+}
+
+export function TimelineDescription({ children, className, ...props }: TimelineDescriptionProps) {
+  return (
+    <p className={cn("text-sm text-gray-500 mt-1", className)} {...props}>
+      {children}
+    </p>
+  );
+}
+
+export interface TimelineDateProps extends React.HTMLAttributes<HTMLParagraphElement> {
+  children: React.ReactNode;
+}
+
+export function TimelineDate({ children, className, ...props }: TimelineDateProps) {
+  return (
+    <p className={cn("text-xs text-gray-400 mt-1", className)} {...props}>
+      {children}
+    </p>
   );
 }

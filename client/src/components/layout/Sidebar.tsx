@@ -224,24 +224,26 @@ export default function Sidebar({ role }: SidebarProps) {
 
         <nav className="space-y-1">
           {navItems.map((item) => (
-            <Link key={item.href} href={item.href}>
-              <a
-                className={cn(
-                  "flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors",
-                  item.active
-                    ? "bg-primary/10 text-primary"
-                    : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                )}
-              >
-                <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
-                {item.label}
-                {item.label === "Messages" && (
-                  <span className="ml-auto bg-primary text-primary-foreground text-xs font-medium px-2 py-0.5 rounded-full">
-                    2
-                  </span>
-                )}
-              </a>
-            </Link>
+            <div key={item.href}>
+              <Link href={item.href}>
+                <div
+                  className={cn(
+                    "flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer",
+                    item.active
+                      ? "bg-primary/10 text-primary"
+                      : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                  )}
+                >
+                  <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
+                  {item.label}
+                  {item.label === "Messages" && (
+                    <span className="ml-auto bg-primary text-primary-foreground text-xs font-medium px-2 py-0.5 rounded-full">
+                      2
+                    </span>
+                  )}
+                </div>
+              </Link>
+            </div>
           ))}
         </nav>
       </div>

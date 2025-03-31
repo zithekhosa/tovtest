@@ -411,11 +411,13 @@ export const addMockupData = async () => {
       city,
       state,
       zipCode,
+      location: `${city}, ${state}`, // Set location field
       propertyType,
       bedrooms,
       bathrooms,
       squareFeet,
       rentAmount,
+      securityDeposit: Math.round(rentAmount * 2), // Add security deposit
       available: getRandomBoolean(0.3), // 30% available
       images: imageUrls
     };

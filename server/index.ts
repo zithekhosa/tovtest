@@ -39,12 +39,43 @@ app.use((req, res, next) => {
   next();
 });
 
-// Function to create test users on server startup
-async function createTestUsers() {
+// Function to verify database connectivity and create test users if needed
+async function verifyDatabaseAndUsers() {
   try {
-    console.log("Creating test users for development environment...");
+    console.log("Verifying database connection and users...");
     
-    // Check if users already exist
+    // Check database connectivity by getting existing users
+    try {
+      // Check the database status by role
+      const landlords = await storage.getUsersByRole(UserRole.LANDLORD);
+      const tenants = await storage.getUsersByRole(UserRole.TENANT);
+      const agencies = await storage.getUsersByRole(UserRole.AGENCY);
+      const maintenanceProviders = await storage.getUsersByRole(UserRole.MAINTENANCE);
+      
+      console.log("=== Database User Status ===");
+      console.log(`Landlords: ${landlords.length}`);
+      console.log(`Tenants: ${tenants.length}`);
+      console.log(`Agencies: ${agencies.length}`);
+      console.log(`Maintenance Providers: ${maintenanceProviders.length}`);
+      
+      // Get some properties
+      const properties = await storage.getProperties();
+      console.log(`Properties: ${properties.length}`);
+      
+      // Get leases
+      const leases = await storage.getLeasesByTenant(tenants[0]?.id || 0);
+      console.log(`Leases for first tenant: ${leases.length}`);
+      
+      if (landlords.length > 0 && tenants.length > 0 && agencies.length > 0 && maintenanceProviders.length > 0) {
+        console.log("Database contains users for all roles, skipping test user creation");
+        return;
+      }
+    } catch (dbError) {
+      console.error("Error connecting to database or retrieving users:", dbError);
+      console.log("Will proceed with creating local test users");
+    }
+    
+    // Check if basic test users already exist
     const existingLandlord = await storage.getUserByUsername("landlord");
     if (existingLandlord) {
       console.log("Test users already exist, skipping creation");
@@ -107,22 +138,22 @@ async function createTestUsers() {
     const agency = await storage.getUserByUsername("agency");
     const maintenance = await storage.getUserByUsername("maintenance");
     
-    console.log("=== User Verification ===");
+    console.log("=== Test User Verification ===");
     console.log(`Landlord exists: ${Boolean(landlord)}`);
     console.log(`Tenant exists: ${Boolean(tenant)}`);
     console.log(`Agency exists: ${Boolean(agency)}`);
     console.log(`Maintenance exists: ${Boolean(maintenance)}`);
     
   } catch (error) {
-    console.error("Error creating test users:", error);
+    console.error("Error during database and user verification:", error);
   }
 }
 
 (async () => {
   const server = await registerRoutes(app);
   
-  // Create test users on server startup
-  await createTestUsers();
+  // Verify database and test users on server startup
+  await verifyDatabaseAndUsers();
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     console.error('Error details:', err);
