@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
+import tovLogo from "@/assets/images/tov-logo.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -118,10 +119,7 @@ export default function LandingPage() {
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center">
-              <div className="w-10 h-10 bg-primary rounded-md flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-lg">T</span>
-              </div>
-              <h1 className="text-xl font-bold text-gray-900 ml-2">TOV</h1>
+              <img src={tovLogo} alt="TOV Logo" className="h-10 w-auto" />
             </div>
             <nav className="hidden md:flex items-center space-x-6">
               <a href="#properties" className="text-gray-600 hover:text-primary">Properties</a>
@@ -673,10 +671,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center mb-4">
-                <div className="w-10 h-10 bg-white rounded-md flex items-center justify-center">
-                  <span className="text-primary font-bold text-lg">T</span>
-                </div>
-                <h2 className="text-xl font-bold text-white ml-2">TOV</h2>
+                <img src={tovLogo} alt="TOV Logo" className="h-10 w-auto bg-white p-1 rounded-md" />
               </div>
               <p className="mb-4 text-gray-400">
                 The complete property operating system for Botswana, connecting landlords, tenants, 

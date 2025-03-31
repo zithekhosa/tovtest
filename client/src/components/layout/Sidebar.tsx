@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import tovLogo from "@/assets/images/tov-logo.png";
 import { 
   User, Home, Building, Users, Wrench, FileText, 
   MessageSquare, Settings, LogOut, BarChart3, DollarSign,
@@ -207,7 +208,11 @@ export default function Sidebar({ role }: SidebarProps) {
   };
 
   return (
-    <aside className="hidden md:flex flex-col w-64 bg-white border-r border-gray-200 h-screen fixed top-0 left-0 pt-16 z-30">
+    <aside className="hidden md:flex flex-col w-64 bg-white border-r border-gray-200 h-screen fixed top-0 left-0 pt-5 z-30">
+      <div className="px-4 pb-4 mb-2 flex items-center border-b border-gray-200">
+        <img src={tovLogo} alt="TOV Logo" className="h-10 w-auto" />
+        <span className="font-medium text-gray-700 ml-2">Property OS</span>
+      </div>
       <div className="flex-1 overflow-y-auto py-6 px-4">
         <div className="pb-6 mb-6 border-b border-gray-200">
           <div className="flex items-center space-x-3">

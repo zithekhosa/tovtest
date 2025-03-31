@@ -13,6 +13,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Building, Eye, EyeOff, Home, Users, Wrench } from "lucide-react";
 import { UserRoleType } from "@shared/schema";
+import tovLogo from "@/assets/images/tov-logo.png";
 
 export default function AuthPage() {
   const [email, setEmail] = useState("");
@@ -61,10 +62,7 @@ export default function AuthPage() {
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center">
-              <div className="w-10 h-10 bg-primary rounded-md flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-lg">T</span>
-              </div>
-              <h1 className="text-xl font-bold text-gray-900 ml-2">TOV</h1>
+              <img src={tovLogo} alt="TOV Logo" className="h-10 w-auto" />
             </div>
             <nav className="hidden md:flex space-x-4">
               <Button variant="ghost" onClick={() => navigate("/maintenance/marketplace")}>Marketplace</Button>
@@ -217,8 +215,18 @@ export default function AuthPage() {
       </main>
 
       <footer className="border-t border-gray-200 py-8">
-        <div className="container mx-auto text-center">
-          <p>&copy; 2024 TOV Property Management. All rights reserved.</p>
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center justify-between">
+            <div className="flex items-center mb-4 md:mb-0">
+              <img src={tovLogo} alt="TOV Logo" className="h-8 w-auto" />
+              <span className="ml-2 text-gray-600">&copy; 2024 TOV Property Management. All rights reserved.</span>
+            </div>
+            <div className="flex space-x-4">
+              <Button variant="ghost" size="sm">Terms</Button>
+              <Button variant="ghost" size="sm">Privacy</Button>
+              <Button variant="ghost" size="sm">Contact</Button>
+            </div>
+          </div>
         </div>
       </footer>
     </div>

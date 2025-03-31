@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Link, useLocation } from "wouter";
 import { cn, getInitials } from "@/lib/utils";
+import tovLogo from "@/assets/images/tov-logo.png";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { UserRoleType } from "@shared/schema";
@@ -227,7 +228,7 @@ export function MobileNav() {
       {/* Mobile Menu Sheet - Top Nav Bar with Menu Icon */}
       <div className="fixed top-0 left-0 w-full bg-white border-b border-gray-200 p-2 flex items-center justify-between z-40 md:hidden">
         <div className="flex items-center">
-          <span className="font-bold text-xl text-primary">TOV</span>
+          <img src={tovLogo} alt="TOV Logo" className="h-8 w-auto" />
           <span className="font-medium text-gray-700 ml-2">Property OS</span>
         </div>
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -240,7 +241,7 @@ export function MobileNav() {
             <SheetHeader className="border-b pb-4 mb-4">
               <SheetTitle className="flex items-center justify-between">
                 <div className="flex items-center">
-                  <span className="font-bold text-xl text-primary">TOV</span>
+                  <img src={tovLogo} alt="TOV Logo" className="h-8 w-auto" />
                   <span className="font-medium text-gray-700 ml-2">Property OS</span>
                 </div>
                 <Button 
