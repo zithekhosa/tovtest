@@ -1,4 +1,4 @@
-import { users, properties, leases, payments, maintenanceRequests, documents, messages, type User, type Property, type Lease, type Payment, type MaintenanceRequest, type Document, type Message, type InsertUser, type InsertProperty, type InsertLease, type InsertPayment, type InsertMaintenanceRequest, type InsertDocument, type InsertMessage } from "@shared/schema";
+import { users, properties, leases, payments, maintenanceRequests, documents, messages, type User, type Property, type Lease, type Payment, type MaintenanceRequest, type Document, type Message, type InsertUser, type InsertProperty, type InsertLease, type InsertPayment, type InsertMaintenanceRequest, type InsertDocument, type InsertMessage, type UserRoleType } from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
 
@@ -106,6 +106,13 @@ export class MemStorage implements IStorage {
     
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000, // 24 hours
+      stale: true, // Allow stale sessions
+      ttl: 7 * 24 * 60 * 60 * 1000, // 7 days to match cookie
+    });
+    
+    // Add error handler for session store
+    this.sessionStore.on('error', (error) => {
+      console.error('Session store error:', error);
     });
   }
   
@@ -164,7 +171,17 @@ export class MemStorage implements IStorage {
   
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.userIdCounter++;
-    const user: User = { ...insertUser, id };
+    const user: User = {
+      id,
+      username: insertUser.username,
+      password: insertUser.password,
+      firstName: insertUser.firstName,
+      lastName: insertUser.lastName,
+      email: insertUser.email,
+      role: insertUser.role as unknown as UserRoleType,
+      phone: insertUser.phone || null,
+      profileImage: insertUser.profileImage || null
+    };
     this.users.set(id, user);
     return user;
   }
@@ -190,7 +207,22 @@ export class MemStorage implements IStorage {
   
   async createProperty(insertProperty: InsertProperty): Promise<Property> {
     const id = this.propertyIdCounter++;
-    const property: Property = { ...insertProperty, id };
+    const property: Property = {
+      id,
+      landlordId: insertProperty.landlordId,
+      address: insertProperty.address,
+      city: insertProperty.city,
+      state: insertProperty.state,
+      zipCode: insertProperty.zipCode,
+      propertyType: insertProperty.propertyType,
+      bedrooms: insertProperty.bedrooms,
+      bathrooms: insertProperty.bathrooms,
+      squareFeet: insertProperty.squareFeet || null,
+      rentAmount: insertProperty.rentAmount,
+      description: insertProperty.description || null,
+      available: insertProperty.available ?? true,
+      images: Array.isArray(insertProperty.images) ? insertProperty.images : null
+    };
     this.properties.set(id, property);
     return property;
   }
@@ -229,7 +261,17 @@ export class MemStorage implements IStorage {
   
   async createLease(insertLease: InsertLease): Promise<Lease> {
     const id = this.leaseIdCounter++;
-    const lease: Lease = { ...insertLease, id };
+    const lease: Lease = { 
+      id,
+      rentAmount: insertLease.rentAmount,
+      propertyId: insertLease.propertyId,
+      tenantId: insertLease.tenantId,
+      startDate: insertLease.startDate,
+      endDate: insertLease.endDate,
+      securityDeposit: insertLease.securityDeposit,
+      documentUrl: insertLease.documentUrl || null,
+      active: insertLease.active ?? true
+    };
     this.leases.set(id, lease);
     return lease;
   }
@@ -262,7 +304,15 @@ export class MemStorage implements IStorage {
   
   async createPayment(insertPayment: InsertPayment): Promise<Payment> {
     const id = this.paymentIdCounter++;
-    const payment: Payment = { ...insertPayment, id };
+    const payment: Payment = { 
+      id,
+      tenantId: insertPayment.tenantId,
+      leaseId: insertPayment.leaseId,
+      amount: insertPayment.amount,
+      paymentDate: insertPayment.paymentDate,
+      paymentType: insertPayment.paymentType,
+      description: insertPayment.description || null
+    };
     this.payments.set(id, payment);
     return payment;
   }
@@ -299,8 +349,15 @@ export class MemStorage implements IStorage {
   async createMaintenanceRequest(insertRequest: InsertMaintenanceRequest): Promise<MaintenanceRequest> {
     const id = this.maintenanceRequestIdCounter++;
     const request: MaintenanceRequest = { 
-      ...insertRequest, 
-      id, 
+      id,
+      title: insertRequest.title, 
+      description: insertRequest.description,
+      propertyId: insertRequest.propertyId,
+      tenantId: insertRequest.tenantId,
+      priority: insertRequest.priority,
+      status: insertRequest.status || 'New',
+      images: Array.isArray(insertRequest.images) ? insertRequest.images : null,
+      assignedToId: insertRequest.assignedToId || null,
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -312,11 +369,26 @@ export class MemStorage implements IStorage {
     const request = this.maintenanceRequests.get(id);
     if (!request) return undefined;
     
-    const updatedRequest = { 
-      ...request, 
-      ...updates, 
-      updatedAt: new Date() 
+    // Process images array separately if provided
+    let processedImages = request.images;
+    if (updates.images !== undefined) {
+      processedImages = Array.isArray(updates.images) ? updates.images : null;
+    }
+    
+    // Create a new object with all updates
+    const updatedRequest: MaintenanceRequest = {
+      ...request,
+      title: updates.title ?? request.title,
+      description: updates.description ?? request.description,
+      propertyId: updates.propertyId ?? request.propertyId,
+      tenantId: updates.tenantId ?? request.tenantId,
+      priority: updates.priority ?? request.priority,
+      status: updates.status ?? request.status,
+      assignedToId: updates.assignedToId !== undefined ? (updates.assignedToId || null) : request.assignedToId,
+      images: processedImages,
+      updatedAt: new Date()
     };
+    
     this.maintenanceRequests.set(id, updatedRequest);
     return updatedRequest;
   }
@@ -341,8 +413,13 @@ export class MemStorage implements IStorage {
   async createDocument(insertDocument: InsertDocument): Promise<Document> {
     const id = this.documentIdCounter++;
     const document: Document = { 
-      ...insertDocument, 
       id,
+      userId: insertDocument.userId,
+      fileName: insertDocument.fileName,
+      fileUrl: insertDocument.fileUrl,
+      fileType: insertDocument.fileType,
+      documentType: insertDocument.documentType,
+      propertyId: insertDocument.propertyId || null,
       uploadedAt: new Date()
     };
     this.documents.set(id, document);

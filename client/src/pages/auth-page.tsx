@@ -43,7 +43,14 @@ export default function AuthPage() {
   }, [user, navigate]);
 
   const onSubmit = (data: z.infer<typeof loginSchema>) => {
-    loginMutation.mutate(data);
+    // Combine username with role to support role-specific login
+    const username = data.username;
+    // If no username is provided, use the role as username (for demo accounts)
+    const usernameToUse = username.trim() ? username : userRole;
+    loginMutation.mutate({
+      username: usernameToUse,
+      password: data.password
+    });
   };
 
   return (

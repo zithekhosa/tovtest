@@ -125,11 +125,41 @@ async function createTestUsers() {
   await createTestUsers();
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+    console.error('Error details:', err);
+    
+    // Check if headers have already been sent
+    if (res.headersSent) {
+      return _next(err);
+    }
+    
+    // Handle different error types
+    if (err.name === 'UnauthorizedError' || err.status === 401) {
+      return res.status(401).json({
+        message: 'Unauthorized access: Please login to access this resource'
+      });
+    }
+    
+    if (err.name === 'ValidationError') {
+      return res.status(400).json({
+        message: 'Validation Error',
+        errors: err.errors || 'Invalid data provided'
+      });
+    }
+    
+    if (err.name === 'NotFoundError' || err.status === 404) {
+      return res.status(404).json({
+        message: err.message || 'Resource not found'
+      });
+    }
+    
+    // Generic error handling
     const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-
-    res.status(status).json({ message });
-    throw err;
+    const message = err.message || 'Internal Server Error';
+    
+    return res.status(status).json({
+      message,
+      error: process.env.NODE_ENV === 'production' ? 'An unexpected error occurred' : err.toString()
+    });
   });
 
   // importantly only setup vite in development and after
