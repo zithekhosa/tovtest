@@ -3,7 +3,10 @@ import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Home, Building, Users, Wrench, FileText, MessageSquare, Settings, LogOut } from "lucide-react";
+import { 
+  Menu, X, Home, Building, Users, Wrench, FileText, 
+  MessageSquare, Settings, LogOut, DollarSign 
+} from "lucide-react";
 import { UserRoleType } from "@shared/schema";
 
 interface MobileNavProps {
@@ -51,6 +54,12 @@ export default function MobileNav({ role }: MobileNavProps) {
           icon: Users,
           label: "Tenants",
           active: location.includes("tenants"),
+        },
+        {
+          href: "/landlord/financial-management",
+          icon: DollarSign,
+          label: "Financial Management",
+          active: location.includes("financial-management"),
         },
         {
           href: "/landlord/maintenance",
@@ -132,29 +141,17 @@ export default function MobileNav({ role }: MobileNavProps) {
 
   return (
     <>
-      <div className="fixed bottom-0 left-0 z-50 w-full h-16 bg-white border-t border-gray-200 md:hidden">
-        <div className="grid h-full grid-cols-5">
-          {navItems.slice(0, 4).map((item, i) => (
-            <Link key={i} href={item.href}>
-              <a className="inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 relative">
-                <item.icon className="w-6 h-6 mb-1 text-gray-500 group-hover:text-primary" />
-                <span className="text-xs text-gray-500">{item.label}</span>
-                {item.label === "Messages" && (
-                  <span className="absolute top-2 right-6 bg-primary text-primary-foreground text-xs font-medium px-1.5 rounded-full">
-                    2
-                  </span>
-                )}
-              </a>
-            </Link>
-          ))}
-          <button
-            className="inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50"
-            onClick={() => setIsOpen(true)}
-          >
-            <Menu className="w-6 h-6 mb-1 text-gray-500" />
-            <span className="text-xs text-gray-500">Menu</span>
-          </button>
-        </div>
+      {/* Mobile Menu Button */}
+      <div className="fixed top-4 right-4 z-50 md:hidden">
+        <Button
+          variant="outline"
+          size="icon"
+          className="h-10 w-10 rounded-full shadow-md"
+          onClick={() => setIsOpen(true)}
+        >
+          <Menu className="h-5 w-5" />
+          <span className="sr-only">Open menu</span>
+        </Button>
       </div>
 
       {/* Full-screen drawer menu */}

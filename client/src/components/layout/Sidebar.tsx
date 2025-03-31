@@ -3,7 +3,10 @@ import { cn } from "@/lib/utils";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { User, Home, Building, Users, Wrench, FileText, MessageSquare, Settings, LogOut } from "lucide-react";
+import { 
+  User, Home, Building, Users, Wrench, FileText, 
+  MessageSquare, Settings, LogOut, BarChart3, DollarSign 
+} from "lucide-react";
 import { UserRoleType } from "@shared/schema";
 
 interface SidebarProps {
@@ -56,6 +59,12 @@ export default function Sidebar({ role }: SidebarProps) {
           icon: Users,
           label: "Tenants",
           active: location.includes("tenants"),
+        },
+        {
+          href: "/landlord/financial-management",
+          icon: DollarSign,
+          label: "Financial Management",
+          active: location.includes("financial-management"),
         },
         {
           href: "/landlord/maintenance",
