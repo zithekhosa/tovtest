@@ -91,10 +91,10 @@ export default function PinterestPropertyGrid({ properties, onPropertyClick }: P
                 <Bath className="h-4 w-4 mr-2 text-gray-500" />
                 <span>{property.bathrooms} {property.bathrooms === 1 ? 'Bathroom' : 'Bathrooms'}</span>
               </div>
-              {property.squareFeet && (
+              {property.squareFootage && (
                 <div className="flex items-center text-gray-700 col-span-2">
                   <Building className="h-4 w-4 mr-2 text-gray-500" />
-                  <span>{property.squareFeet} sq ft</span>
+                  <span>{property.squareFootage} sq ft</span>
                 </div>
               )}
             </div>

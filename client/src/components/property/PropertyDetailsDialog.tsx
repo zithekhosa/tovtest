@@ -167,7 +167,7 @@ export default function PropertyDetailsDialog({
                 {property.propertyType}
               </Badge>
               {property.available && (
-                <Badge variant="success" className="ml-2 mt-1">
+                <Badge variant="outline" className="ml-2 mt-1 bg-green-50 text-green-700 hover:bg-green-50 border-green-200">
                   Available
                 </Badge>
               )}

@@ -424,7 +424,7 @@ export default function ApplicationsPage() {
                       <SquareIcon className="h-4 w-4 mr-2 text-gray-500" />
                       <span className="text-gray-600">Size:</span>
                       <span className="ml-1 font-medium">
-                        {selectedApplication.property.squareFeet || 'N/A'} sq ft
+                        {selectedApplication.property.squareFootage || 'N/A'} sq ft
                       </span>
                     </div>
                     <div className="flex items-center text-sm">

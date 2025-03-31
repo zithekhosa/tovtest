@@ -470,7 +470,7 @@ export default function LandlordDashboard() {
                         </div>
                         <div>
                           <p className="text-muted-foreground">Sq.Ft</p>
-                          <p className="font-medium">{property.squareFeet || "N/A"}</p>
+                          <p className="font-medium">{property.squareFootage || "N/A"}</p>
                         </div>
                       </div>
                     </CardContent>

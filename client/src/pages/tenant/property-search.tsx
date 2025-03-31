@@ -505,18 +505,18 @@ export default function PropertySearch() {
                     {property.city}, {property.state}
                   </div>
                   
-                  <div className="flex justify-between text-sm border-t pt-3">
+                  <div className="grid grid-cols-3 gap-2 text-sm border-t pt-3">
                     <div className="flex items-center">
-                      <Bed className="h-4 w-4 mr-1 text-gray-400" />
-                      <span>{property.bedrooms} {property.bedrooms === 1 ? "Bed" : "Beds"}</span>
+                      <Bed className="h-4 w-4 mr-1 text-gray-400 flex-shrink-0" />
+                      <span className="truncate">{property.bedrooms} {property.bedrooms === 1 ? "Bed" : "Beds"}</span>
                     </div>
                     <div className="flex items-center">
-                      <Bath className="h-4 w-4 mr-1 text-gray-400" />
-                      <span>{property.bathrooms} {property.bathrooms === 1 ? "Bath" : "Baths"}</span>
+                      <Bath className="h-4 w-4 mr-1 text-gray-400 flex-shrink-0" />
+                      <span className="truncate">{property.bathrooms} {property.bathrooms === 1 ? "Bath" : "Baths"}</span>
                     </div>
                     <div className="flex items-center">
-                      <SquareIcon className="h-4 w-4 mr-1 text-gray-400" />
-                      <span>{property.squareFeet || "-"} sqft</span>
+                      <SquareIcon className="h-4 w-4 mr-1 text-gray-400 flex-shrink-0" />
+                      <span className="truncate">{property.squareFootage || "-"} sqft</span>
                     </div>
                   </div>
                 </CardContent>
@@ -552,13 +552,8 @@ export default function PropertySearch() {
       {selectedProperty && (
         <PropertyDetailsDialog
           property={selectedProperty}
-          isOpen={isDetailsOpen}
-          onClose={() => setIsDetailsOpen(false)}
-          onApply={() => {
-            // Handle application logic
-            alert(`Application submitted for ${selectedProperty.address}`);
-            setIsDetailsOpen(false);
-          }}
+          open={isDetailsOpen}
+          onOpenChange={setIsDetailsOpen}
         />
       )}
     </DashLayout>

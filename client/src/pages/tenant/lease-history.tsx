@@ -472,7 +472,7 @@ export default function LeaseHistoryPage() {
                       <div className="flex justify-between">
                         <span className="text-gray-500">Square Feet:</span>
                         <span className="font-medium">
-                          {selectedLease.property.squareFeet || 'N/A'}
+                          {selectedLease.property.squareFootage || 'N/A'}
                         </span>
                       </div>
                     </div>
