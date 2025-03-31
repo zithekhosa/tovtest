@@ -23,28 +23,28 @@ interface MetricsCardProps {
 
 export function MetricsCard({ title, value, description, icon, trend, progress, className }: MetricsCardProps) {
   return (
-    <Card className={className}>
+    <Card className={`tov-metrics-card ${className || ''}`}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+        <CardTitle className="text-sm font-medium tov-truncate-text">{title}</CardTitle>
+        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
           {icon}
         </div>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
+        <div className="text-2xl font-bold tov-truncate-text">{value}</div>
         
         {description && (
-          <p className="text-xs text-muted-foreground">{description}</p>
+          <p className="text-xs text-muted-foreground tov-text-ellipsis">{description}</p>
         )}
         
         {trend && (
           <div className="flex items-center text-xs mt-2">
             {trend.isPositive ? (
-              <TrendingUp className="mr-1 h-3 w-3 text-green-500" />
+              <TrendingUp className="mr-1 h-3 w-3 text-green-500 shrink-0" />
             ) : (
-              <TrendingDown className="mr-1 h-3 w-3 text-red-500" />
+              <TrendingDown className="mr-1 h-3 w-3 text-red-500 shrink-0" />
             )}
-            <span className={trend.isPositive ? "text-green-500" : "text-red-500"}>
+            <span className={`${trend.isPositive ? "text-green-500" : "text-red-500"} tov-text-ellipsis`}>
               {trend.value}% {trend.text || (trend.isPositive ? "increase" : "decrease")}
             </span>
           </div>
@@ -53,7 +53,7 @@ export function MetricsCard({ title, value, description, icon, trend, progress, 
         {progress && (
           <div className="mt-3">
             <Progress value={(progress.value / progress.max) * 100} className="h-1.5" />
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-xs text-muted-foreground mt-1 tov-text-ellipsis">
               {progress.value} of {progress.max}
             </p>
           </div>

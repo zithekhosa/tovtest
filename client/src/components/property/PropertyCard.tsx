@@ -27,7 +27,7 @@ export default function PropertyCard({
   };
 
   return (
-    <Card className="overflow-hidden group hover:shadow-md transition-all cursor-pointer" onClick={onClick}>
+    <Card className="tov-card overflow-hidden group hover:shadow-md transition-all cursor-pointer" onClick={onClick}>
       <div className="relative h-52 overflow-hidden">
         <img 
           src={getPropertyImage()} 
@@ -50,38 +50,38 @@ export default function PropertyCard({
         </div>
       </div>
       <CardHeader className="pb-2">
-        <CardTitle className="text-xl">{property.title || `${property.propertyType} in ${property.city}`}</CardTitle>
-        <div className="flex items-center text-gray-500 text-sm">
-          <MapPin className="h-4 w-4 mr-1" />
-          {property.location || property.address}
+        <CardTitle className="text-xl tov-card-title">{property.title || `${property.propertyType} in ${property.city}`}</CardTitle>
+        <div className="tov-flex-center text-gray-500 text-sm">
+          <MapPin className="h-4 w-4 mr-1 shrink-0" />
+          <span className="tov-truncate-text">{property.location || property.address}</span>
         </div>
       </CardHeader>
-      <CardContent className="pt-0">
-        <div className="flex justify-between items-center">
+      <CardContent className="pt-0 tov-card-content">
+        <div className="tov-flex-between">
           {property.bedrooms !== null && property.bedrooms !== undefined && (
-            <div className="flex items-center text-gray-600">
-              <BedDouble className="h-4 w-4 mr-1" />
+            <div className="tov-flex-center text-gray-600">
+              <BedDouble className="h-4 w-4 mr-1 shrink-0" />
               <span>{property.bedrooms} {property.bedrooms === 1 ? 'Bed' : 'Beds'}</span>
             </div>
           )}
           {property.bathrooms !== null && property.bathrooms !== undefined && (
-            <div className="flex items-center text-gray-600">
-              <Bath className="h-4 w-4 mr-1" />
+            <div className="tov-flex-center text-gray-600">
+              <Bath className="h-4 w-4 mr-1 shrink-0" />
               <span>{property.bathrooms} {property.bathrooms === 1 ? 'Bath' : 'Baths'}</span>
             </div>
           )}
           {property.squareFootage !== null && property.squareFootage !== undefined && (
-            <div className="flex items-center text-gray-600">
-              <Square className="h-4 w-4 mr-1" />
+            <div className="tov-flex-center text-gray-600">
+              <Square className="h-4 w-4 mr-1 shrink-0" />
               <span>{property.squareFootage} m²</span>
             </div>
           )}
         </div>
       </CardContent>
       {showViewDetails && (
-        <CardFooter className="pt-0 flex justify-between">
+        <CardFooter className="pt-0 tov-flex-between">
           <Button variant="ghost" className="text-primary p-0 hover:bg-transparent hover:text-primary/80">
-            View Details <ArrowRight className="h-4 w-4 ml-1" />
+            View Details <ArrowRight className="h-4 w-4 ml-1 shrink-0" />
           </Button>
         </CardFooter>
       )}

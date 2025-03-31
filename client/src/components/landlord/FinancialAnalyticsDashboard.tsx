@@ -184,45 +184,45 @@ export default function FinancialAnalyticsDashboard({ properties, leases, paymen
   return (
     <div className="space-y-6">
       {/* Summary Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="tov-metrics-card">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Portfolio Value</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground tov-truncate-text">Portfolio Value</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center">
-              <Building className="h-5 w-5 text-blue-500 mr-2" />
-              <div className="text-2xl font-bold">{formatCurrency(totalPortfolioValue)}</div>
+              <Building className="h-5 w-5 text-blue-500 mr-2 shrink-0" />
+              <div className="text-2xl font-bold tov-truncate-text">{formatCurrency(totalPortfolioValue)}</div>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-xs text-muted-foreground mt-1 tov-text-ellipsis">
               {properties.length} properties in portfolio
             </p>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="tov-metrics-card">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Monthly Cash Flow</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground tov-truncate-text">Monthly Cash Flow</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center">
-              <TrendingUp className={`h-5 w-5 ${cashFlow >= 0 ? 'text-green-500' : 'text-red-500'} mr-2`} />
-              <div className="text-2xl font-bold">{formatCurrency(cashFlow / 12)}</div>
+              <TrendingUp className={`h-5 w-5 ${cashFlow >= 0 ? 'text-green-500' : 'text-red-500'} mr-2 shrink-0`} />
+              <div className="text-2xl font-bold tov-truncate-text">{formatCurrency(cashFlow / 12)}</div>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-xs text-muted-foreground mt-1 tov-text-ellipsis">
               {cashFlow >= 0 ? 'Positive' : 'Negative'} monthly cash flow
             </p>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="tov-metrics-card">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Occupancy Rate</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground tov-truncate-text">Occupancy Rate</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center">
-              <DollarSign className="h-5 w-5 text-amber-500 mr-2" />
-              <div className="text-2xl font-bold">{occupancyRate.toFixed(0)}%</div>
+              <DollarSign className="h-5 w-5 text-amber-500 mr-2 shrink-0" />
+              <div className="text-2xl font-bold tov-truncate-text">{occupancyRate.toFixed(0)}%</div>
             </div>
             <div className="mt-2">
               <Progress value={occupancyRate} className="h-1" />
@@ -230,18 +230,18 @@ export default function FinancialAnalyticsDashboard({ properties, leases, paymen
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="tov-metrics-card">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Avg Cap Rate</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground tov-truncate-text">Avg Cap Rate</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center">
-              <Percent className="h-5 w-5 text-indigo-500 mr-2" />
-              <div className="text-2xl font-bold">
+              <Percent className="h-5 w-5 text-indigo-500 mr-2 shrink-0" />
+              <div className="text-2xl font-bold tov-truncate-text">
                 {(capRateData.reduce((sum, item) => sum + item.capRate, 0) / capRateData.length).toFixed(2)}%
               </div>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-xs text-muted-foreground mt-1 tov-text-ellipsis">
               Average capitalization rate
             </p>
           </CardContent>

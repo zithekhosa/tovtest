@@ -872,30 +872,34 @@ export default function LandlordDashboard() {
               </Card>
 
               {/* Tenant Verification */}
-              <Card className="shadow-sm">
+              <Card className="tov-card shadow-sm">
                 <CardContent className="p-6 text-center">
-                  <div className="mb-4 mx-auto bg-green-100 h-12 w-12 flex items-center justify-center rounded-full">
+                  <div className="mb-4 mx-auto bg-green-100 h-12 w-12 flex items-center justify-center rounded-full shrink-0">
                     <UserCheck className="h-6 w-6 text-green-600" />
                   </div>
-                  <CardTitle className="mb-2">Tenant Verification</CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    Comprehensive background checks, credit reports, and rental history verification for
-                    potential tenants to minimize risk.
-                  </p>
+                  <CardTitle className="mb-3 tov-card-title">Tenant Verification</CardTitle>
+                  <div className="tov-card-content">
+                    <p className="text-sm text-muted-foreground line-clamp-3">
+                      Comprehensive background checks, credit reports, and rental history verification for
+                      potential tenants to minimize risk.
+                    </p>
+                  </div>
                 </CardContent>
               </Card>
 
               {/* Smart Pricing */}
-              <Card className="shadow-sm">
+              <Card className="tov-card shadow-sm">
                 <CardContent className="p-6 text-center">
-                  <div className="mb-4 mx-auto bg-indigo-100 h-12 w-12 flex items-center justify-center rounded-full">
+                  <div className="mb-4 mx-auto bg-indigo-100 h-12 w-12 flex items-center justify-center rounded-full shrink-0">
                     <BadgePercent className="h-6 w-6 text-indigo-600" />
                   </div>
-                  <CardTitle className="mb-2">Smart Pricing</CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    AI-powered rent pricing recommendations based on market data, property features, 
-                    and local trends to maximize your rental income.
-                  </p>
+                  <CardTitle className="mb-3 tov-card-title">Smart Pricing</CardTitle>
+                  <div className="tov-card-content">
+                    <p className="text-sm text-muted-foreground line-clamp-3">
+                      AI-powered rent pricing recommendations based on market data, property features, 
+                      and local trends to maximize your rental income.
+                    </p>
+                  </div>
                 </CardContent>
               </Card>
             </div>

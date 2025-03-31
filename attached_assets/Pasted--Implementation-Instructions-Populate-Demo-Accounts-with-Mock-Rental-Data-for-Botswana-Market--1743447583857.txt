@@ -1,0 +1,45 @@
+# Implementation Instructions: Populate Demo Accounts with Mock Rental Data for Botswana Market
+
+## IMPORTANT: This is not a suggestion - this is a direct instruction to implement immediately.
+
+Your task is to populate the demo accounts in our rental/lease management system with localized Botswana mock data so that users can see realistic examples when demonstrating the system. This is a CRITICAL requirement as currently all demo accounts show "no rental information found" when accessing lease history or rental information.
+
+## What needs to be implemented (DO NOT JUST ACKNOWLEDGE, ACTUALLY IMPLEMENT THIS):
+
+1. Insert the 20 mock data records (including tenants, properties, leases, and maintenance requests) from the provided JSON structure into our database. All data has been localized with:
+   - Botswana names (Kgosi, Lesego, Tumelo, etc.)
+   - Botswana locations (Gaborone, Palapye, etc.)
+   - Local currency values
+   - Local phone number formats
+   - Appropriate regional districts
+
+2. Ensure that EVERY demo account has:
+   - At least one active lease
+   - At least one historical lease
+   - Visible payment history for all leases
+   - At least one maintenance request (either completed or in progress)
+
+3. Connect these records properly so that:
+   - When users click on "lease history," they see a list of their current and past leases
+   - When users click on "my rental," they see details about their current property
+   - Payment histories are visible and properly formatted
+   - Maintenance requests are associated with the correct properties and tenants
+
+## Implementation Deadline:
+This must be implemented IMMEDIATELY - not planned for later. The system should display this data within 24 hours.
+
+## Technical Requirements:
+- Use the exact data structure provided in the JSON sample with Botswana names and locations
+- Maintain all relationships between entities (tenants-leases-properties)
+- Generate additional records as needed to reach 20 complete profiles
+- Ensure all dates are properly formatted for database storage
+- Use Botswana's currency format (Pula) where applicable
+
+## Verification Steps:
+1. After implementation, log into 5 different demo accounts
+2. Verify each account can access lease history with Botswana-relevant information
+3. Verify each account can view detailed rental information for properties in Gaborone and other Botswana locations
+4. Verify payment histories are visible with appropriate currency values
+5. Send confirmation that implementation is complete with screenshots showing the Botswana content is properly displayed
+
+DO NOT RESPOND WITH ACKNOWLEDGMENT ONLY. RESPOND WITH CONFIRMATION THAT YOU HAVE ACTUALLY IMPLEMENTED THE CHANGES AND POPULATED THE SYSTEM WITH BOTSWANA-SPECIFIC MOCK DATA.

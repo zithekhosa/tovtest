@@ -95,22 +95,22 @@ export default function RatingCard({ rating, type, onUpdate }: RatingCardProps) 
   
   return (
     <>
-      <Card className="mb-4 w-full">
+      <Card className="tov-card mb-4 w-full">
         <CardHeader className="pb-2">
-          <div className="flex justify-between items-start">
-            <div className="flex items-center gap-2">
-              <Avatar className="h-8 w-8">
+          <div className="tov-flex-between">
+            <div className="tov-flex-start gap-2 min-w-0">
+              <Avatar className="h-8 w-8 shrink-0">
                 <AvatarFallback><User className="h-4 w-4" /></AvatarFallback>
                 {rating.userProfileImage && <AvatarImage src={rating.userProfileImage} alt="User" />}
               </Avatar>
-              <div>
-                <CardTitle className="text-base">
+              <div className="min-w-0">
+                <CardTitle className="text-base tov-card-title">
                   {type === 'landlord' ? rating.tenantName : rating.landlordName}
                 </CardTitle>
                 <p className="text-xs text-muted-foreground">{formattedDate}</p>
               </div>
             </div>
-            <div className="flex items-center">
+            <div className="tov-flex-center shrink-0">
               <div className="flex mr-2">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <Star
@@ -127,9 +127,9 @@ export default function RatingCard({ rating, type, onUpdate }: RatingCardProps) 
             </div>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="tov-card-content">
           {rating.review ? (
-            <p className="text-sm">{rating.review}</p>
+            <p className="text-sm tov-text-wrap tov-line-clamp-3">{rating.review}</p>
           ) : (
             <p className="text-sm text-muted-foreground italic">No written review provided.</p>
           )}
@@ -138,7 +138,7 @@ export default function RatingCard({ rating, type, onUpdate }: RatingCardProps) 
             {detailedRatings.map((item) => (
               item.value ? (
                 <div key={item.name} className="space-y-1">
-                  <div className="flex justify-between text-xs">
+                  <div className="tov-flex-between text-xs">
                     <span>{item.name}</span>
                     <span>{item.value}/5</span>
                   </div>
@@ -152,14 +152,14 @@ export default function RatingCard({ rating, type, onUpdate }: RatingCardProps) 
             <>
               <Separator className="my-3" />
               <div className="text-xs text-muted-foreground">
-                <span>Property: {rating.propertyAddress}</span>
+                <span className="tov-truncate-text">Property: {rating.propertyAddress}</span>
               </div>
             </>
           )}
         </CardContent>
         
         {isOwner && (
-          <CardFooter className="pt-0 flex justify-end gap-2">
+          <CardFooter className="pt-0 tov-flex-between gap-2">
             <Dialog open={isEditing} onOpenChange={setIsEditing}>
               <Button 
                 variant="outline" 
@@ -167,7 +167,7 @@ export default function RatingCard({ rating, type, onUpdate }: RatingCardProps) 
                 className="h-8"
                 onClick={() => setIsEditing(true)}
               >
-                <Edit className="h-3.5 w-3.5 mr-1" />
+                <Edit className="h-3.5 w-3.5 mr-1 shrink-0" />
                 Edit
               </Button>
               <DialogContent className="sm:max-w-[550px]">
@@ -191,7 +191,7 @@ export default function RatingCard({ rating, type, onUpdate }: RatingCardProps) 
                 className="h-8 text-destructive"
                 onClick={() => setIsDeleting(true)}
               >
-                <Trash2 className="h-3.5 w-3.5 mr-1" />
+                <Trash2 className="h-3.5 w-3.5 mr-1 shrink-0" />
                 Delete
               </Button>
               <AlertDialogContent>

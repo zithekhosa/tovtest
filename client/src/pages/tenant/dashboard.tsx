@@ -755,13 +755,13 @@ export default function TenantDashboard() {
 
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-md font-medium">Find Service Providers</CardTitle>
+                <CardTitle className="text-md font-medium tov-card-title">Find Service Providers</CardTitle>
                 <CardDescription>Browse the maintenance marketplace for service providers</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-4">
-                  <Wrench className="h-12 w-12 text-primary mx-auto mb-4 opacity-50" />
-                  <p className="mb-4">Need maintenance help? Find qualified professionals in our marketplace.</p>
+                <div className="text-center py-4 tov-card-content">
+                  <Wrench className="h-12 w-12 text-primary mx-auto mb-4 opacity-50 shrink-0" />
+                  <p className="mb-4 line-clamp-2">Need maintenance help? Find qualified professionals in our marketplace.</p>
                   <Button asChild>
                     <Link href="/tenant/marketplace">
                       Browse Marketplace

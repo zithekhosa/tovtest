@@ -135,11 +135,11 @@ export default function MaintenanceMarketplace() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
               {filteredProviders.length > 0 ? (
                 filteredProviders.map((provider) => (
-                  <Card key={provider.id} className="overflow-hidden group hover:shadow-lg transition-shadow duration-300">
+                  <Card key={provider.id} className="tov-card overflow-hidden group hover:shadow-lg transition-shadow duration-300">
                     <CardContent className="p-0">
                       <div className="relative p-4">
                         <div className="flex items-center space-x-4">
-                          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
+                          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden shrink-0">
                             {provider.user.profileImage ? (
                               <img 
                                 src={provider.user.profileImage} 
@@ -150,10 +150,10 @@ export default function MaintenanceMarketplace() {
                               <Wrench className="h-8 w-8 text-primary" />
                             )}
                           </div>
-                          <div>
-                            <h3 className="font-medium text-lg">{provider.user.firstName} {provider.user.lastName}</h3>
+                          <div className="min-w-0">
+                            <h3 className="font-medium text-lg tov-card-title truncate">{provider.user.firstName} {provider.user.lastName}</h3>
                             <div className="flex items-center text-sm text-gray-500">
-                              <Star className="h-4 w-4 text-yellow-500 mr-1" />
+                              <Star className="h-4 w-4 text-yellow-500 mr-1 shrink-0" />
                               <span>{provider.rating.toFixed(1)} ({provider.completedJobs} jobs)</span>
                             </div>
                             <div className="flex flex-wrap mt-2 gap-1">
@@ -166,13 +166,13 @@ export default function MaintenanceMarketplace() {
                           </div>
                         </div>
                         
-                        <div className="mt-4 space-y-3">
+                        <div className="mt-4 space-y-3 tov-card-content">
                           <div className="flex items-center text-sm">
-                            <DollarSign className="h-4 w-4 text-gray-400 mr-2" />
+                            <DollarSign className="h-4 w-4 text-gray-400 mr-2 shrink-0" />
                             <span>{formatCurrency(provider.hourlyRate)} / hour</span>
                           </div>
                           <div className="flex items-center text-sm">
-                            <Calendar className="h-4 w-4 text-gray-400 mr-2" />
+                            <Calendar className="h-4 w-4 text-gray-400 mr-2 shrink-0" />
                             <span className={
                               provider.availability.includes("Available Now") 
                                 ? "text-green-600" 
@@ -196,7 +196,7 @@ export default function MaintenanceMarketplace() {
                             asChild
                           >
                             <Link href={`/messages/${provider.id}`}>
-                              <MessageSquare className="h-4 w-4 mr-1" />
+                              <MessageSquare className="h-4 w-4 mr-1 shrink-0" />
                               Message
                             </Link>
                           </Button>
