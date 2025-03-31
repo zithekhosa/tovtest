@@ -173,7 +173,7 @@ export default function LandlordDashboard() {
 
         {/* Dashboard Metrics Cards */}
         <div className="container mx-auto max-w-7xl px-4">
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
             {dashboardMetrics.map((metric, index) => (
               <MetricsCard
                 key={index}
@@ -183,7 +183,7 @@ export default function LandlordDashboard() {
                 icon={metric.icon}
                 trend={metric.trend}
                 progress={metric.progress}
-                className="tov-metrics-card"
+                className="tov-metrics-card shadow-sm"
               />
             ))}
           </div>

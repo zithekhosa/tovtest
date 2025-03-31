@@ -22,23 +22,37 @@ interface MetricsCardProps {
 }
 
 export function MetricsCard({ title, value, description, icon, trend, progress, className }: MetricsCardProps) {
+  // Determine icon background color based on the icon's text color class
+  const iconClasses = (icon as React.ReactElement)?.props?.className || "";
+  let bgColorClass = "bg-primary/10";
+  
+  if (iconClasses.includes("text-blue")) {
+    bgColorClass = "bg-blue-100";
+  } else if (iconClasses.includes("text-green")) {
+    bgColorClass = "bg-green-100";
+  } else if (iconClasses.includes("text-amber")) {
+    bgColorClass = "bg-amber-100";
+  } else if (iconClasses.includes("text-purple")) {
+    bgColorClass = "bg-purple-100";
+  }
+
   return (
-    <Card className={`tov-metrics-card ${className || ''}`}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+    <Card className={`tov-metrics-card bg-white border border-gray-100 shadow-md hover:shadow-lg transition-shadow ${className || ''}`}>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-6 pt-6">
         <CardTitle className="text-sm font-medium tov-truncate-text">{title}</CardTitle>
-        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+        <div className={`h-10 w-10 rounded-full ${bgColorClass} flex items-center justify-center shrink-0`}>
           {icon}
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-6 pb-6">
         <div className="text-2xl font-bold tov-truncate-text">{value}</div>
         
         {description && (
-          <p className="text-xs text-muted-foreground tov-text-ellipsis">{description}</p>
+          <p className="text-xs text-muted-foreground tov-text-ellipsis mt-1">{description}</p>
         )}
         
         {trend && (
-          <div className="flex items-center text-xs mt-2">
+          <div className="flex items-center text-xs mt-3">
             {trend.isPositive ? (
               <TrendingUp className="mr-1 h-3 w-3 text-green-500 shrink-0" />
             ) : (
@@ -139,7 +153,7 @@ export function getLandlordMetrics(propertyCount = 5, vacancyCount = 1, monthlyI
       title: "Properties",
       value: propertyCount,
       description: `${propertyCount - vacancyCount} occupied, ${vacancyCount} vacant`,
-      icon: <Building className="h-4 w-4 text-primary" />,
+      icon: <Building className="h-5 w-5 text-blue-600" />,
       progress: {
         value: propertyCount - vacancyCount,
         max: propertyCount
@@ -149,9 +163,9 @@ export function getLandlordMetrics(propertyCount = 5, vacancyCount = 1, monthlyI
       title: "Monthly Income",
       value: formatCurrency(monthlyIncome),
       description: "Across all properties",
-      icon: <DollarSign className="h-4 w-4 text-primary" />,
+      icon: <DollarSign className="h-5 w-5 text-green-600" />,
       trend: {
-        value: 3.2,
+        value: 9.5,
         isPositive: true
       }
     },
@@ -159,13 +173,13 @@ export function getLandlordMetrics(propertyCount = 5, vacancyCount = 1, monthlyI
       title: "Maintenance",
       value: "4",
       description: "2 pending, 2 in progress",
-      icon: <Wrench className="h-4 w-4 text-primary" />
+      icon: <Wrench className="h-5 w-5 text-amber-600" />
     },
     {
       title: "Leases Renewing",
       value: "2",
       description: "Within the next 60 days",
-      icon: <Calendar className="h-4 w-4 text-primary" />
+      icon: <Calendar className="h-5 w-5 text-purple-600" />
     }
   ];
 }
