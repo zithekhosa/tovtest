@@ -221,7 +221,7 @@ export class MemStorage implements IStorage {
       rentAmount: insertProperty.rentAmount,
       description: insertProperty.description || null,
       available: insertProperty.available ?? true,
-      images: Array.isArray(insertProperty.images) ? insertProperty.images : null
+      images: insertProperty.images || null
     };
     this.properties.set(id, property);
     return property;
@@ -356,7 +356,7 @@ export class MemStorage implements IStorage {
       tenantId: insertRequest.tenantId,
       priority: insertRequest.priority,
       status: insertRequest.status || 'New',
-      images: Array.isArray(insertRequest.images) ? insertRequest.images : null,
+      images: insertRequest.images || null,
       assignedToId: insertRequest.assignedToId || null,
       createdAt: new Date(),
       updatedAt: new Date()
@@ -372,7 +372,7 @@ export class MemStorage implements IStorage {
     // Process images array separately if provided
     let processedImages = request.images;
     if (updates.images !== undefined) {
-      processedImages = Array.isArray(updates.images) ? updates.images : null;
+      processedImages = updates.images || null;
     }
     
     // Create a new object with all updates

@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { Property } from "@shared/schema";
 import PropertyCard from "@/components/property/PropertyCard";
+import PinterestPropertyGrid from "@/components/property/PinterestPropertyGrid";
 import PropertyDetails from "@/components/property/PropertyDetails";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,7 +18,9 @@ import {
   Search, 
   Building, 
   CheckCircle2, 
-  X 
+  X,
+  LayoutGrid,
+  List
 } from "lucide-react";
 
 export default function LandlordProperties() {
@@ -103,24 +106,26 @@ export default function LandlordProperties() {
                 <TabsTrigger value="available">Vacant</TabsTrigger>
               </TabsList>
             </Tabs>
+            <div className="flex items-center gap-2 ml-auto">
+              <Button variant="outline" size="sm" className="h-10 w-10 p-0">
+                <LayoutGrid className="h-4 w-4" />
+                <span className="sr-only">Grid view</span>
+              </Button>
+              <Button variant="ghost" size="sm" className="h-10 w-10 p-0">
+                <List className="h-4 w-4" />
+                <span className="sr-only">List view</span>
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Property List */}
       {filteredProperties && filteredProperties.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProperties.map((property) => (
-            <PropertyCard
-              key={property.id}
-              property={property}
-              onClick={() => setSelectedProperty(property)}
-              showActions={true}
-              actionLabel={property.available ? "List Property" : "View Details"}
-              onAction={() => setSelectedProperty(property)}
-            />
-          ))}
-        </div>
+        <PinterestPropertyGrid 
+          properties={filteredProperties} 
+          onPropertyClick={setSelectedProperty} 
+        />
       ) : (
         <div className="bg-white rounded-xl p-8 shadow-card text-center">
           <div className="mx-auto w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-4">
