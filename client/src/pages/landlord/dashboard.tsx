@@ -175,33 +175,17 @@ export default function LandlordDashboard() {
 
           {/* Dashboard Metrics Cards */}
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {dashboardMetrics.map((metric, index) => {
-              // Get the appropriate background color for the icon
-              let iconBgColor = "bg-primary-100";
-              if (metric.icon.props.className.includes("text-blue")) {
-                iconBgColor = "bg-blue-100";
-              } else if (metric.icon.props.className.includes("text-green")) {
-                iconBgColor = "bg-green-100";
-              } else if (metric.icon.props.className.includes("text-amber")) {
-                iconBgColor = "bg-amber-100";
-              } else if (metric.icon.props.className.includes("text-purple")) {
-                iconBgColor = "bg-purple-100";
-              }
-              
-              return (
-                <div key={index}>
-                  <DashboardMetricCard
-                    title={metric.title}
-                    value={metric.value}
-                    description={metric.description}
-                    icon={metric.icon}
-                    iconBgColor={iconBgColor}
-                    trend={metric.trend}
-                    progress={metric.progress}
-                  />
-                </div>
-              );
-            })}
+            {dashboardMetrics.map((metric, index) => (
+              <div key={index}>
+                <DashboardMetricCard
+                  title={metric.title}
+                  value={metric.value}
+                  description={metric.description}
+                  trend={metric.trend}
+                  progress={metric.progress}
+                />
+              </div>
+            ))}
           </div>
         </div>
       </div>

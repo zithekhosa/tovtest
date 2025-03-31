@@ -3,8 +3,8 @@ import { Progress } from "@/components/ui/progress";
 import { TrendingUp, TrendingDown } from "lucide-react";
 
 interface DashboardMetricCardProps {
-  icon: React.ReactNode;
-  iconBgColor: string;
+  icon?: React.ReactNode; // Made optional
+  iconBgColor?: string; // Made optional
   title: string;
   value: string | number;
   description?: string;
@@ -20,8 +20,6 @@ interface DashboardMetricCardProps {
 }
 
 export function DashboardMetricCard({ 
-  icon, 
-  iconBgColor, 
   title, 
   value, 
   description, 
@@ -30,11 +28,8 @@ export function DashboardMetricCard({
 }: DashboardMetricCardProps) {
   return (
     <Card className="p-4 flex flex-col items-center justify-center text-center shadow-sm h-[120px]">
-      <div className={`flex h-10 w-10 rounded-full ${iconBgColor} items-center justify-center mb-2`}>
-        {icon}
-      </div>
       <h3 className="text-sm font-medium">{title}</h3>
-      <div className="text-xl font-bold my-1">{value}</div>
+      <div className="text-xl font-bold my-2">{value}</div>
       
       {description && (
         <p className="text-xs text-muted-foreground truncate max-w-full">{description}</p>
