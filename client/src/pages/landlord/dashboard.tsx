@@ -165,15 +165,15 @@ export default function LandlordDashboard() {
 
   return (
     <DashLayout>
-      <div className="space-y-6">
-        <DashboardHeader 
-          title={`Welcome back, ${user?.firstName}`}
-          subtitle="Here's an overview of your properties and latest activity"
-        />
-
-        {/* Dashboard Metrics Cards */}
+      <div className="bg-gray-50 pb-6">
         <div className="container mx-auto max-w-7xl px-4">
-          <div className="grid gap-8 md:gap-10 md:grid-cols-2 lg:grid-cols-4 w-full">
+          <DashboardHeader 
+            title={`Welcome back, ${user?.firstName}`}
+            subtitle="Here's an overview of your properties and latest activity"
+          />
+
+          {/* Dashboard Metrics Cards */}
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {dashboardMetrics.map((metric, index) => (
               <MetricsCard
                 key={index}
@@ -188,6 +188,7 @@ export default function LandlordDashboard() {
             ))}
           </div>
         </div>
+      </div>
 
         <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="container mx-auto max-w-7xl px-4">
           <TabsList className="grid w-full grid-cols-4 h-auto">
