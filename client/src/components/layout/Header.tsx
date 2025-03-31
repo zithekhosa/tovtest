@@ -1,6 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { Bell, Search } from "lucide-react";
+import { ThemeSwitcher } from "./ThemeSwitcher";
 
 export default function Header() {
   const { user } = useAuth();
@@ -24,25 +25,26 @@ export default function Header() {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 z-30">
+    <header className="fixed top-0 left-0 right-0 h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 z-30">
       <div className="flex items-center justify-between h-full px-4 md:px-6">
         <div className="flex items-center md:hidden">
           <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center mr-3">
             <span className="text-primary-foreground font-bold text-lg">T</span>
           </div>
-          <h1 className="text-xl font-bold">{pageTitle()}</h1>
+          <h1 className="text-xl font-bold dark:text-white">{pageTitle()}</h1>
         </div>
         
         <div className="hidden md:block">
-          <h1 className="text-xl font-bold">{pageTitle()}</h1>
+          <h1 className="text-xl font-bold dark:text-white">{pageTitle()}</h1>
         </div>
         
         <div className="flex items-center space-x-2">
-          <button className="p-2 rounded-full hover:bg-gray-100">
-            <Bell className="h-5 w-5 text-gray-500" />
+          <ThemeSwitcher />
+          <button className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
+            <Bell className="h-5 w-5 text-gray-500 dark:text-gray-400" />
           </button>
-          <button className="p-2 rounded-full hover:bg-gray-100 md:mr-2">
-            <Search className="h-5 w-5 text-gray-500" />
+          <button className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 md:mr-2">
+            <Search className="h-5 w-5 text-gray-500 dark:text-gray-400" />
           </button>
         </div>
       </div>

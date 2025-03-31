@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { ThemeSwitcher } from "@/components/layout/ThemeSwitcher";
 import { 
   Building, 
   Home, 
@@ -115,17 +116,18 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <header className="border-b border-gray-200 py-4 sticky top-0 bg-white z-10">
+      <header className="border-b border-gray-200 dark:border-gray-800 py-4 sticky top-0 bg-white dark:bg-gray-900 z-10">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center">
               <img src={tovLogo} alt="TOV Logo" className="h-10 w-auto" />
             </div>
             <nav className="hidden md:flex items-center space-x-6">
-              <a href="#properties" className="text-gray-600 hover:text-primary">Properties</a>
-              <a href="#services" className="text-gray-600 hover:text-primary">Services</a>
-              <a href="#about" className="text-gray-600 hover:text-primary">About</a>
-              <a href="#contact" className="text-gray-600 hover:text-primary">Contact</a>
+              <a href="#properties" className="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary">Properties</a>
+              <a href="#services" className="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary">Services</a>
+              <a href="#about" className="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary">About</a>
+              <a href="#contact" className="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary">Contact</a>
+              <ThemeSwitcher />
               <Button variant="outline" onClick={() => navigate("/providers-signup")}>
                 Join as Provider
               </Button>
@@ -133,16 +135,19 @@ export default function LandingPage() {
                 Sign In / Register
               </Button>
             </nav>
-            <Button className="md:hidden" variant="ghost" size="icon">
-              <Menu className="h-6 w-6" />
-            </Button>
+            <div className="flex items-center space-x-2 md:hidden">
+              <ThemeSwitcher />
+              <Button variant="ghost" size="icon">
+                <Menu className="h-6 w-6" />
+              </Button>
+            </div>
           </div>
         </div>
       </header>
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative bg-gray-50 py-20 overflow-hidden">
+        <section className="relative bg-gray-50 dark:bg-gray-900 py-20 overflow-hidden">
           <div className="absolute inset-0 z-0 opacity-10">
             <div className="absolute inset-0 bg-gradient-to-br from-primary to-primary-foreground"></div>
             <img 
@@ -153,15 +158,15 @@ export default function LandingPage() {
           </div>
           <div className="container mx-auto px-4 relative z-10">
             <div className="max-w-3xl mx-auto text-center mb-12">
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
                 Find Your Perfect Place with TOV
               </h1>
-              <p className="text-xl text-gray-600 mb-8">
+              <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
                 Your complete property operating system - connecting tenants, landlords, 
                 agencies, and service providers in one platform.
               </p>
               
-              <div className="bg-white rounded-lg shadow-lg p-4 max-w-2xl mx-auto">
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 max-w-2xl mx-auto">
                 <Tabs defaultValue="rent" className="mb-4">
                   <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="rent">Rent</TabsTrigger>
@@ -297,7 +302,7 @@ export default function LandingPage() {
         {/* User Paths Section */}
 
         {/* Featured Properties Section */}
-        <section id="properties" className="py-16 bg-gray-50">
+        <section id="properties" className="py-16 bg-gray-50 dark:bg-gray-900">
           <div className="container mx-auto px-4">
             <div className="flex justify-between items-center mb-10">
               <h2 className="text-3xl font-bold">Featured Properties</h2>
@@ -369,7 +374,7 @@ export default function LandingPage() {
         </section>
 
         {/* Maintenance Services Section */}
-        <section id="services" className="py-16 bg-white">
+        <section id="services" className="py-16 bg-white dark:bg-gray-800">
           <div className="container mx-auto px-4">
             <div className="flex justify-between items-center mb-10">
               <h2 className="text-3xl font-bold">Maintenance Services</h2>
@@ -417,7 +422,7 @@ export default function LandingPage() {
         </section>
 
         {/* Features Section */}
-        <section className="py-16 bg-gray-50">
+        <section className="py-16 bg-gray-50 dark:bg-gray-900">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto text-center mb-12">
               <h2 className="text-3xl font-bold mb-4">Everything You Need in One Platform</h2>
@@ -487,7 +492,7 @@ export default function LandingPage() {
           </div>
         </section>
         {/* User Paths Section */}
-        <section className="py-16 bg-white">
+        <section className="py-16 bg-white dark:bg-gray-800">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold text-center mb-12">How TOV Works For You</h2>
             

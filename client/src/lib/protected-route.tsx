@@ -57,7 +57,7 @@ export function ProtectedRoute({
   // User is authenticated and has proper role, render component with layout
   return (
     <Route path={path}>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
         <Header />
         <div className="flex">
           <Sidebar role={user.role} />

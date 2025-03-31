@@ -13,13 +13,14 @@ type RegionalTheme = {
   theme: Theme;
 };
 
-// Regional theme presets for different regions of Botswana
+// Regional theme presets for different regions of Africa
 const regionalThemes: RegionalTheme[] = [
+  // Botswana Themes
   {
     name: "Gaborone",
     theme: {
       variant: "tint",
-      primary: "hsl(210, 90%, 95%)",
+      primary: "hsl(210, 90%, 50%)",
       appearance: "light",
       radius: 0.5,
       region: "Gaborone"
@@ -30,7 +31,7 @@ const regionalThemes: RegionalTheme[] = [
     theme: {
       variant: "professional",
       primary: "hsl(210, 90%, 50%)",
-      appearance: "light",
+      appearance: "dark",
       radius: 0.5,
       region: "Francistown"
     }
@@ -50,7 +51,7 @@ const regionalThemes: RegionalTheme[] = [
     theme: {
       variant: "professional",
       primary: "hsl(160, 60%, 40%)",
-      appearance: "light",
+      appearance: "dark",
       radius: 0.5,
       region: "Palapye"
     }
@@ -63,6 +64,96 @@ const regionalThemes: RegionalTheme[] = [
       appearance: "light",
       radius: 0.5,
       region: "Jwaneng"
+    }
+  },
+  
+  // South Africa Themes
+  {
+    name: "Johannesburg",
+    theme: {
+      variant: "professional",
+      primary: "hsl(215, 80%, 45%)",
+      appearance: "light",
+      radius: 1.0,
+      region: "Johannesburg"
+    }
+  },
+  {
+    name: "Cape Town",
+    theme: {
+      variant: "vibrant",
+      primary: "hsl(195, 80%, 50%)",
+      appearance: "dark",
+      radius: 1.0,
+      region: "Cape Town"
+    }
+  },
+  
+  // Nigeria Themes
+  {
+    name: "Lagos",
+    theme: {
+      variant: "professional",
+      primary: "hsl(120, 60%, 40%)",
+      appearance: "light",
+      radius: 0.5,
+      region: "Lagos"
+    }
+  },
+  {
+    name: "Abuja",
+    theme: {
+      variant: "tint",
+      primary: "hsl(110, 70%, 45%)",
+      appearance: "dark",
+      radius: 0.5,
+      region: "Abuja"
+    }
+  },
+  
+  // Kenya Themes
+  {
+    name: "Nairobi",
+    theme: {
+      variant: "vibrant",
+      primary: "hsl(0, 80%, 50%)",
+      appearance: "light",
+      radius: 0.5,
+      region: "Nairobi"
+    }
+  },
+  {
+    name: "Mombasa",
+    theme: {
+      variant: "professional",
+      primary: "hsl(200, 80%, 50%)",
+      appearance: "dark",
+      radius: 1.0,
+      region: "Mombasa"
+    }
+  },
+  
+  // Ghana Themes
+  {
+    name: "Accra",
+    theme: {
+      variant: "vibrant",
+      primary: "hsl(45, 90%, 50%)",
+      appearance: "light",
+      radius: 0.5,
+      region: "Accra"
+    }
+  },
+  
+  // Morocco Themes
+  {
+    name: "Casablanca",
+    theme: {
+      variant: "professional",
+      primary: "hsl(15, 70%, 50%)",
+      appearance: "dark",
+      radius: 1.0,
+      region: "Casablanca"
     }
   }
 ];

@@ -156,26 +156,26 @@ export default function MobileNav({ role }: MobileNavProps) {
 
       {/* Full-screen drawer menu */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 bg-gray-900/50 md:hidden">
-          <div className="h-full w-full max-w-sm ml-auto bg-white flex flex-col">
-            <div className="flex items-center justify-between p-4 border-b">
+        <div className="fixed inset-0 z-50 bg-gray-900/50 dark:bg-black/70 md:hidden">
+          <div className="h-full w-full max-w-sm ml-auto bg-white dark:bg-gray-900 flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
               <div className="flex items-center space-x-2">
                 <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
                   <span className="text-primary-foreground font-bold text-lg">T</span>
                 </div>
-                <span className="font-bold text-lg">TOV Platform</span>
+                <span className="font-bold text-lg dark:text-white">TOV Platform</span>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
               >
                 <X className="h-6 w-6" />
               </button>
             </div>
 
-            <div className="p-4 border-b">
+            <div className="p-4 border-b border-gray-200 dark:border-gray-800">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
                   <span className="text-primary font-medium">
                     {user.firstName && user.lastName 
                       ? getInitials(user.firstName, user.lastName) 
@@ -183,12 +183,12 @@ export default function MobileNav({ role }: MobileNavProps) {
                   </span>
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">
+                  <p className="font-medium text-gray-900 dark:text-white">
                     {user.firstName && user.lastName 
                       ? `${user.firstName} ${user.lastName}` 
                       : user.username}
                   </p>
-                  <p className="text-sm text-gray-500 capitalize">{role}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 capitalize">{role}</p>
                 </div>
               </div>
             </div>
@@ -200,8 +200,8 @@ export default function MobileNav({ role }: MobileNavProps) {
                   href={item.href}
                   onClick={() => setIsOpen(false)}
                   className={cn(
-                    "flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100",
-                    item.active && "bg-primary/10 text-primary"
+                    "flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800",
+                    item.active && "bg-primary/10 dark:bg-primary/20 text-primary"
                   )}
                 >
                   <item.icon className="h-5 w-5 mr-3" />
@@ -215,10 +215,10 @@ export default function MobileNav({ role }: MobileNavProps) {
               ))}
             </div>
 
-            <div className="p-4 border-t">
+            <div className="p-4 border-t border-gray-200 dark:border-gray-800">
               <Button
                 variant="ghost"
-                className="w-full justify-start text-gray-700 hover:bg-gray-100"
+                className="w-full justify-start text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                 onClick={() => {
                   handleLogout();
                   setIsOpen(false);

@@ -199,26 +199,157 @@ export function ThemeSwitcher() {
         <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
           Regional Presets
         </DropdownMenuLabel>
-        <div className="max-h-40 overflow-y-auto p-1">
-          {regionalThemes.map((regionalTheme) => (
-            <Button
-              key={regionalTheme.name}
-              variant="ghost"
-              size="sm"
-              className={cn(
-                "w-full h-8 justify-start mb-1",
-                theme.region === regionalTheme.name && "bg-muted"
-              )}
-              onClick={() => setRegionalTheme(regionalTheme.name)}
-            >
-              <MapPin className="mr-2 h-4 w-4" />
-              <span>{regionalTheme.name}</span>
-              <div 
-                className="ml-auto h-4 w-4 rounded-full"
-                style={{ backgroundColor: regionalTheme.theme.primary }}
-              />
-            </Button>
-          ))}
+        <div className="max-h-60 overflow-y-auto p-1">
+          {/* Group themes by country/region */}
+          <div className="mb-3">
+            <p className="text-xs font-medium pl-2 pb-1 text-primary">Botswana</p>
+            {regionalThemes
+              .filter(rt => ["Gaborone", "Francistown", "Maun", "Palapye", "Jwaneng"].includes(rt.name))
+              .map((regionalTheme) => (
+                <Button
+                  key={regionalTheme.name}
+                  variant="ghost"
+                  size="sm"
+                  className={cn(
+                    "w-full h-8 justify-start mb-1",
+                    theme.region === regionalTheme.name && "bg-muted"
+                  )}
+                  onClick={() => setRegionalTheme(regionalTheme.name)}
+                >
+                  <MapPin className="mr-2 h-4 w-4" />
+                  <span>{regionalTheme.name}</span>
+                  <div className="ml-auto flex items-center">
+                    <span className="text-xs mr-2">
+                      {regionalTheme.theme.appearance === "dark" ? "Dark" : "Light"}
+                    </span>
+                    <div 
+                      className="h-4 w-4 rounded-full"
+                      style={{ backgroundColor: regionalTheme.theme.primary }}
+                    />
+                  </div>
+                </Button>
+              ))}
+          </div>
+          
+          <div className="mb-3">
+            <p className="text-xs font-medium pl-2 pb-1 text-primary">South Africa</p>
+            {regionalThemes
+              .filter(rt => ["Johannesburg", "Cape Town"].includes(rt.name))
+              .map((regionalTheme) => (
+                <Button
+                  key={regionalTheme.name}
+                  variant="ghost"
+                  size="sm"
+                  className={cn(
+                    "w-full h-8 justify-start mb-1",
+                    theme.region === regionalTheme.name && "bg-muted"
+                  )}
+                  onClick={() => setRegionalTheme(regionalTheme.name)}
+                >
+                  <MapPin className="mr-2 h-4 w-4" />
+                  <span>{regionalTheme.name}</span>
+                  <div className="ml-auto flex items-center">
+                    <span className="text-xs mr-2">
+                      {regionalTheme.theme.appearance === "dark" ? "Dark" : "Light"}
+                    </span>
+                    <div 
+                      className="h-4 w-4 rounded-full"
+                      style={{ backgroundColor: regionalTheme.theme.primary }}
+                    />
+                  </div>
+                </Button>
+              ))}
+          </div>
+          
+          <div className="mb-3">
+            <p className="text-xs font-medium pl-2 pb-1 text-primary">East Africa</p>
+            {regionalThemes
+              .filter(rt => ["Nairobi", "Mombasa"].includes(rt.name))
+              .map((regionalTheme) => (
+                <Button
+                  key={regionalTheme.name}
+                  variant="ghost"
+                  size="sm"
+                  className={cn(
+                    "w-full h-8 justify-start mb-1",
+                    theme.region === regionalTheme.name && "bg-muted"
+                  )}
+                  onClick={() => setRegionalTheme(regionalTheme.name)}
+                >
+                  <MapPin className="mr-2 h-4 w-4" />
+                  <span>{regionalTheme.name}</span>
+                  <div className="ml-auto flex items-center">
+                    <span className="text-xs mr-2">
+                      {regionalTheme.theme.appearance === "dark" ? "Dark" : "Light"}
+                    </span>
+                    <div 
+                      className="h-4 w-4 rounded-full"
+                      style={{ backgroundColor: regionalTheme.theme.primary }}
+                    />
+                  </div>
+                </Button>
+              ))}
+          </div>
+          
+          <div className="mb-3">
+            <p className="text-xs font-medium pl-2 pb-1 text-primary">West Africa</p>
+            {regionalThemes
+              .filter(rt => ["Lagos", "Abuja", "Accra"].includes(rt.name))
+              .map((regionalTheme) => (
+                <Button
+                  key={regionalTheme.name}
+                  variant="ghost"
+                  size="sm"
+                  className={cn(
+                    "w-full h-8 justify-start mb-1",
+                    theme.region === regionalTheme.name && "bg-muted"
+                  )}
+                  onClick={() => setRegionalTheme(regionalTheme.name)}
+                >
+                  <MapPin className="mr-2 h-4 w-4" />
+                  <span>{regionalTheme.name}</span>
+                  <div className="ml-auto flex items-center">
+                    <span className="text-xs mr-2">
+                      {regionalTheme.theme.appearance === "dark" ? "Dark" : "Light"}
+                    </span>
+                    <div 
+                      className="h-4 w-4 rounded-full"
+                      style={{ backgroundColor: regionalTheme.theme.primary }}
+                    />
+                  </div>
+                </Button>
+              ))}
+          </div>
+          
+          <div className="mb-2">
+            <p className="text-xs font-medium pl-2 pb-1 text-primary">North Africa</p>
+            {regionalThemes
+              .filter(rt => ["Casablanca"].includes(rt.name))
+              .map((regionalTheme) => (
+                <Button
+                  key={regionalTheme.name}
+                  variant="ghost"
+                  size="sm"
+                  className={cn(
+                    "w-full h-8 justify-start mb-1",
+                    theme.region === regionalTheme.name && "bg-muted"
+                  )}
+                  onClick={() => setRegionalTheme(regionalTheme.name)}
+                >
+                  <MapPin className="mr-2 h-4 w-4" />
+                  <span>{regionalTheme.name}</span>
+                  <div className="ml-auto flex items-center">
+                    <span className="text-xs mr-2">
+                      {regionalTheme.theme.appearance === "dark" ? "Dark" : "Light"}
+                    </span>
+                    <div 
+                      className="h-4 w-4 rounded-full"
+                      style={{ backgroundColor: regionalTheme.theme.primary }}
+                    />
+                  </div>
+                </Button>
+              ))}
+          </div>
         </div>
       </DropdownMenuContent>
     </DropdownMenu>
