@@ -166,23 +166,27 @@ export default function LandlordDashboard() {
 
   return (
     <DashLayout>
-      <div className="bg-gray-50 pb-6">
-        <div className="container mx-auto max-w-7xl px-4">
+      <div className="bg-gray-50 dark:bg-gray-800 pb-6">
+        <div className="container mx-auto max-w-7xl px-4 sm:px-6">
           <DashboardHeader 
             title={`Welcome back, ${user?.firstName}`}
             subtitle="Here's an overview of your properties and latest activity"
           />
 
           {/* Dashboard Metrics Cards */}
-          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="mt-6 flex overflow-x-auto pb-4 gap-4 -mx-4 px-4 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-6 sm:overflow-visible">
             {dashboardMetrics.map((metric, index) => (
-              <div key={index}>
+              <div key={index} className="flex-shrink-0 w-[280px] sm:w-auto">
                 <DashboardMetricCard
                   title={metric.title}
                   value={metric.value}
                   description={metric.description}
                   trend={metric.trend}
                   progress={metric.progress}
+                  icon={index === 0 ? <Building className="h-5 w-5 text-primary" /> : 
+                        index === 1 ? <DollarSign className="h-5 w-5 text-primary" /> : 
+                        index === 2 ? <BadgePercent className="h-5 w-5 text-primary" /> : 
+                        <Users className="h-5 w-5 text-primary" />}
                 />
               </div>
             ))}
@@ -190,14 +194,16 @@ export default function LandlordDashboard() {
         </div>
       </div>
 
-      <div className="container mx-auto max-w-7xl px-4">
+      <div className="container mx-auto max-w-7xl px-4 sm:px-6">
         <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4 h-auto">
-            <TabsTrigger value="overview" className="py-2">Overview</TabsTrigger>
-            <TabsTrigger value="properties" className="py-2">Properties</TabsTrigger>
-            <TabsTrigger value="tenants" className="py-2">Tenants</TabsTrigger>
-            <TabsTrigger value="maintenance" className="py-2">Maintenance</TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 pb-1">
+            <TabsList className="grid w-full min-w-[500px] sm:min-w-0 grid-cols-4 h-auto">
+              <TabsTrigger value="overview" className="py-2">Overview</TabsTrigger>
+              <TabsTrigger value="properties" className="py-2">Properties</TabsTrigger>
+              <TabsTrigger value="tenants" className="py-2">Tenants</TabsTrigger>
+              <TabsTrigger value="maintenance" className="py-2">Maintenance</TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* OVERVIEW SECTION */}
           <TabsContent value="overview" className="space-y-8 mt-6">
