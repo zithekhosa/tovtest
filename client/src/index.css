@@ -35,7 +35,7 @@
   }
   
   .tov-metrics-card {
-    @apply flex flex-col p-4 rounded-xl border shadow-sm h-[120px];
+    @apply flex flex-col p-6 rounded-lg border shadow-sm min-h-[150px] min-w-[250px];
   }
   
   .tov-analytics-card {
