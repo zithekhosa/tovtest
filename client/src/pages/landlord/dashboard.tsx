@@ -39,6 +39,7 @@ import {
   ExternalLink,
   CalendarDays,
   BarChart3,
+  BadgePercent,
   TrendingUp,
   MessageSquare,
   AlertCircle,
@@ -47,7 +48,8 @@ import {
   Filter,
   Plus,
   Eye,
-  Pencil
+  Pencil,
+  UserCheck
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -193,105 +195,105 @@ export default function LandlordDashboard() {
           </TabsList>
 
           {/* OVERVIEW SECTION */}
-          <TabsContent value="overview" className="space-y-4 mt-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <TabsContent value="overview" className="space-y-6 mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Financial Summary */}
-              <Card>
-                <CardHeader className="pb-2">
+              <Card className="shadow-sm">
+                <CardHeader className="pb-3 pt-6">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-md font-medium">Financial Summary</CardTitle>
-                    <Button variant="ghost" size="sm" className="h-8 gap-1">
-                      <span className="text-xs">View Reports</span>
-                      <ExternalLink className="h-3.5 w-3.5" />
+                    <CardTitle className="text-xl font-medium">Financial Summary</CardTitle>
+                    <Button variant="ghost" size="sm" className="h-9 gap-2">
+                      <span>View Report</span>
+                      <ExternalLink className="h-4 w-4" />
                     </Button>
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
+                <CardContent className="px-6 pb-6">
+                  <div className="space-y-6">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">Monthly Income</span>
-                      <span className="font-medium">{formatCurrency(totalMonthlyIncome)}</span>
+                      <span className="text-base text-muted-foreground">Monthly Income</span>
+                      <span className="text-lg font-medium">{formatCurrency(totalMonthlyIncome)}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">Expenses (Est.)</span>
-                      <span className="font-medium">{formatCurrency(totalMonthlyIncome * 0.25)}</span>
+                      <span className="text-base text-muted-foreground">Expenses (Est.)</span>
+                      <span className="text-lg font-medium">{formatCurrency(totalMonthlyIncome * 0.25)}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">Net Income</span>
-                      <span className="font-medium">{formatCurrency(totalMonthlyIncome * 0.75)}</span>
+                      <span className="text-base text-muted-foreground">Net Income</span>
+                      <span className="text-lg font-medium">{formatCurrency(totalMonthlyIncome * 0.75)}</span>
                     </div>
-                    <Separator />
-                    <div className="space-y-2">
+                    <Separator className="my-2" />
+                    <div className="space-y-3">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-muted-foreground">Rent Collection</span>
-                        <span className="text-sm font-medium">{rentCollectionRate}%</span>
+                        <span className="text-base text-muted-foreground">Rent Collection</span>
+                        <span className="text-base font-medium">{rentCollectionRate}%</span>
                       </div>
-                      <Progress value={rentCollectionRate} className="h-2" />
+                      <Progress value={rentCollectionRate} className="h-2.5" />
                     </div>
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-muted-foreground">Occupancy Rate</span>
-                        <span className="text-sm font-medium">{occupancyRate}%</span>
+                        <span className="text-base text-muted-foreground">Occupancy Rate</span>
+                        <span className="text-base font-medium">{occupancyRate}%</span>
                       </div>
-                      <Progress value={occupancyRate} className="h-2" />
+                      <Progress value={occupancyRate} className="h-2.5" />
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
               {/* Recent Activity */}
-              <Card>
-                <CardHeader className="pb-2">
+              <Card className="shadow-sm">
+                <CardHeader className="pb-3 pt-6">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-md font-medium">Recent Activity</CardTitle>
-                    <Button variant="ghost" size="sm" className="h-8 gap-1">
-                      <span className="text-xs">View All</span>
-                      <ArrowRight className="h-3.5 w-3.5" />
+                    <CardTitle className="text-xl font-medium">Recent Activity</CardTitle>
+                    <Button variant="ghost" size="sm" className="h-9 gap-2">
+                      <span>View All</span>
+                      <ArrowRight className="h-4 w-4" />
                     </Button>
                   </div>
                 </CardHeader>
                 <CardContent className="p-0">
-                  <ScrollArea className="h-[260px] px-6">
-                    <div className="space-y-4 py-2">
+                  <ScrollArea className="h-[310px] px-6">
+                    <div className="space-y-6 py-4">
                       {/* Activity items - these would come from a real data source */}
-                      <div className="flex gap-3">
-                        <div className="flex-shrink-0 flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
-                          <DollarSign className="h-4 w-4 text-primary" />
+                      <div className="flex gap-4">
+                        <div className="flex-shrink-0 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+                          <DollarSign className="h-5 w-5 text-primary" />
                         </div>
                         <div>
-                          <p className="text-sm font-medium">Rent Payment Received</p>
-                          <p className="text-xs text-muted-foreground">Tumelo Mokoena paid {formatCurrency(3500)} for November</p>
-                          <p className="text-xs text-muted-foreground mt-1">Today at 9:42 AM</p>
+                          <p className="text-base font-medium">Rent Payment Received</p>
+                          <p className="text-sm text-muted-foreground mt-1">Tumelo Mokoena paid {formatCurrency(3500)} for November</p>
+                          <p className="text-sm text-muted-foreground mt-2">Today at 9:42 AM</p>
                         </div>
                       </div>
-                      <div className="flex gap-3">
-                        <div className="flex-shrink-0 flex h-9 w-9 items-center justify-center rounded-full bg-amber-100">
-                          <Wrench className="h-4 w-4 text-amber-600" />
+                      <div className="flex gap-4">
+                        <div className="flex-shrink-0 flex h-12 w-12 items-center justify-center rounded-full bg-amber-100">
+                          <Wrench className="h-5 w-5 text-amber-600" />
                         </div>
                         <div>
-                          <p className="text-sm font-medium">New Maintenance Request</p>
-                          <p className="text-xs text-muted-foreground">Leaking faucet in Unit 103</p>
-                          <p className="text-xs text-muted-foreground mt-1">Yesterday at 3:15 PM</p>
+                          <p className="text-base font-medium">New Maintenance Request</p>
+                          <p className="text-sm text-muted-foreground mt-1">Leaking faucet in Unit 103</p>
+                          <p className="text-sm text-muted-foreground mt-2">Yesterday at 3:15 PM</p>
                         </div>
                       </div>
-                      <div className="flex gap-3">
-                        <div className="flex-shrink-0 flex h-9 w-9 items-center justify-center rounded-full bg-blue-100">
-                          <MessageSquare className="h-4 w-4 text-blue-600" />
+                      <div className="flex gap-4">
+                        <div className="flex-shrink-0 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
+                          <MessageSquare className="h-5 w-5 text-blue-600" />
                         </div>
                         <div>
-                          <p className="text-sm font-medium">New Message</p>
-                          <p className="text-xs text-muted-foreground">Lesego from Gabs Real Estate regarding property inspection</p>
-                          <p className="text-xs text-muted-foreground mt-1">2 days ago</p>
+                          <p className="text-base font-medium">New Message</p>
+                          <p className="text-sm text-muted-foreground mt-1">Lesego from Gabs Real Estate regarding property inspection</p>
+                          <p className="text-sm text-muted-foreground mt-2">2 days ago</p>
                         </div>
                       </div>
-                      <div className="flex gap-3">
-                        <div className="flex-shrink-0 flex h-9 w-9 items-center justify-center rounded-full bg-green-100">
-                          <CheckCircle className="h-4 w-4 text-green-600" />
+                      <div className="flex gap-4">
+                        <div className="flex-shrink-0 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
+                          <CheckCircle className="h-5 w-5 text-green-600" />
                         </div>
                         <div>
-                          <p className="text-sm font-medium">Maintenance Completed</p>
-                          <p className="text-xs text-muted-foreground">A/C repair at Unit 202 has been completed</p>
-                          <p className="text-xs text-muted-foreground mt-1">3 days ago</p>
+                          <p className="text-base font-medium">Maintenance Completed</p>
+                          <p className="text-sm text-muted-foreground mt-1">A/C repair at Unit 202 has been completed</p>
+                          <p className="text-sm text-muted-foreground mt-2">3 days ago</p>
                         </div>
                       </div>
                     </div>
@@ -300,29 +302,29 @@ export default function LandlordDashboard() {
               </Card>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Expiring Leases Card */}
-              <Card className="md:col-span-1">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-md font-medium">Expiring Leases</CardTitle>
-                  <CardDescription>Leases ending in the next 60 days</CardDescription>
+              <Card className="md:col-span-1 shadow-sm">
+                <CardHeader className="pb-3 pt-6">
+                  <CardTitle className="text-xl font-medium">Expiring Leases</CardTitle>
+                  <CardDescription className="text-base">Leases ending in the next 60 days</CardDescription>
                 </CardHeader>
                 <CardContent className="p-0">
                   {expiringLeases.length > 0 ? (
-                    <ScrollArea className="h-[180px] px-6">
-                      <div className="space-y-4 py-2">
+                    <ScrollArea className="h-[220px] px-6">
+                      <div className="space-y-5 py-4">
                         {expiringLeases.map((lease) => (
                           <div key={lease.id} className="flex justify-between items-start">
                             <div>
-                              <p className="text-sm font-medium">Unit {lease.propertyId}</p>
-                              <p className="text-xs text-muted-foreground">
+                              <p className="text-base font-medium">Unit {lease.propertyId}</p>
+                              <p className="text-sm text-muted-foreground mt-1">
                                 Expires on {formatDate(lease.endDate)}
                               </p>
                             </div>
-                            <Button variant="ghost" size="sm" asChild>
+                            <Button variant="ghost" size="sm" className="h-9" asChild>
                               <Link href={`/landlord/leases/${lease.id}`}>
-                                <Eye className="h-3.5 w-3.5 mr-1" />
-                                <span className="text-xs">View</span>
+                                <Eye className="h-4 w-4 mr-2" />
+                                <span>View</span>
                               </Link>
                             </Button>
                           </div>
@@ -330,23 +332,23 @@ export default function LandlordDashboard() {
                       </div>
                     </ScrollArea>
                   ) : (
-                    <div className="px-6 py-8 text-center">
-                      <CalendarDays className="h-8 w-8 mx-auto text-muted-foreground opacity-50 mb-2" />
-                      <p className="text-sm text-muted-foreground">No leases expiring soon</p>
+                    <div className="px-6 py-12 text-center">
+                      <CalendarDays className="h-12 w-12 mx-auto text-muted-foreground opacity-50 mb-4" />
+                      <p className="text-base text-muted-foreground">No leases expiring soon</p>
                     </div>
                   )}
                 </CardContent>
               </Card>
 
               {/* Pending Maintenance Card */}
-              <Card className="md:col-span-2">
-                <CardHeader className="pb-2">
+              <Card className="md:col-span-2 shadow-sm">
+                <CardHeader className="pb-3 pt-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <CardTitle className="text-md font-medium">Pending Maintenance</CardTitle>
-                      <CardDescription>Requests requiring your attention</CardDescription>
+                      <CardTitle className="text-xl font-medium">Pending Maintenance</CardTitle>
+                      <CardDescription className="text-base">Requests requiring your attention</CardDescription>
                     </div>
-                    <Button variant="outline" size="sm" asChild>
+                    <Button variant="outline" size="sm" className="h-9" asChild>
                       <Link href="/landlord/maintenance">
                         View All
                       </Link>
@@ -355,40 +357,40 @@ export default function LandlordDashboard() {
                 </CardHeader>
                 <CardContent className="p-0">
                   {pendingMaintenanceCount > 0 || inProgressMaintenanceCount > 0 ? (
-                    <ScrollArea className="h-[180px] px-6">
-                      <div className="space-y-4 py-2">
+                    <ScrollArea className="h-[220px] px-6">
+                      <div className="space-y-5 py-4">
                         {getPendingMaintenance().map((request) => (
                           <div key={request.id} className="flex justify-between items-start">
-                            <div className="flex gap-3">
-                              <div className="flex-shrink-0 flex h-9 w-9 items-center justify-center rounded-full bg-amber-100">
-                                <AlertCircle className="h-4 w-4 text-amber-600" />
+                            <div className="flex gap-4">
+                              <div className="flex-shrink-0 flex h-12 w-12 items-center justify-center rounded-full bg-amber-100">
+                                <AlertCircle className="h-5 w-5 text-amber-600" />
                               </div>
                               <div>
-                                <p className="text-sm font-medium">{request.title}</p>
-                                <p className="text-xs text-muted-foreground">
+                                <p className="text-base font-medium">{request.title}</p>
+                                <p className="text-sm text-muted-foreground mt-1">
                                   Unit {request.propertyId} • {formatDate(request.createdAt)}
                                 </p>
                               </div>
                             </div>
-                            <Badge variant="outline" className="bg-amber-50 text-amber-700 hover:bg-amber-50">
+                            <Badge variant="outline" className="bg-amber-50 text-amber-700 hover:bg-amber-50 px-3 py-1 text-sm">
                               Pending
                             </Badge>
                           </div>
                         ))}
                         {getInProgressMaintenance().map((request) => (
                           <div key={request.id} className="flex justify-between items-start">
-                            <div className="flex gap-3">
-                              <div className="flex-shrink-0 flex h-9 w-9 items-center justify-center rounded-full bg-blue-100">
-                                <Clock className="h-4 w-4 text-blue-600" />
+                            <div className="flex gap-4">
+                              <div className="flex-shrink-0 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
+                                <Clock className="h-5 w-5 text-blue-600" />
                               </div>
                               <div>
-                                <p className="text-sm font-medium">{request.title}</p>
-                                <p className="text-xs text-muted-foreground">
+                                <p className="text-base font-medium">{request.title}</p>
+                                <p className="text-sm text-muted-foreground mt-1">
                                   Unit {request.propertyId} • {formatDate(request.createdAt)}
                                 </p>
                               </div>
                             </div>
-                            <Badge variant="outline" className="bg-blue-50 text-blue-700 hover:bg-blue-50">
+                            <Badge variant="outline" className="bg-blue-50 text-blue-700 hover:bg-blue-50 px-3 py-1 text-sm">
                               In Progress
                             </Badge>
                           </div>
@@ -396,9 +398,9 @@ export default function LandlordDashboard() {
                       </div>
                     </ScrollArea>
                   ) : (
-                    <div className="px-6 py-8 text-center">
-                      <CheckCircle className="h-8 w-8 mx-auto text-muted-foreground opacity-50 mb-2" />
-                      <p className="text-sm text-muted-foreground">No pending maintenance requests</p>
+                    <div className="px-6 py-12 text-center">
+                      <CheckCircle className="h-12 w-12 mx-auto text-muted-foreground opacity-50 mb-4" />
+                      <p className="text-base text-muted-foreground">No pending maintenance requests</p>
                     </div>
                   )}
                 </CardContent>
@@ -407,15 +409,15 @@ export default function LandlordDashboard() {
           </TabsContent>
 
           {/* PROPERTIES SECTION */}
-          <TabsContent value="properties" className="space-y-4 mt-4">
+          <TabsContent value="properties" className="space-y-6 mt-6">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-medium">Your Properties</h3>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm">
+              <h3 className="text-xl font-medium">Your Properties</h3>
+              <div className="flex gap-3">
+                <Button variant="outline" size="sm" className="h-9">
                   <Filter className="h-4 w-4 mr-2" />
                   Filter
                 </Button>
-                <Button size="sm">
+                <Button size="sm" className="h-9">
                   <Plus className="h-4 w-4 mr-2" />
                   Add Property
                 </Button>
@@ -522,15 +524,15 @@ export default function LandlordDashboard() {
           </TabsContent>
 
           {/* TENANTS SECTION */}
-          <TabsContent value="tenants" className="space-y-4 mt-4">
+          <TabsContent value="tenants" className="space-y-6 mt-6">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-medium">Your Tenants</h3>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm">
+              <h3 className="text-xl font-medium">Your Tenants</h3>
+              <div className="flex gap-3">
+                <Button variant="outline" size="sm" className="h-9">
                   <Filter className="h-4 w-4 mr-2" />
                   Filter
                 </Button>
-                <Button size="sm">
+                <Button size="sm" className="h-9">
                   <Plus className="h-4 w-4 mr-2" />
                   Add Tenant
                 </Button>
@@ -652,57 +654,57 @@ export default function LandlordDashboard() {
           </TabsContent>
 
           {/* MAINTENANCE SECTION */}
-          <TabsContent value="maintenance" className="space-y-4 mt-4">
+          <TabsContent value="maintenance" className="space-y-6 mt-6">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-medium">Maintenance Requests</h3>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm">
+              <h3 className="text-xl font-medium">Maintenance Requests</h3>
+              <div className="flex gap-3">
+                <Button variant="outline" size="sm" className="h-9">
                   <Filter className="h-4 w-4 mr-2" />
                   Filter
                 </Button>
-                <Button size="sm">
+                <Button size="sm" className="h-9">
                   <Plus className="h-4 w-4 mr-2" />
                   Create Request
                 </Button>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-md font-medium flex items-center">
-                    <AlertCircle className="h-4 w-4 text-amber-500 mr-2" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card className="shadow-sm">
+                <CardHeader className="pb-3 pt-6">
+                  <CardTitle className="text-xl font-medium flex items-center">
+                    <AlertCircle className="h-5 w-5 text-amber-500 mr-2" />
                     Pending
                   </CardTitle>
-                  <CardDescription>{pendingMaintenanceCount} requests</CardDescription>
+                  <CardDescription className="text-base">{pendingMaintenanceCount} requests</CardDescription>
                 </CardHeader>
                 <CardContent>
                   {pendingMaintenanceCount > 0 ? (
-                    <ScrollArea className="h-[260px] pr-4">
-                      <div className="space-y-4">
+                    <ScrollArea className="h-[280px] pr-4">
+                      <div className="space-y-5">
                         {getPendingMaintenance().map((request) => (
-                          <div key={request.id} className="p-3 border rounded-lg">
-                            <div className="flex justify-between">
-                              <h4 className="font-medium text-sm">{request.title}</h4>
-                              <Badge className="bg-amber-50 text-amber-700">Pending</Badge>
+                          <div key={request.id} className="p-4 border rounded-lg shadow-sm">
+                            <div className="flex justify-between items-start">
+                              <h4 className="font-medium text-base">{request.title}</h4>
+                              <Badge className="bg-amber-50 text-amber-700 px-3 py-1 text-sm">Pending</Badge>
                             </div>
-                            <p className="text-xs text-muted-foreground mt-1">
+                            <p className="text-sm text-muted-foreground mt-1.5">
                               Unit {request.propertyId} • Submitted {formatDate(request.createdAt)}
                             </p>
-                            <p className="text-sm line-clamp-2 mt-2">{request.description}</p>
-                            <div className="flex justify-between mt-3 pt-2 border-t">
+                            <p className="text-sm mt-3 text-gray-700">{request.description}</p>
+                            <div className="flex justify-between mt-4 pt-3 border-t">
                               <Badge variant="outline" className={
                                 request.priority === "urgent" 
-                                  ? "bg-red-50 text-red-700" 
+                                  ? "bg-red-50 text-red-700 px-2.5 py-1" 
                                   : request.priority === "high" 
-                                    ? "bg-orange-50 text-orange-700" 
-                                    : "bg-blue-50 text-blue-700"
+                                    ? "bg-orange-50 text-orange-700 px-2.5 py-1" 
+                                    : "bg-blue-50 text-blue-700 px-2.5 py-1"
                               }>
                                 {request.priority.charAt(0).toUpperCase() + request.priority.slice(1)} Priority
                               </Badge>
-                              <Button variant="ghost" size="sm" className="h-7">
-                                <Eye className="h-3.5 w-3.5 mr-1" />
-                                <span className="text-xs">View</span>
+                              <Button variant="outline" size="sm" className="h-9">
+                                <Eye className="h-4 w-4 mr-2" />
+                                <span>View</span>
                               </Button>
                             </div>
                           </div>
@@ -710,49 +712,49 @@ export default function LandlordDashboard() {
                       </div>
                     </ScrollArea>
                   ) : (
-                    <div className="py-8 text-center">
-                      <CheckCircle className="h-8 w-8 mx-auto text-muted-foreground opacity-50 mb-2" />
-                      <p className="text-sm text-muted-foreground">No pending requests</p>
+                    <div className="py-12 text-center">
+                      <CheckCircle className="h-12 w-12 mx-auto text-muted-foreground opacity-50 mb-4" />
+                      <p className="text-base text-muted-foreground">No pending requests</p>
                     </div>
                   )}
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-md font-medium flex items-center">
-                    <Clock className="h-4 w-4 text-blue-500 mr-2" />
+              <Card className="shadow-sm">
+                <CardHeader className="pb-3 pt-6">
+                  <CardTitle className="text-xl font-medium flex items-center">
+                    <Clock className="h-5 w-5 text-blue-500 mr-2" />
                     In Progress
                   </CardTitle>
-                  <CardDescription>{inProgressMaintenanceCount} requests</CardDescription>
+                  <CardDescription className="text-base">{inProgressMaintenanceCount} requests</CardDescription>
                 </CardHeader>
                 <CardContent>
                   {inProgressMaintenanceCount > 0 ? (
-                    <ScrollArea className="h-[260px] pr-4">
-                      <div className="space-y-4">
+                    <ScrollArea className="h-[280px] pr-4">
+                      <div className="space-y-5">
                         {getInProgressMaintenance().map((request) => (
-                          <div key={request.id} className="p-3 border rounded-lg">
-                            <div className="flex justify-between">
-                              <h4 className="font-medium text-sm">{request.title}</h4>
-                              <Badge className="bg-blue-50 text-blue-700">In Progress</Badge>
+                          <div key={request.id} className="p-4 border rounded-lg shadow-sm">
+                            <div className="flex justify-between items-start">
+                              <h4 className="font-medium text-base">{request.title}</h4>
+                              <Badge className="bg-blue-50 text-blue-700 px-3 py-1 text-sm">In Progress</Badge>
                             </div>
-                            <p className="text-xs text-muted-foreground mt-1">
+                            <p className="text-sm text-muted-foreground mt-1.5">
                               Unit {request.propertyId} • Submitted {formatDate(request.createdAt)}
                             </p>
-                            <p className="text-sm line-clamp-2 mt-2">{request.description}</p>
-                            <div className="flex justify-between mt-3 pt-2 border-t">
+                            <p className="text-sm mt-3 text-gray-700">{request.description}</p>
+                            <div className="flex justify-between mt-4 pt-3 border-t">
                               <Badge variant="outline" className={
                                 request.priority === "urgent" 
-                                  ? "bg-red-50 text-red-700" 
+                                  ? "bg-red-50 text-red-700 px-2.5 py-1" 
                                   : request.priority === "high" 
-                                    ? "bg-orange-50 text-orange-700" 
-                                    : "bg-blue-50 text-blue-700"
+                                    ? "bg-orange-50 text-orange-700 px-2.5 py-1" 
+                                    : "bg-blue-50 text-blue-700 px-2.5 py-1"
                               }>
                                 {request.priority.charAt(0).toUpperCase() + request.priority.slice(1)} Priority
                               </Badge>
-                              <Button variant="ghost" size="sm" className="h-7">
-                                <Eye className="h-3.5 w-3.5 mr-1" />
-                                <span className="text-xs">View</span>
+                              <Button variant="outline" size="sm" className="h-9">
+                                <Eye className="h-4 w-4 mr-2" />
+                                <span>View</span>
                               </Button>
                             </div>
                           </div>
@@ -760,65 +762,85 @@ export default function LandlordDashboard() {
                       </div>
                     </ScrollArea>
                   ) : (
-                    <div className="py-8 text-center">
-                      <CheckCircle className="h-8 w-8 mx-auto text-muted-foreground opacity-50 mb-2" />
-                      <p className="text-sm text-muted-foreground">No in-progress requests</p>
+                    <div className="py-12 text-center">
+                      <CheckCircle className="h-12 w-12 mx-auto text-muted-foreground opacity-50 mb-4" />
+                      <p className="text-base text-muted-foreground">No in-progress requests</p>
                     </div>
                   )}
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-md font-medium flex items-center">
-                    <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+              <Card className="shadow-sm">
+                <CardHeader className="pb-3 pt-6">
+                  <CardTitle className="text-xl font-medium flex items-center">
+                    <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
                     Completed
                   </CardTitle>
-                  <CardDescription>{completedMaintenanceCount} requests</CardDescription>
+                  <CardDescription className="text-base">{completedMaintenanceCount} requests</CardDescription>
                 </CardHeader>
                 <CardContent>
                   {completedMaintenanceCount > 0 ? (
-                    <ScrollArea className="h-[260px] pr-4">
-                      <div className="space-y-4">
+                    <ScrollArea className="h-[280px] pr-4">
+                      <div className="space-y-5">
                         {/* Placeholder for completed maintenance requests */}
-                        <div className="p-3 border rounded-lg">
-                          <div className="flex justify-between">
-                            <h4 className="font-medium text-sm">Broken light fixture</h4>
-                            <Badge className="bg-green-50 text-green-700">Completed</Badge>
+                        <div className="p-4 border rounded-lg shadow-sm">
+                          <div className="flex justify-between items-start">
+                            <h4 className="font-medium text-base">Broken light fixture</h4>
+                            <Badge className="bg-green-50 text-green-700 px-3 py-1 text-sm">Completed</Badge>
                           </div>
-                          <p className="text-xs text-muted-foreground mt-1">
+                          <p className="text-sm text-muted-foreground mt-1.5">
                             Unit 202 • Completed Nov 15, 2023
                           </p>
-                          <div className="flex justify-between mt-3 pt-2 border-t">
-                            <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                          <div className="flex justify-between mt-4 pt-3 border-t">
+                            <Badge variant="outline" className="bg-blue-50 text-blue-700 px-2.5 py-1">
                               Medium Priority
                             </Badge>
-                            <Button variant="ghost" size="sm" className="h-7">
-                              <Eye className="h-3.5 w-3.5 mr-1" />
-                              <span className="text-xs">View</span>
+                            <Button variant="outline" size="sm" className="h-9">
+                              <Eye className="h-4 w-4 mr-2" />
+                              <span>View</span>
                             </Button>
                           </div>
                         </div>
                       </div>
                     </ScrollArea>
                   ) : (
-                    <div className="py-8 text-center">
-                      <Wrench className="h-8 w-8 mx-auto text-muted-foreground opacity-50 mb-2" />
-                      <p className="text-sm text-muted-foreground">No completed requests</p>
+                    <div className="py-12 text-center">
+                      <Wrench className="h-12 w-12 mx-auto text-muted-foreground opacity-50 mb-4" />
+                      <p className="text-base text-muted-foreground">No completed requests</p>
                     </div>
                   )}
                 </CardContent>
               </Card>
             </div>
 
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-md font-medium">Find Maintenance Professionals</CardTitle>
-                <CardDescription>Connect with verified maintenance providers</CardDescription>
+            <Card className="mt-6 shadow-sm">
+              <CardHeader className="pb-3 pt-6">
+                <CardTitle className="text-xl font-medium">Find Maintenance Professionals</CardTitle>
+                <CardDescription className="text-base">Connect with verified maintenance providers in your area</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-4">
-                  <Button variant="outline" asChild>
+                <div className="text-center py-6">
+                  <div className="mb-4 flex justify-center space-x-4">
+                    <div className="flex flex-col items-center">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100 mb-2">
+                        <UserCheck className="h-6 w-6 text-green-600" />
+                      </div>
+                      <span className="text-sm">Verified Providers</span>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 mb-2">
+                        <Clock className="h-6 w-6 text-blue-600" />
+                      </div>
+                      <span className="text-sm">Fast Service</span>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 mb-2">
+                        <BadgePercent className="h-6 w-6 text-amber-600" />
+                      </div>
+                      <span className="text-sm">Competitive Rates</span>
+                    </div>
+                  </div>
+                  <Button size="lg" className="mt-4" asChild>
                     <Link href="/maintenance/marketplace">
                       <Wrench className="h-4 w-4 mr-2" />
                       Browse Maintenance Marketplace
@@ -828,6 +850,92 @@ export default function LandlordDashboard() {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* FEATURE SHOWCASE SECTION */}
+          <div className="mt-12 space-y-6">
+            <h2 className="text-2xl font-semibold tracking-tight">Premium Features</h2>
+            <p className="text-muted-foreground">Enhance your property management experience with these powerful tools</p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+              {/* Financial Analytics */}
+              <Card className="shadow-sm">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                        <BarChart3 className="h-5 w-5 text-primary" />
+                      </div>
+                      <CardTitle className="text-lg">Financial Analytics</CardTitle>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="pb-2">
+                  <p className="text-sm text-muted-foreground">
+                    Advanced financial reporting and analytics to track your rental income,
+                    expenses, and ROI across your property portfolio.
+                  </p>
+                </CardContent>
+                <CardFooter>
+                  <Button variant="outline" className="w-full gap-2">
+                    <TrendingUp className="h-4 w-4" />
+                    <span>Explore Analytics</span>
+                  </Button>
+                </CardFooter>
+              </Card>
+
+              {/* Tenant Verification */}
+              <Card className="shadow-sm">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
+                        <UserCheck className="h-5 w-5 text-green-600" />
+                      </div>
+                      <CardTitle className="text-lg">Tenant Verification</CardTitle>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="pb-2">
+                  <p className="text-sm text-muted-foreground">
+                    Comprehensive background checks, credit reports, and rental history verification for
+                    potential tenants to minimize risk.
+                  </p>
+                </CardContent>
+                <CardFooter>
+                  <Button variant="outline" className="w-full gap-2">
+                    <CheckCircle className="h-4 w-4" />
+                    <span>Verify Tenants</span>
+                  </Button>
+                </CardFooter>
+              </Card>
+
+              {/* Smart Pricing */}
+              <Card className="shadow-sm">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
+                        <BadgePercent className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <CardTitle className="text-lg">Smart Pricing</CardTitle>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="pb-2">
+                  <p className="text-sm text-muted-foreground">
+                    AI-powered rent pricing recommendations based on market data, property features, 
+                    and local trends to maximize your rental income.
+                  </p>
+                </CardContent>
+                <CardFooter>
+                  <Button variant="outline" className="w-full gap-2">
+                    <DollarSign className="h-4 w-4" />
+                    <span>Optimize Pricing</span>
+                  </Button>
+                </CardFooter>
+              </Card>
+            </div>
+          </div>
         </Tabs>
       </div>
     </DashLayout>
