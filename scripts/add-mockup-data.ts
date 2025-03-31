@@ -282,11 +282,18 @@ export const addMockupData = async () => {
     console.log(`Created landlord: ${person.firstName} ${person.lastName}`);
   }
   
-  // Generate agencies (3)
+  // Add existing landlord (Kago) to the list
+  const existingLandlord = await storage.getUserByUsername("landlord");
+  if (existingLandlord) {
+    landlords.push(existingLandlord.id);
+  }
+  
+  // Generate agencies (5)
   const agencies: number[] = [];
-  for (let i = 0; i < 3; i++) {
+  const agencyNames = ['Pula Realty', 'BW Properties', 'Gaborone Estates', 'Botswana Home Finders', 'Capital Property Services'];
+  
+  for (let i = 0; i < 5; i++) {
     const person = generatePerson();
-    const agencyNames = ['Pula Realty', 'BW Properties', 'Gaborone Estates', 'Botswana Home Finders', 'Capital Property Services'];
     const agencyName = agencyNames[i % agencyNames.length];
     
     const agency: InsertUser = {
@@ -306,9 +313,15 @@ export const addMockupData = async () => {
     console.log(`Created agency: ${agencyName} (${person.firstName} ${person.lastName})`);
   }
   
-  // Generate maintenance providers (7)
+  // Add existing agency to the list
+  const existingAgency = await storage.getUserByUsername("agency");
+  if (existingAgency) {
+    agencies.push(existingAgency.id);
+  }
+  
+  // Generate maintenance providers (10)
   const maintenanceProviders: number[] = [];
-  for (let i = 0; i < 7; i++) {
+  for (let i = 0; i < 10; i++) {
     const person = generatePerson(true); // Most maintenance providers are male in Botswana
     const skills = getRandomElements([...Object.keys(maintenanceDescriptions), 'Carpentry', 'Painting', 'Roofing', 'Tiling'], getRandomInt(2, 4));
     
@@ -328,14 +341,22 @@ export const addMockupData = async () => {
     maintenanceProviders.push(createdProvider.id);
     console.log(`Created maintenance provider: ${person.firstName} ${person.lastName} (${skills.join(', ')})`);
   }
+  
+  // Add existing maintenance provider to the list
+  const existingProvider = await storage.getUserByUsername("maintenance");
+  if (existingProvider) {
+    maintenanceProviders.push(existingProvider.id);
+  }
 
-  // Generate tenants (10)
+  // Generate tenants (20)
   const tenants: number[] = [];
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 20; i++) {
     const isMale = Math.random() > 0.5;
     const person = generatePerson(isMale);
     const occupations = ['Teacher', 'IT Specialist', 'Doctor', 'Engineer', 'Government Employee', 
-                         'Bank Clerk', 'Shop Owner', 'University Student', 'Accountant', 'Nurse'];
+                         'Bank Clerk', 'Shop Owner', 'University Student', 'Accountant', 'Nurse',
+                         'Police Officer', 'Taxi Driver', 'Lawyer', 'Sales Representative', 'Lecturer',
+                         'Chef', 'Pharmacist', 'Economist', 'Entrepreneur', 'Social Worker'];
     
     const tenant: InsertUser = {
       username: `tenant${i + 2}`,
@@ -353,10 +374,16 @@ export const addMockupData = async () => {
     tenants.push(createdTenant.id);
     console.log(`Created tenant: ${person.firstName} ${person.lastName}`);
   }
+  
+  // Add existing tenant to the list
+  const existingTenant = await storage.getUserByUsername("tenant");
+  if (existingTenant) {
+    tenants.push(existingTenant.id);
+  }
 
-  // Generate properties (25) - distributed among landlords and agencies
+  // Generate properties (40) - distributed among landlords and agencies
   const properties: number[] = [];
-  for (let i = 0; i < 25; i++) {
+  for (let i = 0; i < 40; i++) {
     const fullAddress = generateRandomAddress();
     const { address, city, state, zipCode } = formatAddress(fullAddress);
     
@@ -368,7 +395,9 @@ export const addMockupData = async () => {
     
     // Decide if property is managed by landlord directly or through agency
     const isAgencyManaged = Math.random() < 0.4; // 40% of properties are managed by agencies
-    const ownerId = getRandomElement(landlords);
+    
+    // Distribute more properties to Kago (landlord1)
+    const ownerId = i < 10 && existingLandlord ? existingLandlord.id : getRandomElement(landlords);
     const agencyId = isAgencyManaged ? getRandomElement(agencies) : null;
     
     const propertyAmenities = getRandomElements(amenities, getRandomInt(3, 8));
@@ -396,9 +425,9 @@ export const addMockupData = async () => {
     console.log(`Created property: ${bedrooms} bedroom ${propertyType} in ${city} (${isAgencyManaged ? 'Agency managed' : 'Owner managed'})`);
   }
 
-  // Create leases (15) - some properties should be leased, others available
+  // Create leases (30) - with varying durations and start dates
   const leases: number[] = [];
-  const leasedProperties = getRandomElements(properties, 15);
+  const leasedProperties = getRandomElements(properties, 30);
   
   for (let i = 0; i < leasedProperties.length; i++) {
     const propertyId = leasedProperties[i];
@@ -409,11 +438,32 @@ export const addMockupData = async () => {
     // Mark property as unavailable since it's leased
     await storage.updateProperty(propertyId, { available: false });
     
-    const tenantId = getRandomElement(tenants);
-    const startDate = getRandomDate(new Date(2022, 0, 1), new Date(2023, 6, 1));
+    const tenantId = tenants[i % tenants.length]; // Distribute tenants relatively evenly
     
-    // Lease duration between 6 and 24 months
-    const duration = getRandomInt(6, 24);
+    // Create a mix of recent and longstanding tenancies
+    let startDate;
+    if (i < 8) {
+      // 8 long-term tenants (3-5 years)
+      startDate = getRandomDate(
+        new Date(new Date().getFullYear() - 5, 0, 1), 
+        new Date(new Date().getFullYear() - 3, 0, 1)
+      );
+    } else if (i < 20) {
+      // 12 medium-term tenants (1-2 years)
+      startDate = getRandomDate(
+        new Date(new Date().getFullYear() - 2, 0, 1), 
+        new Date(new Date().getFullYear() - 1, 0, 1)
+      );
+    } else {
+      // 10 recent tenants (0-6 months)
+      startDate = getRandomDate(
+        new Date(new Date().getFullYear(), new Date().getMonth() - 6, 1), 
+        new Date()
+      );
+    }
+    
+    // Lease duration between 6 and 36 months
+    const duration = getRandomInt(6, 36);
     const endDate = new Date(startDate);
     endDate.setMonth(endDate.getMonth() + duration);
     
@@ -436,9 +486,9 @@ export const addMockupData = async () => {
     console.log(`Created lease for property ID ${propertyId} to tenant ID ${tenantId}, ${duration} months`);
   }
 
-  // Generate payments (40) - historical rent payments for the leases
-  for (let i = 0; i < 40; i++) {
-    const leaseId = getRandomElement(leases);
+  // Generate payments (120) - historical rent payments for the leases, multiple payments per lease
+  // Each lease should have multiple monthly payments
+  for (const leaseId of leases) {
     const lease = await storage.getLease(leaseId);
     
     if (!lease) continue;
@@ -450,33 +500,51 @@ export const addMockupData = async () => {
     // Only create payments for months that have already passed since lease start
     if (monthsFromStart <= 0) continue;
     
-    const paymentMonth = new Date(lease.startDate);
-    paymentMonth.setMonth(paymentMonth.getMonth() + getRandomInt(0, Math.min(monthsFromStart, 6)));
+    // For each month since the lease started, create a payment record (up to 24 months)
+    const maxMonths = Math.min(monthsFromStart, 24);
     
-    const dueDate = new Date(paymentMonth);
-    dueDate.setDate(1); // Due on 1st of the month
-    
-    const paymentDate = getRandomBoolean(0.8) 
-      ? new Date(dueDate.getTime() + getRandomInt(-3, 7) * 24 * 60 * 60 * 1000) // 80% paid around due date
-      : null; // 20% not paid yet
-    
-    const status = paymentDate ? (paymentDate <= dueDate ? 'paid_on_time' : 'paid_late') : 'pending';
-    const amount = lease.rentAmount;
-    const method = paymentDate ? getRandomElement(paymentMethods) : null;
-    
-    const payment: InsertPayment = {
-      leaseId,
-      amount,
-      dueDate,
-      paymentDate,
-      status,
-      method: method || null,
-      tenantId: lease.tenantId,
-      landlordId: (await storage.getProperty(lease.propertyId))?.landlordId || 0
-    };
-    
-    await storage.createPayment(payment);
-    console.log(`Created ${status} payment for lease ID ${leaseId}, due ${dueDate.toISOString().split('T')[0]}`);
+    for (let month = 0; month < maxMonths; month++) {
+      const paymentMonth = new Date(lease.startDate);
+      paymentMonth.setMonth(paymentMonth.getMonth() + month);
+      
+      const dueDate = new Date(paymentMonth);
+      dueDate.setDate(1); // Due on 1st of the month
+      
+      // Payment pattern: first 80% of months paid on time, last 20% with varying payment patterns
+      const paymentPattern = month < (maxMonths * 0.8)
+        ? 'on_time' // First 80% of months: paid on time
+        : getRandomElement(['on_time', 'late', 'pending']); // Last 20%: mix of on time, late, pending
+      
+      let paymentDate = null;
+      if (paymentPattern === 'on_time') {
+        // Paid 0-3 days before due date
+        paymentDate = new Date(dueDate.getTime() - getRandomInt(0, 3) * 24 * 60 * 60 * 1000);
+      } else if (paymentPattern === 'late') {
+        // Paid 1-10 days after due date
+        paymentDate = new Date(dueDate.getTime() + getRandomInt(1, 10) * 24 * 60 * 60 * 1000);
+      }
+      // If pattern is 'pending', paymentDate remains null
+      
+      const status = paymentPattern === 'on_time' ? 'paid_on_time' : 
+                    paymentPattern === 'late' ? 'paid_late' : 'pending';
+      
+      const amount = lease.rentAmount;
+      const method = paymentDate ? getRandomElement(paymentMethods) : null;
+      
+      const payment: InsertPayment = {
+        leaseId,
+        amount,
+        dueDate,
+        paymentDate,
+        status,
+        method: method || null,
+        tenantId: lease.tenantId,
+        landlordId: (await storage.getProperty(lease.propertyId))?.landlordId || 0
+      };
+      
+      await storage.createPayment(payment);
+      console.log(`Created ${status} payment for lease ID ${leaseId}, due ${dueDate.toISOString().split('T')[0]}`);
+    }
   }
 
   // Generate maintenance requests (30) - covering different statuses and priorities
