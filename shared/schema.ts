@@ -550,6 +550,100 @@ export const insertMarketReportSchema = createInsertSchema(marketReports).pick({
 export type InsertMarketReport = z.infer<typeof insertMarketReportSchema>;
 export type MarketReport = typeof marketReports.$inferSelect;
 
+// Landlord Ratings table - for tenants to rate landlords
+export const landlordRatings = pgTable("landlord_ratings", {
+  id: serial("id").primaryKey(),
+  landlordId: integer("landlord_id").notNull(),
+  tenantId: integer("tenant_id").notNull(),
+  propertyId: integer("property_id").notNull(),
+  rating: integer("rating").notNull(), // 1-5 stars
+  review: text("review"),
+  communicationRating: integer("communication_rating"), // 1-5 stars
+  maintenanceRating: integer("maintenance_rating"), // 1-5 stars
+  valueRating: integer("value_rating"), // 1-5 stars
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at"),
+});
+
+export const landlordRatingsRelations = relations(landlordRatings, ({ one }) => ({
+  landlord: one(users, {
+    fields: [landlordRatings.landlordId],
+    references: [users.id],
+    relationName: "landlord_ratings",
+  }),
+  tenant: one(users, {
+    fields: [landlordRatings.tenantId],
+    references: [users.id],
+    relationName: "tenant_given_ratings",
+  }),
+  property: one(properties, {
+    fields: [landlordRatings.propertyId],
+    references: [properties.id],
+    relationName: "property_landlord_ratings",
+  }),
+}));
+
+export const insertLandlordRatingSchema = createInsertSchema(landlordRatings).pick({
+  landlordId: true,
+  tenantId: true,
+  propertyId: true,
+  rating: true,
+  review: true,
+  communicationRating: true,
+  maintenanceRating: true,
+  valueRating: true,
+});
+
+export type InsertLandlordRating = z.infer<typeof insertLandlordRatingSchema>;
+export type LandlordRating = typeof landlordRatings.$inferSelect;
+
+// Tenant Ratings table - for landlords to rate tenants
+export const tenantRatings = pgTable("tenant_ratings", {
+  id: serial("id").primaryKey(),
+  tenantId: integer("tenant_id").notNull(),
+  landlordId: integer("landlord_id").notNull(),
+  propertyId: integer("property_id").notNull(),
+  rating: integer("rating").notNull(), // 1-5 stars
+  review: text("review"),
+  paymentRating: integer("payment_rating"), // 1-5 stars for payment timeliness
+  propertyRespectRating: integer("property_respect_rating"), // 1-5 stars for property care
+  communicationRating: integer("communication_rating"), // 1-5 stars for communication
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at"),
+});
+
+export const tenantRatingsRelations = relations(tenantRatings, ({ one }) => ({
+  tenant: one(users, {
+    fields: [tenantRatings.tenantId],
+    references: [users.id],
+    relationName: "tenant_ratings",
+  }),
+  landlord: one(users, {
+    fields: [tenantRatings.landlordId],
+    references: [users.id],
+    relationName: "landlord_given_ratings",
+  }),
+  property: one(properties, {
+    fields: [tenantRatings.propertyId],
+    references: [properties.id],
+    relationName: "property_tenant_ratings",
+  }),
+}));
+
+export const insertTenantRatingSchema = createInsertSchema(tenantRatings).pick({
+  tenantId: true,
+  landlordId: true,
+  propertyId: true,
+  rating: true,
+  review: true,
+  paymentRating: true,
+  propertyRespectRating: true,
+  communicationRating: true,
+});
+
+export type InsertTenantRating = z.infer<typeof insertTenantRatingSchema>;
+export type TenantRating = typeof tenantRatings.$inferSelect;
+
 // Now that all tables are defined, we can add user relations
 export const usersRelations = relations(users, ({ many }) => ({
   properties: many(properties, { relationName: "user_properties" }),
@@ -561,4 +655,9 @@ export const usersRelations = relations(users, ({ many }) => ({
   receivedMessages: many(messages, { relationName: "user_received_messages" }),
   maintenanceJobs: many(maintenanceJobs, { relationName: "user_maintenance_jobs" }),
   applications: many(applications, { relationName: "user_applications" }),
+  // Ratings relations
+  landlordRatings: many(landlordRatings, { relationName: "landlord_ratings" }),
+  givenLandlordRatings: many(landlordRatings, { relationName: "tenant_given_ratings" }),
+  tenantRatings: many(tenantRatings, { relationName: "tenant_ratings" }),
+  givenTenantRatings: many(tenantRatings, { relationName: "landlord_given_ratings" }),
 }));

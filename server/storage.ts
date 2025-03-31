@@ -1,4 +1,4 @@
-import { users, properties, leases, payments, maintenanceRequests, documents, messages, applications, maintenanceJobs, maintenanceBids, type User, type Property, type Lease, type Payment, type MaintenanceRequest, type Document, type Message, type Application, type MaintenanceJob, type MaintenanceBid, type InsertUser, type InsertProperty, type InsertLease, type InsertPayment, type InsertMaintenanceRequest, type InsertDocument, type InsertMessage, type InsertApplication, type InsertMaintenanceJob, type InsertMaintenanceBid, type UserRoleType } from "@shared/schema";
+import { users, properties, leases, payments, maintenanceRequests, documents, messages, applications, maintenanceJobs, maintenanceBids, landlordRatings, tenantRatings, type User, type Property, type Lease, type Payment, type MaintenanceRequest, type Document, type Message, type Application, type MaintenanceJob, type MaintenanceBid, type LandlordRating, type TenantRating, type InsertUser, type InsertProperty, type InsertLease, type InsertPayment, type InsertMaintenanceRequest, type InsertDocument, type InsertMessage, type InsertApplication, type InsertMaintenanceJob, type InsertMaintenanceBid, type InsertLandlordRating, type InsertTenantRating, type UserRoleType } from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
 import { db } from "./db";
@@ -84,6 +84,27 @@ export interface IStorage {
   markMessageAsRead(id: number): Promise<Message | undefined>;
   clearMessages(): Promise<void>;
   
+  // Ratings
+  // Landlord Ratings
+  getLandlordRating(id: number): Promise<LandlordRating | undefined>;
+  getLandlordRatingsByLandlord(landlordId: number): Promise<LandlordRating[]>;
+  getLandlordRatingsByTenant(tenantId: number): Promise<LandlordRating[]>;
+  getLandlordRatingsByProperty(propertyId: number): Promise<LandlordRating[]>;
+  createLandlordRating(rating: InsertLandlordRating): Promise<LandlordRating>;
+  updateLandlordRating(id: number, rating: Partial<InsertLandlordRating>): Promise<LandlordRating | undefined>;
+  deleteLandlordRating(id: number): Promise<boolean>;
+  clearLandlordRatings(): Promise<void>;
+  
+  // Tenant Ratings
+  getTenantRating(id: number): Promise<TenantRating | undefined>;
+  getTenantRatingsByTenant(tenantId: number): Promise<TenantRating[]>;
+  getTenantRatingsByLandlord(landlordId: number): Promise<TenantRating[]>;
+  getTenantRatingsByProperty(propertyId: number): Promise<TenantRating[]>;
+  createTenantRating(rating: InsertTenantRating): Promise<TenantRating>;
+  updateTenantRating(id: number, rating: Partial<InsertTenantRating>): Promise<TenantRating | undefined>;
+  deleteTenantRating(id: number): Promise<boolean>;
+  clearTenantRatings(): Promise<void>;
+
   // Session store
   sessionStore: session.Store;
 }
@@ -96,6 +117,8 @@ export class MemStorage implements IStorage {
   private maintenanceRequests: Map<number, MaintenanceRequest>;
   private documents: Map<number, Document>;
   private messages: Map<number, Message>;
+  private landlordRatings: Map<number, LandlordRating>;
+  private tenantRatings: Map<number, TenantRating>;
   
   sessionStore: session.Store;
   
@@ -106,6 +129,8 @@ export class MemStorage implements IStorage {
   private maintenanceRequestIdCounter: number;
   private documentIdCounter: number;
   private messageIdCounter: number;
+  private landlordRatingIdCounter: number;
+  private tenantRatingIdCounter: number;
   
   constructor() {
     this.users = new Map();
@@ -115,6 +140,8 @@ export class MemStorage implements IStorage {
     this.maintenanceRequests = new Map();
     this.documents = new Map();
     this.messages = new Map();
+    this.landlordRatings = new Map();
+    this.tenantRatings = new Map();
     
     this.userIdCounter = 1;
     this.propertyIdCounter = 1;
@@ -123,6 +150,8 @@ export class MemStorage implements IStorage {
     this.maintenanceRequestIdCounter = 1;
     this.documentIdCounter = 1;
     this.messageIdCounter = 1;
+    this.landlordRatingIdCounter = 1;
+    this.tenantRatingIdCounter = 1;
     
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000, // 24 hours
@@ -170,6 +199,126 @@ export class MemStorage implements IStorage {
   async clearMessages(): Promise<void> {
     this.messages.clear();
     this.messageIdCounter = 1;
+  }
+  
+  async clearLandlordRatings(): Promise<void> {
+    this.landlordRatings.clear();
+    this.landlordRatingIdCounter = 1;
+  }
+  
+  async clearTenantRatings(): Promise<void> {
+    this.tenantRatings.clear();
+    this.tenantRatingIdCounter = 1;
+  }
+  
+  // Landlord Ratings
+  async getLandlordRating(id: number): Promise<LandlordRating | undefined> {
+    return this.landlordRatings.get(id);
+  }
+
+  async getLandlordRatingsByLandlord(landlordId: number): Promise<LandlordRating[]> {
+    return Array.from(this.landlordRatings.values()).filter(
+      (rating) => rating.landlordId === landlordId
+    );
+  }
+
+  async getLandlordRatingsByTenant(tenantId: number): Promise<LandlordRating[]> {
+    return Array.from(this.landlordRatings.values()).filter(
+      (rating) => rating.tenantId === tenantId
+    );
+  }
+
+  async getLandlordRatingsByProperty(propertyId: number): Promise<LandlordRating[]> {
+    return Array.from(this.landlordRatings.values()).filter(
+      (rating) => rating.propertyId === propertyId
+    );
+  }
+
+  async createLandlordRating(rating: InsertLandlordRating): Promise<LandlordRating> {
+    const id = this.landlordRatingIdCounter++;
+    const newRating: LandlordRating = {
+      id,
+      createdAt: new Date(),
+      updatedAt: null,
+      ...rating,
+      communicationRating: rating.communicationRating || null,
+      maintenanceRating: rating.maintenanceRating || null,
+      valueRating: rating.valueRating || null
+    };
+    this.landlordRatings.set(id, newRating);
+    return newRating;
+  }
+
+  async updateLandlordRating(id: number, updates: Partial<InsertLandlordRating>): Promise<LandlordRating | undefined> {
+    const rating = this.landlordRatings.get(id);
+    if (!rating) return undefined;
+    
+    const updatedRating = { 
+      ...rating, 
+      ...updates,
+      updatedAt: new Date() 
+    };
+    this.landlordRatings.set(id, updatedRating);
+    return updatedRating;
+  }
+
+  async deleteLandlordRating(id: number): Promise<boolean> {
+    return this.landlordRatings.delete(id);
+  }
+  
+  // Tenant Ratings
+  async getTenantRating(id: number): Promise<TenantRating | undefined> {
+    return this.tenantRatings.get(id);
+  }
+
+  async getTenantRatingsByTenant(tenantId: number): Promise<TenantRating[]> {
+    return Array.from(this.tenantRatings.values()).filter(
+      (rating) => rating.tenantId === tenantId
+    );
+  }
+
+  async getTenantRatingsByLandlord(landlordId: number): Promise<TenantRating[]> {
+    return Array.from(this.tenantRatings.values()).filter(
+      (rating) => rating.landlordId === landlordId
+    );
+  }
+
+  async getTenantRatingsByProperty(propertyId: number): Promise<TenantRating[]> {
+    return Array.from(this.tenantRatings.values()).filter(
+      (rating) => rating.propertyId === propertyId
+    );
+  }
+
+  async createTenantRating(rating: InsertTenantRating): Promise<TenantRating> {
+    const id = this.tenantRatingIdCounter++;
+    const newRating: TenantRating = {
+      id,
+      createdAt: new Date(),
+      updatedAt: null,
+      ...rating,
+      communicationRating: rating.communicationRating || null,
+      paymentRating: rating.paymentRating || null,
+      propertyRespectRating: rating.propertyRespectRating || null
+    };
+    this.tenantRatings.set(id, newRating);
+    return newRating;
+  }
+
+  async updateTenantRating(id: number, updates: Partial<InsertTenantRating>): Promise<TenantRating | undefined> {
+    const rating = this.tenantRatings.get(id);
+    if (!rating) return undefined;
+    
+    const updatedRating = { 
+      ...rating, 
+      ...updates,
+      updatedAt: new Date() 
+    };
+    this.tenantRatings.set(id, updatedRating);
+    return updatedRating;
+  }
+
+  async deleteTenantRating(id: number): Promise<boolean> {
+    return this.tenantRatings.delete(id);
   }
   
   // Users
@@ -622,6 +771,120 @@ export class MemStorage implements IStorage {
     this.messages.set(id, updatedMessage);
     return updatedMessage;
   }
+  
+  // Landlord Ratings
+  async getLandlordRating(id: number): Promise<LandlordRating | undefined> {
+    return this.landlordRatings.get(id);
+  }
+
+  async getLandlordRatingsByLandlord(landlordId: number): Promise<LandlordRating[]> {
+    return Array.from(this.landlordRatings.values()).filter(
+      (rating) => rating.landlordId === landlordId
+    );
+  }
+
+  async getLandlordRatingsByTenant(tenantId: number): Promise<LandlordRating[]> {
+    return Array.from(this.landlordRatings.values()).filter(
+      (rating) => rating.tenantId === tenantId
+    );
+  }
+
+  async getLandlordRatingsByProperty(propertyId: number): Promise<LandlordRating[]> {
+    return Array.from(this.landlordRatings.values()).filter(
+      (rating) => rating.propertyId === propertyId
+    );
+  }
+
+  async createLandlordRating(insertRating: InsertLandlordRating): Promise<LandlordRating> {
+    const id = this.landlordRatingIdCounter++;
+    const rating: LandlordRating = {
+      id,
+      landlordId: insertRating.landlordId,
+      tenantId: insertRating.tenantId,
+      propertyId: insertRating.propertyId,
+      rating: insertRating.rating,
+      review: insertRating.review || null,
+      createdAt: new Date()
+    };
+    this.landlordRatings.set(id, rating);
+    return rating;
+  }
+
+  async updateLandlordRating(id: number, updates: Partial<InsertLandlordRating>): Promise<LandlordRating | undefined> {
+    const rating = this.landlordRatings.get(id);
+    if (!rating) return undefined;
+    
+    const updatedRating: LandlordRating = {
+      ...rating,
+      rating: updates.rating ?? rating.rating,
+      review: updates.review !== undefined ? updates.review || null : rating.review
+    };
+    
+    this.landlordRatings.set(id, updatedRating);
+    return updatedRating;
+  }
+
+  async deleteLandlordRating(id: number): Promise<boolean> {
+    if (!this.landlordRatings.has(id)) return false;
+    return this.landlordRatings.delete(id);
+  }
+  
+  // Tenant Ratings
+  async getTenantRating(id: number): Promise<TenantRating | undefined> {
+    return this.tenantRatings.get(id);
+  }
+
+  async getTenantRatingsByTenant(tenantId: number): Promise<TenantRating[]> {
+    return Array.from(this.tenantRatings.values()).filter(
+      (rating) => rating.tenantId === tenantId
+    );
+  }
+
+  async getTenantRatingsByLandlord(landlordId: number): Promise<TenantRating[]> {
+    return Array.from(this.tenantRatings.values()).filter(
+      (rating) => rating.landlordId === landlordId
+    );
+  }
+
+  async getTenantRatingsByProperty(propertyId: number): Promise<TenantRating[]> {
+    return Array.from(this.tenantRatings.values()).filter(
+      (rating) => rating.propertyId === propertyId
+    );
+  }
+
+  async createTenantRating(insertRating: InsertTenantRating): Promise<TenantRating> {
+    const id = this.tenantRatingIdCounter++;
+    const rating: TenantRating = {
+      id,
+      landlordId: insertRating.landlordId,
+      tenantId: insertRating.tenantId,
+      propertyId: insertRating.propertyId,
+      rating: insertRating.rating,
+      review: insertRating.review || null,
+      createdAt: new Date()
+    };
+    this.tenantRatings.set(id, rating);
+    return rating;
+  }
+
+  async updateTenantRating(id: number, updates: Partial<InsertTenantRating>): Promise<TenantRating | undefined> {
+    const rating = this.tenantRatings.get(id);
+    if (!rating) return undefined;
+    
+    const updatedRating: TenantRating = {
+      ...rating,
+      rating: updates.rating ?? rating.rating,
+      review: updates.review !== undefined ? updates.review || null : rating.review
+    };
+    
+    this.tenantRatings.set(id, updatedRating);
+    return updatedRating;
+  }
+
+  async deleteTenantRating(id: number): Promise<boolean> {
+    if (!this.tenantRatings.has(id)) return false;
+    return this.tenantRatings.delete(id);
+  }
 }
 
 export class DatabaseStorage implements IStorage {
@@ -977,6 +1240,92 @@ export class DatabaseStorage implements IStorage {
   
   async clearMessages(): Promise<void> {
     await db.delete(messages);
+  }
+  
+  // Landlord Ratings
+  async getLandlordRating(id: number): Promise<LandlordRating | undefined> {
+    const [rating] = await db.select().from(landlordRatings).where(eq(landlordRatings.id, id));
+    return rating;
+  }
+
+  async getLandlordRatingsByLandlord(landlordId: number): Promise<LandlordRating[]> {
+    return await db.select().from(landlordRatings).where(eq(landlordRatings.landlordId, landlordId));
+  }
+
+  async getLandlordRatingsByTenant(tenantId: number): Promise<LandlordRating[]> {
+    return await db.select().from(landlordRatings).where(eq(landlordRatings.tenantId, tenantId));
+  }
+
+  async getLandlordRatingsByProperty(propertyId: number): Promise<LandlordRating[]> {
+    return await db.select().from(landlordRatings).where(eq(landlordRatings.propertyId, propertyId));
+  }
+
+  async createLandlordRating(rating: InsertLandlordRating): Promise<LandlordRating> {
+    const [newRating] = await db.insert(landlordRatings).values(rating).returning();
+    return newRating;
+  }
+
+  async updateLandlordRating(id: number, updates: Partial<InsertLandlordRating>): Promise<LandlordRating | undefined> {
+    const [rating] = await db
+      .update(landlordRatings)
+      .set(updates)
+      .where(eq(landlordRatings.id, id))
+      .returning();
+    return rating;
+  }
+
+  async deleteLandlordRating(id: number): Promise<boolean> {
+    const result = await db
+      .delete(landlordRatings)
+      .where(eq(landlordRatings.id, id));
+    return result.count > 0;
+  }
+
+  async clearLandlordRatings(): Promise<void> {
+    await db.delete(landlordRatings);
+  }
+  
+  // Tenant Ratings
+  async getTenantRating(id: number): Promise<TenantRating | undefined> {
+    const [rating] = await db.select().from(tenantRatings).where(eq(tenantRatings.id, id));
+    return rating;
+  }
+
+  async getTenantRatingsByTenant(tenantId: number): Promise<TenantRating[]> {
+    return await db.select().from(tenantRatings).where(eq(tenantRatings.tenantId, tenantId));
+  }
+
+  async getTenantRatingsByLandlord(landlordId: number): Promise<TenantRating[]> {
+    return await db.select().from(tenantRatings).where(eq(tenantRatings.landlordId, landlordId));
+  }
+
+  async getTenantRatingsByProperty(propertyId: number): Promise<TenantRating[]> {
+    return await db.select().from(tenantRatings).where(eq(tenantRatings.propertyId, propertyId));
+  }
+
+  async createTenantRating(rating: InsertTenantRating): Promise<TenantRating> {
+    const [newRating] = await db.insert(tenantRatings).values(rating).returning();
+    return newRating;
+  }
+
+  async updateTenantRating(id: number, updates: Partial<InsertTenantRating>): Promise<TenantRating | undefined> {
+    const [rating] = await db
+      .update(tenantRatings)
+      .set(updates)
+      .where(eq(tenantRatings.id, id))
+      .returning();
+    return rating;
+  }
+
+  async deleteTenantRating(id: number): Promise<boolean> {
+    const result = await db
+      .delete(tenantRatings)
+      .where(eq(tenantRatings.id, id));
+    return result.count > 0;
+  }
+
+  async clearTenantRatings(): Promise<void> {
+    await db.delete(tenantRatings);
   }
 }
 

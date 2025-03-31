@@ -16,11 +16,15 @@ import {
   insertMarketDataSchema,
   insertMarketForecastSchema,
   insertMarketReportSchema,
+  insertLandlordRatingSchema,
+  insertTenantRatingSchema,
   Property,
   MaintenanceRequest,
   MarketData,
   MarketForecast,
-  MarketReport
+  MarketReport,
+  LandlordRating,
+  TenantRating
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -1713,6 +1717,284 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(forecast);
     } catch (error) {
       res.status(500).json({ message: "Error fetching market forecast" });
+    }
+  });
+  
+  // Ratings routes
+  // =====================
+  
+  // Landlord Ratings
+  app.get('/api/landlord-ratings/:id', async (req, res) => {
+    const rating = await storage.getLandlordRating(Number(req.params.id));
+    if (!rating) {
+      return res.status(404).json({ error: 'Landlord rating not found' });
+    }
+    res.json(rating);
+  });
+
+  app.get('/api/landlord-ratings/landlord/:landlordId', async (req, res) => {
+    const ratings = await storage.getLandlordRatingsByLandlord(Number(req.params.landlordId));
+    res.json(ratings);
+  });
+
+  app.get('/api/landlord-ratings/tenant/:tenantId', async (req, res) => {
+    const ratings = await storage.getLandlordRatingsByTenant(Number(req.params.tenantId));
+    res.json(ratings);
+  });
+
+  app.get('/api/landlord-ratings/property/:propertyId', async (req, res) => {
+    const ratings = await storage.getLandlordRatingsByProperty(Number(req.params.propertyId));
+    res.json(ratings);
+  });
+
+  app.post('/api/landlord-ratings', async (req, res) => {
+    try {
+      // Validate that the user is authenticated and is a tenant
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ error: 'You must be logged in to rate a landlord' });
+      }
+      
+      if (req.user.role !== 'tenant') {
+        return res.status(403).json({ error: 'Only tenants can rate landlords' });
+      }
+      
+      // Parse the input data first
+      const ratingData = insertLandlordRatingSchema.parse(req.body);
+      
+      // Validate essential fields
+      if (!ratingData.landlordId || !ratingData.propertyId || !ratingData.rating) {
+        return res.status(400).json({ error: 'Missing required fields' });
+      }
+      
+      // Override the tenant ID with the authenticated user's ID for security
+      // This ensures tenants can only create ratings as themselves
+      ratingData.tenantId = req.user.id;
+    
+      // Create the rating
+      const rating = await storage.createLandlordRating(ratingData);
+    
+      // Notify the landlord via WebSocket if they're connected
+      broadcastPropertyNotification({
+        type: 'new-landlord-rating',
+        rating,
+        propertyId: rating.propertyId,
+        message: `You have received a new rating from a tenant for property #${rating.propertyId}`,
+        userId: rating.landlordId
+      });
+      
+      res.status(201).json(rating);
+    } catch (error) {
+      console.error('Error creating landlord rating:', error);
+      res.status(500).json({ error: 'Failed to create landlord rating' });
+    }
+  });
+
+  app.put('/api/landlord-ratings/:id', async (req, res) => {
+    try {
+      // Validate that the user is authenticated and is the tenant who created the rating
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ error: 'You must be logged in to update a rating' });
+      }
+      
+      const rating = await storage.getLandlordRating(Number(req.params.id));
+      if (!rating) {
+        return res.status(404).json({ error: 'Rating not found' });
+      }
+      
+      if (req.user.id !== rating.tenantId) {
+        return res.status(403).json({ error: 'You can only update your own ratings' });
+      }
+      
+      // Update the rating
+      const updatedRating = await storage.updateLandlordRating(Number(req.params.id), req.body);
+      
+      // Notify the landlord via WebSocket
+      broadcastPropertyNotification({
+        type: 'updated-landlord-rating',
+        rating: updatedRating,
+        propertyId: updatedRating.propertyId,
+        message: `A tenant has updated their rating for property #${updatedRating.propertyId}`,
+        userId: updatedRating.landlordId
+      });
+      
+      res.json(updatedRating);
+    } catch (error) {
+      console.error('Error updating landlord rating:', error);
+      res.status(500).json({ error: 'Failed to update landlord rating' });
+    }
+  });
+
+  app.delete('/api/landlord-ratings/:id', async (req, res) => {
+    try {
+      // Validate that the user is authenticated and is the tenant who created the rating or an admin
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ error: 'You must be logged in to delete a rating' });
+      }
+      
+      const rating = await storage.getLandlordRating(Number(req.params.id));
+      if (!rating) {
+        return res.status(404).json({ error: 'Rating not found' });
+      }
+      
+      if (req.user.id !== rating.tenantId && req.user.role !== 'admin') {
+        return res.status(403).json({ error: 'You can only delete your own ratings' });
+      }
+      
+      // Delete the rating
+      const deleted = await storage.deleteLandlordRating(Number(req.params.id));
+      
+      if (deleted) {
+        // Notify the landlord via WebSocket
+        broadcastPropertyNotification({
+          type: 'deleted-landlord-rating',
+          ratingId: Number(req.params.id),
+          propertyId: rating.propertyId,
+          message: `A tenant has deleted their rating for property #${rating.propertyId}`,
+          userId: rating.landlordId
+        });
+        
+        return res.status(204).end();
+      } else {
+        return res.status(500).json({ error: 'Failed to delete rating' });
+      }
+    } catch (error) {
+      console.error('Error deleting landlord rating:', error);
+      res.status(500).json({ error: 'Failed to delete landlord rating' });
+    }
+  });
+  
+  // Tenant Ratings
+  app.get('/api/tenant-ratings/:id', async (req, res) => {
+    const rating = await storage.getTenantRating(Number(req.params.id));
+    if (!rating) {
+      return res.status(404).json({ error: 'Tenant rating not found' });
+    }
+    res.json(rating);
+  });
+
+  app.get('/api/tenant-ratings/tenant/:tenantId', async (req, res) => {
+    const ratings = await storage.getTenantRatingsByTenant(Number(req.params.tenantId));
+    res.json(ratings);
+  });
+
+  app.get('/api/tenant-ratings/landlord/:landlordId', async (req, res) => {
+    const ratings = await storage.getTenantRatingsByLandlord(Number(req.params.landlordId));
+    res.json(ratings);
+  });
+
+  app.get('/api/tenant-ratings/property/:propertyId', async (req, res) => {
+    const ratings = await storage.getTenantRatingsByProperty(Number(req.params.propertyId));
+    res.json(ratings);
+  });
+
+  app.post('/api/tenant-ratings', async (req, res) => {
+    try {
+      // Validate that the user is authenticated and is a landlord or agency
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ error: 'You must be logged in to rate a tenant' });
+      }
+      
+      if (req.user.role !== 'landlord' && req.user.role !== 'agency') {
+        return res.status(403).json({ error: 'Only landlords and agencies can rate tenants' });
+      }
+      
+      // Parse the input data first
+      const ratingData = insertTenantRatingSchema.parse(req.body);
+      
+      // Validate essential fields
+      if (!ratingData.tenantId || !ratingData.propertyId || !ratingData.rating) {
+        return res.status(400).json({ error: 'Missing required fields' });
+      }
+      
+      // Override the landlord ID with the authenticated user's ID for security
+      // This ensures landlords can only create ratings as themselves
+      ratingData.landlordId = req.user.id;
+      
+      // Create the rating
+      const rating = await storage.createTenantRating(ratingData);
+      
+      // Notify the tenant via WebSocket if they're connected
+      sendToUser(rating.tenantId, {
+        type: 'new-tenant-rating',
+        rating,
+        message: `You have received a new rating from your landlord for property #${rating.propertyId}`
+      });
+      
+      res.status(201).json(rating);
+    } catch (error) {
+      console.error('Error creating tenant rating:', error);
+      res.status(500).json({ error: 'Failed to create tenant rating' });
+    }
+  });
+
+  app.put('/api/tenant-ratings/:id', async (req, res) => {
+    try {
+      // Validate that the user is authenticated and is the landlord who created the rating
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ error: 'You must be logged in to update a rating' });
+      }
+      
+      const rating = await storage.getTenantRating(Number(req.params.id));
+      if (!rating) {
+        return res.status(404).json({ error: 'Rating not found' });
+      }
+      
+      if (req.user.id !== rating.landlordId) {
+        return res.status(403).json({ error: 'You can only update your own ratings' });
+      }
+      
+      // Update the rating
+      const updatedRating = await storage.updateTenantRating(Number(req.params.id), req.body);
+      
+      // Notify the tenant via WebSocket
+      sendToUser(updatedRating.tenantId, {
+        type: 'updated-tenant-rating',
+        rating: updatedRating,
+        message: `Your landlord has updated their rating for property #${updatedRating.propertyId}`
+      });
+      
+      res.json(updatedRating);
+    } catch (error) {
+      console.error('Error updating tenant rating:', error);
+      res.status(500).json({ error: 'Failed to update tenant rating' });
+    }
+  });
+
+  app.delete('/api/tenant-ratings/:id', async (req, res) => {
+    try {
+      // Validate that the user is authenticated and is the landlord who created the rating or an admin
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ error: 'You must be logged in to delete a rating' });
+      }
+      
+      const rating = await storage.getTenantRating(Number(req.params.id));
+      if (!rating) {
+        return res.status(404).json({ error: 'Rating not found' });
+      }
+      
+      if (req.user.id !== rating.landlordId && req.user.role !== 'admin') {
+        return res.status(403).json({ error: 'You can only delete your own ratings' });
+      }
+      
+      // Delete the rating
+      const deleted = await storage.deleteTenantRating(Number(req.params.id));
+      
+      if (deleted) {
+        // Notify the tenant via WebSocket
+        sendToUser(rating.tenantId, {
+          type: 'deleted-tenant-rating',
+          ratingId: Number(req.params.id),
+          propertyId: rating.propertyId,
+          message: `Your landlord has deleted their rating for property #${rating.propertyId}`
+        });
+        
+        return res.status(204).end();
+      } else {
+        return res.status(500).json({ error: 'Failed to delete rating' });
+      }
+    } catch (error) {
+      console.error('Error deleting tenant rating:', error);
+      res.status(500).json({ error: 'Failed to delete tenant rating' });
     }
   });
   
