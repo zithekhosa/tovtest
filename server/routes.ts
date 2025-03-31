@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
+import { registerThemeRoutes } from "./theme-routes";
 import { z } from "zod";
 import path from "path";
 import { 
@@ -25,6 +26,9 @@ import {
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes
   setupAuth(app);
+  
+  // Set up theme routes
+  registerThemeRoutes(app);
 
   // API routes
   // =====================
