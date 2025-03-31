@@ -104,19 +104,19 @@ export default function PropertySearchPage() {
       {/* Property type quick links */}
       <div className="container mx-auto px-4 -mt-8">
         <div className="bg-white rounded-lg shadow-md p-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Link href="#property-search?type=house" className="flex flex-col items-center p-3 hover:bg-gray-50 rounded-md transition duration-200">
+          <Link href="#property-search" onClick={() => document.getElementById('property-search')?.scrollIntoView({ behavior: 'smooth' })} className="flex flex-col items-center p-3 hover:bg-gray-50 rounded-md transition duration-200">
             <Home className="h-8 w-8 text-primary mb-2" />
             <span className="font-medium">Houses</span>
           </Link>
-          <Link href="#property-search?type=apartment" className="flex flex-col items-center p-3 hover:bg-gray-50 rounded-md transition duration-200">
+          <Link href="#property-search" onClick={() => document.getElementById('property-search')?.scrollIntoView({ behavior: 'smooth' })} className="flex flex-col items-center p-3 hover:bg-gray-50 rounded-md transition duration-200">
             <Building className="h-8 w-8 text-primary mb-2" />
             <span className="font-medium">Apartments</span>
           </Link>
-          <Link href="#property-search?type=commercial" className="flex flex-col items-center p-3 hover:bg-gray-50 rounded-md transition duration-200">
+          <Link href="#property-search" onClick={() => document.getElementById('property-search')?.scrollIntoView({ behavior: 'smooth' })} className="flex flex-col items-center p-3 hover:bg-gray-50 rounded-md transition duration-200">
             <Info className="h-8 w-8 text-primary mb-2" />
             <span className="font-medium">Commercial</span>
           </Link>
-          <Link href="#property-search?type=land" className="flex flex-col items-center p-3 hover:bg-gray-50 rounded-md transition duration-200">
+          <Link href="#property-search" onClick={() => document.getElementById('property-search')?.scrollIntoView({ behavior: 'smooth' })} className="flex flex-col items-center p-3 hover:bg-gray-50 rounded-md transition duration-200">
             <MapPin className="h-8 w-8 text-primary mb-2" />
             <span className="font-medium">Land</span>
           </Link>

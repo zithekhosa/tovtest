@@ -25,7 +25,7 @@ interface PropertySearchComponentProps {
 
 export default function PropertySearchComponent({
   initialQuery = "",
-  initialPropertyType = "",
+  initialPropertyType = "any",
   standalone = true,
   onPropertySelect,
   onPropertyRequest,
@@ -62,7 +62,7 @@ export default function PropertySearchComponent({
       const params = new URLSearchParams();
       
       if (query) params.append('query', query);
-      if (propertyType) params.append('propertyType', propertyType);
+      if (propertyType && propertyType !== 'any') params.append('propertyType', propertyType);
       if (minBedrooms !== undefined) params.append('minBedrooms', minBedrooms.toString());
       if (maxBedrooms !== undefined) params.append('maxBedrooms', maxBedrooms.toString());
       if (minBathrooms !== undefined) params.append('minBathrooms', minBathrooms.toString());

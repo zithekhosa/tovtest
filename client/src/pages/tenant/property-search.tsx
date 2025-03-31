@@ -93,7 +93,7 @@ export default function PropertySearch() {
       }
 
       // Filter by property type
-      if (propertyTypeFilter) {
+      if (propertyTypeFilter && propertyTypeFilter !== 'all') {
         filtered = filtered.filter(
           (property) => property.propertyType === propertyTypeFilter
         );
@@ -360,7 +360,7 @@ export default function PropertySearch() {
                 <SelectValue placeholder="All Types" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Types</SelectItem>
+                <SelectItem value="all">All Types</SelectItem>
                 {getPropertyTypes().map((type) => (
                   <SelectItem key={type} value={type}>{type}</SelectItem>
                 ))}
