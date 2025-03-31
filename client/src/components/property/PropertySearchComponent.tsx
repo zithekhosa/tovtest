@@ -178,7 +178,7 @@ export default function PropertySearchComponent({
                         <SelectValue placeholder="Any type" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Any type</SelectItem>
+                        <SelectItem value="any">Any type</SelectItem>
                         <SelectItem value="apartment">Apartment</SelectItem>
                         <SelectItem value="house">House</SelectItem>
                         <SelectItem value="commercial">Commercial</SelectItem>
@@ -193,14 +193,14 @@ export default function PropertySearchComponent({
                     <Label>Bedrooms</Label>
                     <div className="flex gap-2">
                       <Select
-                        value={minBedrooms?.toString() || ""}
-                        onValueChange={(val) => setMinBedrooms(val ? parseInt(val) : undefined)}
+                        value={minBedrooms?.toString() || "any"}
+                        onValueChange={(val) => setMinBedrooms(val === "any" ? undefined : parseInt(val))}
                       >
                         <SelectTrigger className="flex-1">
                           <SelectValue placeholder="Min" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">Any</SelectItem>
+                          <SelectItem value="any">Any</SelectItem>
                           <SelectItem value="1">1</SelectItem>
                           <SelectItem value="2">2</SelectItem>
                           <SelectItem value="3">3</SelectItem>
@@ -210,14 +210,14 @@ export default function PropertySearchComponent({
                       </Select>
                       
                       <Select
-                        value={maxBedrooms?.toString() || ""}
-                        onValueChange={(val) => setMaxBedrooms(val ? parseInt(val) : undefined)}
+                        value={maxBedrooms?.toString() || "any"}
+                        onValueChange={(val) => setMaxBedrooms(val === "any" ? undefined : parseInt(val))}
                       >
                         <SelectTrigger className="flex-1">
                           <SelectValue placeholder="Max" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">Any</SelectItem>
+                          <SelectItem value="any">Any</SelectItem>
                           <SelectItem value="1">1</SelectItem>
                           <SelectItem value="2">2</SelectItem>
                           <SelectItem value="3">3</SelectItem>
@@ -234,14 +234,14 @@ export default function PropertySearchComponent({
                     <Label>Bathrooms</Label>
                     <div className="flex gap-2">
                       <Select
-                        value={minBathrooms?.toString() || ""}
-                        onValueChange={(val) => setMinBathrooms(val ? parseInt(val) : undefined)}
+                        value={minBathrooms?.toString() || "any"}
+                        onValueChange={(val) => setMinBathrooms(val === "any" ? undefined : parseInt(val))}
                       >
                         <SelectTrigger className="flex-1">
                           <SelectValue placeholder="Min" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">Any</SelectItem>
+                          <SelectItem value="any">Any</SelectItem>
                           <SelectItem value="1">1</SelectItem>
                           <SelectItem value="2">2</SelectItem>
                           <SelectItem value="3">3</SelectItem>
@@ -250,14 +250,14 @@ export default function PropertySearchComponent({
                       </Select>
                       
                       <Select
-                        value={maxBathrooms?.toString() || ""}
-                        onValueChange={(val) => setMaxBathrooms(val ? parseInt(val) : undefined)}
+                        value={maxBathrooms?.toString() || "any"}
+                        onValueChange={(val) => setMaxBathrooms(val === "any" ? undefined : parseInt(val))}
                       >
                         <SelectTrigger className="flex-1">
                           <SelectValue placeholder="Max" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">Any</SelectItem>
+                          <SelectItem value="any">Any</SelectItem>
                           <SelectItem value="1">1</SelectItem>
                           <SelectItem value="2">2</SelectItem>
                           <SelectItem value="3">3</SelectItem>
