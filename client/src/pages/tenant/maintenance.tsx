@@ -243,7 +243,7 @@ export default function TenantMaintenance() {
             <p className="text-gray-500">Manage your maintenance requests</p>
           </div>
           <Button onClick={() => setIsRequestDialogOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-4 w-4 mr-2 shrink-0" />
             New Request
           </Button>
         </div>
@@ -319,7 +319,7 @@ export default function TenantMaintenance() {
                 <h3 className="text-lg font-medium text-gray-900">No maintenance requests found</h3>
                 <p className="text-gray-500 mt-1">Create a new request if you have maintenance issues</p>
                 <Button className="mt-4" onClick={() => setIsRequestDialogOpen(true)}>
-                  <Plus className="h-4 w-4 mr-2" />
+                  <Plus className="h-4 w-4 mr-2 shrink-0" />
                   New Request
                 </Button>
               </div>

@@ -46,12 +46,12 @@ export function DashboardHeader({ title, subtitle, showSearch = true, showAction
           },
           { 
             label: 'Add Tenant', 
-            icon: <UserPlus className="h-4 w-4 mr-2" />,
+            icon: <UserPlus className="h-4 w-4 mr-2 shrink-0" />,
             action: () => console.log('Add tenant clicked')
           },
           { 
             label: 'Schedule Maintenance', 
-            icon: <Wrench className="h-4 w-4 mr-2" />,
+            icon: <Wrench className="h-4 w-4 mr-2 shrink-0" />,
             action: () => console.log('Schedule maintenance clicked')
           }
         ];
@@ -60,17 +60,17 @@ export function DashboardHeader({ title, subtitle, showSearch = true, showAction
         return [
           { 
             label: 'Submit Maintenance Request', 
-            icon: <Wrench className="h-4 w-4 mr-2" />,
+            icon: <Wrench className="h-4 w-4 mr-2 shrink-0" />,
             action: () => console.log('Maintenance request clicked')
           },
           { 
             label: 'Schedule Payment', 
-            icon: <CalendarPlus className="h-4 w-4 mr-2" />,
+            icon: <CalendarPlus className="h-4 w-4 mr-2 shrink-0" />,
             action: () => console.log('Schedule payment clicked')
           },
           { 
             label: 'Message Landlord', 
-            icon: <MessageSquarePlus className="h-4 w-4 mr-2" />,
+            icon: <MessageSquarePlus className="h-4 w-4 mr-2 shrink-0" />,
             action: () => console.log('Message landlord clicked')
           }
         ];
@@ -84,12 +84,12 @@ export function DashboardHeader({ title, subtitle, showSearch = true, showAction
           },
           { 
             label: 'Add Client', 
-            icon: <UserPlus className="h-4 w-4 mr-2" />,
+            icon: <UserPlus className="h-4 w-4 mr-2 shrink-0" />,
             action: () => console.log('Add client clicked')
           },
           { 
             label: 'Schedule Viewing', 
-            icon: <CalendarPlus className="h-4 w-4 mr-2" />,
+            icon: <CalendarPlus className="h-4 w-4 mr-2 shrink-0" />,
             action: () => console.log('Schedule viewing clicked')
           }
         ];
@@ -103,12 +103,12 @@ export function DashboardHeader({ title, subtitle, showSearch = true, showAction
           },
           { 
             label: 'Update Job Status', 
-            icon: <Wrench className="h-4 w-4 mr-2" />,
+            icon: <Wrench className="h-4 w-4 mr-2 shrink-0" />,
             action: () => console.log('Update job clicked')
           },
           { 
             label: 'Message Client', 
-            icon: <MessageSquarePlus className="h-4 w-4 mr-2" />,
+            icon: <MessageSquarePlus className="h-4 w-4 mr-2 shrink-0" />,
             action: () => console.log('Message client clicked')
           }
         ];
@@ -172,7 +172,7 @@ export function DashboardHeader({ title, subtitle, showSearch = true, showAction
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button>
-                    <Plus className="h-4 w-4 mr-2" />
+                    <Plus className="h-4 w-4 mr-2 shrink-0" />
                     Quick Actions
                   </Button>
                 </DropdownMenuTrigger>

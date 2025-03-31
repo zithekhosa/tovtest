@@ -112,7 +112,7 @@ export default function TenantsPage() {
           <p className="text-gray-500">Manage your tenant relationships</p>
         </div>
         <Button>
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="h-4 w-4 mr-2 shrink-0" />
           Add Tenant
         </Button>
       </div>

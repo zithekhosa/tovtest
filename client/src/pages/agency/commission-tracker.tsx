@@ -755,7 +755,7 @@ export default function CommissionTracker() {
                           <DollarSign className="h-8 w-8 text-muted-foreground opacity-40 mb-2" />
                           <p className="text-muted-foreground">No commission deals found</p>
                           <Button variant="outline" size="sm" className="mt-2" onClick={handleAddDeal}>
-                            <Plus className="h-4 w-4 mr-2" />
+                            <Plus className="h-4 w-4 mr-2 shrink-0" />
                             Add your first deal
                           </Button>
                         </div>

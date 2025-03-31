@@ -624,12 +624,12 @@ export default function MaintenanceDashboard() {
               <h3 className="text-lg font-medium">My Jobs</h3>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm">
-                  <Filter className="h-4 w-4 mr-2" />
+                  <Filter className="h-4 w-4 mr-2 shrink-0" />
                   Filter
                 </Button>
                 <Button size="sm" asChild>
                   <Link href="/maintenance/marketplace">
-                    <Plus className="h-4 w-4 mr-2" />
+                    <Plus className="h-4 w-4 mr-2 shrink-0" />
                     Find New Jobs
                   </Link>
                 </Button>
@@ -879,7 +879,7 @@ export default function MaintenanceDashboard() {
                   />
                 </div>
                 <Button variant="outline" size="sm">
-                  <Filter className="h-4 w-4 mr-2" />
+                  <Filter className="h-4 w-4 mr-2 shrink-0" />
                   Filter
                 </Button>
               </div>
@@ -1021,7 +1021,7 @@ export default function MaintenanceDashboard() {
                             <div className="flex gap-2">
                               <Button variant="outline" size="sm" asChild>
                                 <Link href={`/maintenance/jobs/${job.id}`}>
-                                  <Eye className="h-4 w-4 mr-2" />
+                                  <Eye className="h-4 w-4 mr-2 shrink-0" />
                                   View Details
                                 </Link>
                               </Button>
@@ -1230,7 +1230,7 @@ export default function MaintenanceDashboard() {
                       </div>
                     </div>
                     <Button variant="outline" size="sm">
-                      <Plus className="h-4 w-4 mr-2" />
+                      <Plus className="h-4 w-4 mr-2 shrink-0" />
                       Add Payment Method
                     </Button>
                   </div>

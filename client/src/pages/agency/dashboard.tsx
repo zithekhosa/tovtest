@@ -603,12 +603,12 @@ export default function AgencyDashboard() {
               <h3 className="text-lg font-medium">Listed Properties ({properties?.length || 0})</h3>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm">
-                  <Filter className="h-4 w-4 mr-2" />
+                  <Filter className="h-4 w-4 mr-2 shrink-0" />
                   Filter
                 </Button>
                 <Button size="sm" asChild>
                   <Link href="/agency/properties/add">
-                    <Plus className="h-4 w-4 mr-2" />
+                    <Plus className="h-4 w-4 mr-2 shrink-0" />
                     Add Property
                   </Link>
                 </Button>
@@ -714,7 +714,7 @@ export default function AgencyDashboard() {
                   </p>
                   <Button asChild>
                     <Link href="/agency/properties/add">
-                      <Plus className="h-4 w-4 mr-2" />
+                      <Plus className="h-4 w-4 mr-2 shrink-0" />
                       Add Your First Property
                     </Link>
                   </Button>
@@ -738,7 +738,7 @@ export default function AgencyDashboard() {
                 </div>
                 <Button size="sm" asChild>
                   <Link href="/agency/inquiries/new">
-                    <Plus className="h-4 w-4 mr-2" />
+                    <Plus className="h-4 w-4 mr-2 shrink-0" />
                     Add Inquiry
                   </Link>
                 </Button>
@@ -851,12 +851,12 @@ export default function AgencyDashboard() {
               <h3 className="text-lg font-medium">Landlord Clients</h3>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm">
-                  <Filter className="h-4 w-4 mr-2" />
+                  <Filter className="h-4 w-4 mr-2 shrink-0" />
                   Filter
                 </Button>
                 <Button size="sm" asChild>
                   <Link href="/agency/landlords/add">
-                    <Plus className="h-4 w-4 mr-2" />
+                    <Plus className="h-4 w-4 mr-2 shrink-0" />
                     Add Landlord
                   </Link>
                 </Button>
@@ -940,7 +940,7 @@ export default function AgencyDashboard() {
                   </p>
                   <Button asChild>
                     <Link href="/agency/landlords/add">
-                      <Plus className="h-4 w-4 mr-2" />
+                      <Plus className="h-4 w-4 mr-2 shrink-0" />
                       Add Your First Landlord
                     </Link>
                   </Button>

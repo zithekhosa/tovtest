@@ -574,7 +574,7 @@ export default function MaintenanceMarketplace() {
                       onClick={handleCreateJob}
                       disabled={!jobTitle.trim() || !jobDescription.trim() || !jobBudget.trim()}
                     >
-                      <Plus className="h-4 w-4 mr-2" />
+                      <Plus className="h-4 w-4 mr-2 shrink-0" />
                       Post Job
                     </Button>
                   </div>

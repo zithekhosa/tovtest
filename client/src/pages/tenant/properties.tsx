@@ -238,7 +238,7 @@ export default function TenantProperties() {
                           For any maintenance issues or repairs needed at the property.
                         </p>
                         <Button variant="secondary" className="w-full mt-2">
-                          <Wrench className="h-4 w-4 mr-2" />
+                          <Wrench className="h-4 w-4 mr-2 shrink-0" />
                           Submit Maintenance Request
                         </Button>
                       </div>

@@ -359,7 +359,7 @@ export default function PaymentsPage() {
                   <Select defaultValue="all">
                     <SelectTrigger className="w-[180px]">
                       <div className="flex items-center">
-                        <Filter className="h-4 w-4 mr-2" />
+                        <Filter className="h-4 w-4 mr-2 shrink-0" />
                         <SelectValue placeholder="Filter Status" />
                       </div>
                     </SelectTrigger>

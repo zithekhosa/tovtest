@@ -643,7 +643,7 @@ export default function LeadsManagement() {
                               Edit details
                             </DropdownMenuItem>
                             <DropdownMenuItem>
-                              <CalendarPlus className="h-4 w-4 mr-2" />
+                              <CalendarPlus className="h-4 w-4 mr-2 shrink-0" />
                               Schedule follow-up
                             </DropdownMenuItem>
                             <DropdownMenuItem>
@@ -667,7 +667,7 @@ export default function LeadsManagement() {
                         <Users className="h-8 w-8 text-muted-foreground opacity-40 mb-2" />
                         <p className="text-muted-foreground">No leads found</p>
                         <Button variant="outline" size="sm" className="mt-2" onClick={handleAddLead}>
-                          <Plus className="h-4 w-4 mr-2" />
+                          <Plus className="h-4 w-4 mr-2 shrink-0" />
                           Add your first lead
                         </Button>
                       </div>

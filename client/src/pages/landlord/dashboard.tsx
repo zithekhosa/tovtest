@@ -172,21 +172,24 @@ export default function LandlordDashboard() {
         />
 
         {/* Dashboard Metrics Cards */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {dashboardMetrics.map((metric, index) => (
-            <MetricsCard
-              key={index}
-              title={metric.title}
-              value={metric.value}
-              description={metric.description}
-              icon={metric.icon}
-              trend={metric.trend}
-              progress={metric.progress}
-            />
-          ))}
+        <div className="container mx-auto max-w-7xl px-4">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {dashboardMetrics.map((metric, index) => (
+              <MetricsCard
+                key={index}
+                title={metric.title}
+                value={metric.value}
+                description={metric.description}
+                icon={metric.icon}
+                trend={metric.trend}
+                progress={metric.progress}
+                className="tov-metrics-card"
+              />
+            ))}
+          </div>
         </div>
 
-        <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab}>
+        <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="container mx-auto max-w-7xl px-4">
           <TabsList className="grid w-full grid-cols-4 h-auto">
             <TabsTrigger value="overview" className="py-2">Overview</TabsTrigger>
             <TabsTrigger value="properties" className="py-2">Properties</TabsTrigger>
@@ -195,8 +198,8 @@ export default function LandlordDashboard() {
           </TabsList>
 
           {/* OVERVIEW SECTION */}
-          <TabsContent value="overview" className="space-y-6 mt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <TabsContent value="overview" className="space-y-8 mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Financial Summary */}
               <Card className="shadow-sm">
                 <CardHeader className="pb-3 pt-6">
@@ -323,7 +326,7 @@ export default function LandlordDashboard() {
                             </div>
                             <Button variant="ghost" size="sm" className="h-9" asChild>
                               <Link href={`/landlord/leases/${lease.id}`}>
-                                <Eye className="h-4 w-4 mr-2" />
+                                <Eye className="h-4 w-4 mr-2 shrink-0" />
                                 <span>View</span>
                               </Link>
                             </Button>
@@ -414,18 +417,18 @@ export default function LandlordDashboard() {
               <h3 className="text-xl font-medium">Your Properties</h3>
               <div className="flex gap-3">
                 <Button variant="outline" size="sm" className="h-9">
-                  <Filter className="h-4 w-4 mr-2" />
+                  <Filter className="h-4 w-4 mr-2 shrink-0" />
                   Filter
                 </Button>
                 <Button size="sm" className="h-9">
-                  <Plus className="h-4 w-4 mr-2" />
+                  <Plus className="h-4 w-4 mr-2 shrink-0" />
                   Add Property
                 </Button>
               </div>
             </div>
 
             {properties && properties.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="tov-grid-layout gap-6">
                 {properties.map((property) => (
                   <Card key={property.id} className="overflow-hidden">
                     <div className="aspect-video bg-muted relative">
@@ -477,12 +480,12 @@ export default function LandlordDashboard() {
                     <CardFooter className="flex justify-between p-4 pt-0 gap-2">
                       <Button variant="outline" className="w-full" asChild>
                         <Link href={`/landlord/properties/${property.id}`}>
-                          <Eye className="h-4 w-4 mr-2" />
+                          <Eye className="h-4 w-4 mr-2 shrink-0" />
                           View
                         </Link>
                       </Button>
                       <Button variant="outline" className="w-full">
-                        <Pencil className="h-4 w-4 mr-2" />
+                        <Pencil className="h-4 w-4 mr-2 shrink-0" />
                         Edit
                       </Button>
                       <DropdownMenu>
@@ -515,7 +518,7 @@ export default function LandlordDashboard() {
                     You haven't added any properties to your account yet.
                   </p>
                   <Button>
-                    <Plus className="h-4 w-4 mr-2" />
+                    <Plus className="h-4 w-4 mr-2 shrink-0" />
                     Add Your First Property
                   </Button>
                 </div>
@@ -529,11 +532,11 @@ export default function LandlordDashboard() {
               <h3 className="text-xl font-medium">Your Tenants</h3>
               <div className="flex gap-3">
                 <Button variant="outline" size="sm" className="h-9">
-                  <Filter className="h-4 w-4 mr-2" />
+                  <Filter className="h-4 w-4 mr-2 shrink-0" />
                   Filter
                 </Button>
                 <Button size="sm" className="h-9">
-                  <Plus className="h-4 w-4 mr-2" />
+                  <Plus className="h-4 w-4 mr-2 shrink-0" />
                   Add Tenant
                 </Button>
               </div>
@@ -645,7 +648,7 @@ export default function LandlordDashboard() {
                     You haven't added any tenants to your account yet.
                   </p>
                   <Button>
-                    <Plus className="h-4 w-4 mr-2" />
+                    <Plus className="h-4 w-4 mr-2 shrink-0" />
                     Add Your First Tenant
                   </Button>
                 </div>
@@ -659,11 +662,11 @@ export default function LandlordDashboard() {
               <h3 className="text-xl font-medium">Maintenance Requests</h3>
               <div className="flex gap-3">
                 <Button variant="outline" size="sm" className="h-9">
-                  <Filter className="h-4 w-4 mr-2" />
+                  <Filter className="h-4 w-4 mr-2 shrink-0" />
                   Filter
                 </Button>
                 <Button size="sm" className="h-9">
-                  <Plus className="h-4 w-4 mr-2" />
+                  <Plus className="h-4 w-4 mr-2 shrink-0" />
                   Create Request
                 </Button>
               </div>
@@ -703,7 +706,7 @@ export default function LandlordDashboard() {
                                 {request.priority.charAt(0).toUpperCase() + request.priority.slice(1)} Priority
                               </Badge>
                               <Button variant="outline" size="sm" className="h-9">
-                                <Eye className="h-4 w-4 mr-2" />
+                                <Eye className="h-4 w-4 mr-2 shrink-0" />
                                 <span>View</span>
                               </Button>
                             </div>
@@ -753,7 +756,7 @@ export default function LandlordDashboard() {
                                 {request.priority.charAt(0).toUpperCase() + request.priority.slice(1)} Priority
                               </Badge>
                               <Button variant="outline" size="sm" className="h-9">
-                                <Eye className="h-4 w-4 mr-2" />
+                                <Eye className="h-4 w-4 mr-2 shrink-0" />
                                 <span>View</span>
                               </Button>
                             </div>
@@ -796,7 +799,7 @@ export default function LandlordDashboard() {
                               Medium Priority
                             </Badge>
                             <Button variant="outline" size="sm" className="h-9">
-                              <Eye className="h-4 w-4 mr-2" />
+                              <Eye className="h-4 w-4 mr-2 shrink-0" />
                               <span>View</span>
                             </Button>
                           </div>
@@ -842,7 +845,7 @@ export default function LandlordDashboard() {
                   </div>
                   <Button size="lg" className="mt-4" asChild>
                     <Link href="/maintenance/marketplace">
-                      <Wrench className="h-4 w-4 mr-2" />
+                      <Wrench className="h-4 w-4 mr-2 shrink-0" />
                       Browse Maintenance Marketplace
                     </Link>
                   </Button>
@@ -852,56 +855,60 @@ export default function LandlordDashboard() {
           </TabsContent>
 
           {/* FEATURE SHOWCASE SECTION */}
-          <div className="mt-12 space-y-4">
-            <h2 className="text-2xl font-semibold tracking-tight text-center">Premium Features</h2>
-            <p className="text-muted-foreground text-center">Enhance your property management experience with these powerful tools</p>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-              {/* Financial Analytics */}
-              <Card className="shadow-sm">
-                <CardContent className="p-6 text-center">
-                  <div className="mb-4 mx-auto bg-blue-100 h-12 w-12 flex items-center justify-center rounded-full">
-                    <BarChart3 className="h-6 w-6 text-blue-600" />
-                  </div>
-                  <CardTitle className="mb-2">Financial Analytics</CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    Advanced financial reporting and analytics to track your rental income,
-                    expenses, and ROI across your property portfolio.
-                  </p>
-                </CardContent>
-              </Card>
+          <div className="py-12">
+            <div className="container mx-auto max-w-6xl px-4">
+              <h2 className="text-2xl font-semibold tracking-tight text-center">Premium Features</h2>
+              <p className="text-muted-foreground text-center mb-8">Enhance your property management experience with these powerful tools</p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {/* Financial Analytics */}
+                <Card className="tov-card shadow-sm">
+                  <CardContent className="p-6 text-center">
+                    <div className="mb-4 mx-auto bg-blue-100 h-12 w-12 flex items-center justify-center rounded-full shrink-0">
+                      <BarChart3 className="h-6 w-6 text-blue-600" />
+                    </div>
+                    <CardTitle className="mb-3 tov-card-title">Financial Analytics</CardTitle>
+                    <div className="tov-card-content">
+                      <p className="text-sm text-muted-foreground line-clamp-3">
+                        Advanced financial reporting and analytics to track your rental income,
+                        expenses, and ROI across your property portfolio.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
 
-              {/* Tenant Verification */}
-              <Card className="tov-card shadow-sm">
-                <CardContent className="p-6 text-center">
-                  <div className="mb-4 mx-auto bg-green-100 h-12 w-12 flex items-center justify-center rounded-full shrink-0">
-                    <UserCheck className="h-6 w-6 text-green-600" />
-                  </div>
-                  <CardTitle className="mb-3 tov-card-title">Tenant Verification</CardTitle>
-                  <div className="tov-card-content">
-                    <p className="text-sm text-muted-foreground line-clamp-3">
-                      Comprehensive background checks, credit reports, and rental history verification for
-                      potential tenants to minimize risk.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+                {/* Tenant Verification */}
+                <Card className="tov-card shadow-sm">
+                  <CardContent className="p-6 text-center">
+                    <div className="mb-4 mx-auto bg-green-100 h-12 w-12 flex items-center justify-center rounded-full shrink-0">
+                      <UserCheck className="h-6 w-6 text-green-600" />
+                    </div>
+                    <CardTitle className="mb-3 tov-card-title">Tenant Verification</CardTitle>
+                    <div className="tov-card-content">
+                      <p className="text-sm text-muted-foreground line-clamp-3">
+                        Comprehensive background checks, credit reports, and rental history verification for
+                        potential tenants to minimize risk.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
 
-              {/* Smart Pricing */}
-              <Card className="tov-card shadow-sm">
-                <CardContent className="p-6 text-center">
-                  <div className="mb-4 mx-auto bg-indigo-100 h-12 w-12 flex items-center justify-center rounded-full shrink-0">
-                    <BadgePercent className="h-6 w-6 text-indigo-600" />
-                  </div>
-                  <CardTitle className="mb-3 tov-card-title">Smart Pricing</CardTitle>
-                  <div className="tov-card-content">
-                    <p className="text-sm text-muted-foreground line-clamp-3">
-                      AI-powered rent pricing recommendations based on market data, property features, 
-                      and local trends to maximize your rental income.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+                {/* Smart Pricing */}
+                <Card className="tov-card shadow-sm">
+                  <CardContent className="p-6 text-center">
+                    <div className="mb-4 mx-auto bg-indigo-100 h-12 w-12 flex items-center justify-center rounded-full shrink-0">
+                      <BadgePercent className="h-6 w-6 text-indigo-600" />
+                    </div>
+                    <CardTitle className="mb-3 tov-card-title">Smart Pricing</CardTitle>
+                    <div className="tov-card-content">
+                      <p className="text-sm text-muted-foreground line-clamp-3">
+                        AI-powered rent pricing recommendations based on market data, property features, 
+                        and local trends to maximize your rental income.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </div>
         </Tabs>

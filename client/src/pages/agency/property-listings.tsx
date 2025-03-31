@@ -1126,7 +1126,7 @@ export default function PropertyListings() {
                       className="mt-4"
                       onClick={handleAddProperty}
                     >
-                      <Plus className="h-4 w-4 mr-2" />
+                      <Plus className="h-4 w-4 mr-2 shrink-0" />
                       Add your first property
                     </Button>
                   </div>

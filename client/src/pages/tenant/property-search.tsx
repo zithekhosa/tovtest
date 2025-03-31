@@ -328,7 +328,7 @@ export default function PropertySearch() {
               }
             }}
           >
-            <Filter className="h-4 w-4 mr-2" />
+            <Filter className="h-4 w-4 mr-2 shrink-0" />
             Filters
             <Badge className="ml-2 bg-primary text-white" hidden={!(
               propertyTypeFilter || 

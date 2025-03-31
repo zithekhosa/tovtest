@@ -82,7 +82,14 @@ export default function TenantDashboard() {
   const {
     data: landlord,
     isLoading: isLoadingLandlord
-  } = useQuery({
+  } = useQuery<{ 
+    id: number; 
+    firstName: string; 
+    lastName: string; 
+    email: string; 
+    phone: string;
+    profileImage?: string;
+  }>({
     queryKey: ["/api/users", property?.landlordId],
     enabled: !!property?.landlordId,
   });
@@ -302,7 +309,7 @@ export default function TenantDashboard() {
                     </div>
                     <Button variant="outline" className="w-full" asChild>
                       <Link href="/tenant/properties">
-                        <Eye className="h-4 w-4 mr-2" />
+                        <Eye className="h-4 w-4 mr-2 shrink-0" />
                         View Details
                       </Link>
                     </Button>
@@ -369,7 +376,7 @@ export default function TenantDashboard() {
                     
                     <Button className="w-full" asChild>
                       <Link href="/tenant/maintenance">
-                        <Plus className="h-4 w-4 mr-2" />
+                        <Plus className="h-4 w-4 mr-2 shrink-0" />
                         Submit New Request
                       </Link>
                     </Button>
