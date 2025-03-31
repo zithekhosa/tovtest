@@ -1,109 +1,177 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-export interface TimelineProps extends React.HTMLAttributes<HTMLDivElement> {
+interface TimelineProviderProps {
   children: React.ReactNode;
 }
 
-export function Timeline({ children, className, ...props }: TimelineProps) {
+interface TimelineProviderValue {
+  isVertical: boolean;
+  isFilled: boolean;
+}
+
+const TimelineContext = React.createContext<TimelineProviderValue | null>(null);
+
+export function TimelineProvider({
+  children,
+}: TimelineProviderProps) {
+  const value = React.useMemo<TimelineProviderValue>(
+    () => ({
+      isVertical: true,
+      isFilled: true,
+    }),
+    []
+  );
+
   return (
-    <div className={cn("space-y-4", className)} {...props}>
+    <TimelineContext.Provider value={value}>
+      {children}
+    </TimelineContext.Provider>
+  );
+}
+
+export function useTimelineContext() {
+  const context = React.useContext(TimelineContext);
+  if (!context) {
+    throw new Error("useTimelineContext must be used within a TimelineProvider");
+  }
+  return context;
+}
+
+export interface TimelineProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+export function Timeline({ children, className }: TimelineProps) {
+  const { isVertical } = useTimelineContext();
+
+  return (
+    <div
+      className={cn(
+        "relative",
+        isVertical ? "flex flex-col space-y-6" : "flex flex-row space-x-6",
+        className
+      )}
+    >
       {children}
     </div>
   );
 }
 
-export interface TimelineItemProps extends React.HTMLAttributes<HTMLDivElement> {
+interface TimelineItemContextValue {
+  isActive: boolean;
+}
+
+const TimelineItemContext = React.createContext<TimelineItemContextValue | null>(
+  null
+);
+
+function useTimelineItemContext() {
+  const context = React.useContext(TimelineItemContext);
+  if (!context) {
+    throw new Error(
+      "useTimelineItemContext must be used within a TimelineItem"
+    );
+  }
+  return context;
+}
+
+interface TimelineItemProps {
   children: React.ReactNode;
+  className?: string;
   active?: boolean;
-  completed?: boolean;
 }
 
-export function TimelineItem({ 
-  children, 
-  active = false,
-  completed = false,
-  className, 
-  ...props 
-}: TimelineItemProps) {
+export const TimelineItem = React.forwardRef<HTMLDivElement, TimelineItemProps>(
+  ({ children, className, active = false, ...props }, ref) => {
+    const { isVertical } = useTimelineContext();
+    const value = React.useMemo<TimelineItemContextValue>(
+      () => ({
+        isActive: active,
+      }),
+      [active]
+    );
+
+    return (
+      <TimelineItemContext.Provider value={value}>
+        <div
+          ref={ref}
+          className={cn(
+            "relative",
+            isVertical ? "pl-8" : "pt-8",
+            className
+          )}
+          {...props}
+        >
+          {children}
+        </div>
+      </TimelineItemContext.Provider>
+    );
+  }
+);
+TimelineItem.displayName = "TimelineItem";
+
+interface TimelineItemIndicatorProps {
+  children?: React.ReactNode;
+  className?: string;
+}
+
+const TimelineItemIndicator = React.forwardRef<
+  HTMLDivElement,
+  TimelineItemIndicatorProps
+>(({ children, className, ...props }, ref) => {
+  const { isVertical } = useTimelineContext();
+  const { isActive } = useTimelineItemContext();
+
   return (
-    <div className={cn("relative pl-8", className)} {...props}>
-      <span
-        className={cn(
-          "absolute left-0 flex h-6 w-6 items-center justify-center rounded-full border",
-          active ? "border-primary bg-primary/10" : 
-          completed ? "border-primary bg-primary text-primary-foreground" : 
-          "border-gray-300 bg-white"
-        )}
-      >
-        {completed && (
-          <svg
-            className="h-3 w-3 text-white"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-        )}
-      </span>
-      <div className={cn(
-        "h-full border-l border-gray-200 absolute left-3 top-6 bottom-0",
-        completed ? "border-primary" : "border-gray-200",
-      )}>
-      </div>
+    <div
+      ref={ref}
+      className={cn(
+        "absolute flex items-center justify-center rounded-full border-2 bg-background text-foreground",
+        isActive ? "border-primary" : "border-border",
+        isVertical ? "-left-[13px] top-1 h-6 w-6" : "-top-[13px] left-1 h-6 w-6",
+        className
+      )}
+      {...props}
+    >
       {children}
     </div>
   );
+});
+TimelineItemIndicator.displayName = "TimelineItemIndicator";
+
+interface TimelineItemContentProps {
+  children?: React.ReactNode;
+  className?: string;
 }
 
-export interface TimelineContentProps extends React.HTMLAttributes<HTMLDivElement> {
-  children: React.ReactNode;
-}
+const TimelineItemContent = React.forwardRef<
+  HTMLDivElement,
+  TimelineItemContentProps
+>(({ children, className, ...props }, ref) => {
+  const { isVertical } = useTimelineContext();
+  const { isActive } = useTimelineItemContext();
 
-export function TimelineContent({ children, className, ...props }: TimelineContentProps) {
   return (
-    <div className={cn("pt-1 pb-6", className)} {...props}>
+    <div
+      ref={ref}
+      className={cn(
+        "relative",
+        isVertical
+          ? "before:absolute before:bottom-0 before:left-[-27px] before:top-2 before:w-0.5 before:bg-border"
+          : "before:absolute before:bottom-[-27px] before:left-0 before:right-2 before:h-0.5 before:bg-border",
+        isActive && "before:bg-primary",
+        className
+      )}
+      {...props}
+    >
       {children}
     </div>
   );
-}
+});
+TimelineItemContent.displayName = "TimelineItemContent";
 
-export interface TimelineTitleProps extends React.HTMLAttributes<HTMLHeadingElement> {
-  children: React.ReactNode;
-}
-
-export function TimelineTitle({ children, className, ...props }: TimelineTitleProps) {
-  return (
-    <h3 className={cn("text-lg font-semibold", className)} {...props}>
-      {children}
-    </h3>
-  );
-}
-
-export interface TimelineDescriptionProps extends React.HTMLAttributes<HTMLParagraphElement> {
-  children: React.ReactNode;
-}
-
-export function TimelineDescription({ children, className, ...props }: TimelineDescriptionProps) {
-  return (
-    <p className={cn("text-sm text-gray-500 mt-1", className)} {...props}>
-      {children}
-    </p>
-  );
-}
-
-export interface TimelineDateProps extends React.HTMLAttributes<HTMLParagraphElement> {
-  children: React.ReactNode;
-}
-
-export function TimelineDate({ children, className, ...props }: TimelineDateProps) {
-  return (
-    <p className={cn("text-xs text-gray-400 mt-1", className)} {...props}>
-      {children}
-    </p>
-  );
-}
+// Add these components as properties to TimelineItem
+TimelineItem.Indicator = TimelineItemIndicator;
+TimelineItem.Content = TimelineItemContent;

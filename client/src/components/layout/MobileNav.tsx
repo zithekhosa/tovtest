@@ -199,21 +199,18 @@ export default function MobileNav({ role }: MobileNavProps) {
                   key={i}
                   href={item.href}
                   onClick={() => setIsOpen(false)}
+                  className={cn(
+                    "flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100",
+                    item.active && "bg-primary/10 text-primary"
+                  )}
                 >
-                  <a
-                    className={cn(
-                      "flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100",
-                      item.active && "bg-primary/10 text-primary"
-                    )}
-                  >
-                    <item.icon className="h-5 w-5 mr-3" />
-                    <span>{item.label}</span>
-                    {item.label === "Messages" && (
-                      <span className="ml-auto bg-primary text-primary-foreground text-xs font-medium px-2 py-0.5 rounded-full">
-                        2
-                      </span>
-                    )}
-                  </a>
+                  <item.icon className="h-5 w-5 mr-3" />
+                  <span>{item.label}</span>
+                  {item.label === "Messages" && (
+                    <span className="ml-auto bg-primary text-primary-foreground text-xs font-medium px-2 py-0.5 rounded-full">
+                      2
+                    </span>
+                  )}
                 </Link>
               ))}
             </div>
