@@ -173,24 +173,28 @@ export default function LandlordDashboard() {
           />
 
           {/* Dashboard Metrics Cards */}
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
             {dashboardMetrics.map((metric, index) => (
-              <MetricsCard
-                key={index}
-                title={metric.title}
-                value={metric.value}
-                description={metric.description}
-                icon={metric.icon}
-                trend={metric.trend}
-                progress={metric.progress}
-                className="tov-metrics-card shadow-md hover:shadow-lg transition-all"
-              />
+              <div className="flex justify-center" key={index}>
+                <div className="w-[180px]">
+                  <MetricsCard
+                    title={metric.title}
+                    value={metric.value}
+                    description={metric.description}
+                    icon={metric.icon}
+                    trend={metric.trend}
+                    progress={metric.progress}
+                    className="tov-metrics-card shadow-sm hover:shadow-md transition-all"
+                  />
+                </div>
+              </div>
             ))}
           </div>
         </div>
       </div>
 
-        <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="container mx-auto max-w-7xl px-4">
+      <div className="container mx-auto max-w-7xl px-4">
+        <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-4 h-auto">
             <TabsTrigger value="overview" className="py-2">Overview</TabsTrigger>
             <TabsTrigger value="properties" className="py-2">Properties</TabsTrigger>
