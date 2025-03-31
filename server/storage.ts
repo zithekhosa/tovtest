@@ -2,7 +2,7 @@ import { users, properties, leases, payments, maintenanceRequests, documents, me
 import session from "express-session";
 import createMemoryStore from "memorystore";
 import { db } from "./db";
-import { and, eq, or, desc, asc, isNull } from "drizzle-orm";
+import { and, eq, or, desc, asc, isNull, gte, lte, ilike } from "drizzle-orm";
 import connectPg from "connect-pg-simple";
 import { Pool } from "@neondatabase/serverless";
 
@@ -26,6 +26,21 @@ export interface IStorage {
   createProperty(property: InsertProperty): Promise<Property>;
   updateProperty(id: number, property: Partial<InsertProperty>): Promise<Property | undefined>;
   getAvailableProperties(): Promise<Property[]>;
+  searchProperties(params: {
+    query?: string;
+    propertyType?: string;
+    minBedrooms?: number;
+    maxBedrooms?: number;
+    minBathrooms?: number;
+    maxBathrooms?: number;
+    minPrice?: number;
+    maxPrice?: number;
+    location?: string;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+    limit?: number;
+    offset?: number;
+  }): Promise<Property[]>;
   clearProperties(): Promise<void>;
   
   // Leases
@@ -245,6 +260,137 @@ export class MemStorage implements IStorage {
     return Array.from(this.properties.values()).filter(
       (property) => property.available === true,
     );
+  }
+  
+  async searchProperties(params: {
+    query?: string;
+    propertyType?: string;
+    minBedrooms?: number;
+    maxBedrooms?: number;
+    minBathrooms?: number;
+    maxBathrooms?: number;
+    minPrice?: number;
+    maxPrice?: number;
+    location?: string;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+    limit?: number;
+    offset?: number;
+  }): Promise<Property[]> {
+    const {
+      query = '',
+      propertyType = 'all',
+      minBedrooms,
+      maxBedrooms,
+      minBathrooms,
+      maxBathrooms,
+      minPrice,
+      maxPrice,
+      location,
+      sortBy = 'createdAt',
+      sortOrder = 'desc',
+      limit = 20,
+      offset = 0
+    } = params;
+    
+    // Get all available properties
+    let properties = Array.from(this.properties.values()).filter(property => property.available === true);
+    
+    // Apply text search filter if query is provided
+    if (query) {
+      const searchTerms = query.toLowerCase().split(' ');
+      properties = properties.filter(property => {
+        // Search across multiple fields
+        const searchText = [
+          property.title || '',
+          property.description || '',
+          property.location || '',
+          property.city || '',
+          property.address || ''
+        ].join(' ').toLowerCase();
+        
+        // Match if any search term exists in the search text
+        return searchTerms.some(term => searchText.includes(term));
+      });
+    }
+    
+    // Filter by property type
+    if (propertyType && propertyType !== 'all') {
+      properties = properties.filter(property => property.propertyType === propertyType);
+    }
+    
+    // Filter by bedrooms range
+    if (minBedrooms !== undefined) {
+      properties = properties.filter(property => property.bedrooms >= minBedrooms);
+    }
+    if (maxBedrooms !== undefined) {
+      properties = properties.filter(property => property.bedrooms <= maxBedrooms);
+    }
+    
+    // Filter by bathrooms range
+    if (minBathrooms !== undefined) {
+      properties = properties.filter(property => property.bathrooms >= minBathrooms);
+    }
+    if (maxBathrooms !== undefined) {
+      properties = properties.filter(property => property.bathrooms <= maxBathrooms);
+    }
+    
+    // Filter by price range
+    if (minPrice !== undefined) {
+      properties = properties.filter(property => property.rentAmount >= minPrice);
+    }
+    if (maxPrice !== undefined) {
+      properties = properties.filter(property => property.rentAmount <= maxPrice);
+    }
+    
+    // Filter by location
+    if (location) {
+      const locationLower = location.toLowerCase();
+      properties = properties.filter(property => {
+        return (property.location || '').toLowerCase().includes(locationLower) ||
+               (property.city || '').toLowerCase().includes(locationLower) ||
+               (property.address || '').toLowerCase().includes(locationLower);
+      });
+    }
+    
+    // Apply sorting
+    if (sortBy === 'price') {
+      properties.sort((a, b) => {
+        return sortOrder === 'asc' ? 
+          a.rentAmount - b.rentAmount : 
+          b.rentAmount - a.rentAmount;
+      });
+    } else if (sortBy === 'bedrooms') {
+      properties.sort((a, b) => {
+        return sortOrder === 'asc' ? 
+          a.bedrooms - b.bedrooms : 
+          b.bedrooms - a.bedrooms;
+      });
+    } else if (sortBy === 'bathrooms') {
+      properties.sort((a, b) => {
+        return sortOrder === 'asc' ? 
+          a.bathrooms - b.bathrooms : 
+          b.bathrooms - a.bathrooms;
+      });
+    } else if (sortBy === 'area') {
+      properties.sort((a, b) => {
+        const aArea = a.squareFeet || 0;
+        const bArea = b.squareFeet || 0;
+        return sortOrder === 'asc' ? 
+          aArea - bArea : 
+          bArea - aArea;
+      });
+    } else {
+      // Default to sorting by creation date if available (newer first)
+      properties.sort((a, b) => {
+        const aDate = a.createdAt ? a.createdAt.getTime() : 0;
+        const bDate = b.createdAt ? b.createdAt.getTime() : 0;
+        return sortOrder === 'asc' ? aDate - bDate : bDate - aDate;
+      });
+    }
+    
+    // Apply pagination
+    return properties.slice(offset, offset + limit);
   }
   
   // Leases
@@ -548,6 +694,122 @@ export class DatabaseStorage implements IStorage {
   
   async getAvailableProperties(): Promise<Property[]> {
     return await db.select().from(properties).where(eq(properties.available, true));
+  }
+  
+  async searchProperties(params: {
+    query?: string;
+    propertyType?: string;
+    minBedrooms?: number;
+    maxBedrooms?: number;
+    minBathrooms?: number;
+    maxBathrooms?: number;
+    minPrice?: number;
+    maxPrice?: number;
+    location?: string;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+    limit?: number;
+    offset?: number;
+  }): Promise<Property[]> {
+    const {
+      query = '',
+      propertyType = 'all',
+      minBedrooms,
+      maxBedrooms,
+      minBathrooms,
+      maxBathrooms,
+      minPrice,
+      maxPrice,
+      location,
+      sortBy = 'createdAt',
+      sortOrder = 'desc',
+      limit = 20,
+      offset = 0
+    } = params;
+    
+    // Base query
+    let queryBuilder = db.select().from(properties)
+      .where(eq(properties.available, true));
+    
+    // Apply filters
+    if (propertyType && propertyType !== 'all') {
+      queryBuilder = queryBuilder.where(eq(properties.propertyType, propertyType));
+    }
+    
+    if (minBedrooms !== undefined) {
+      queryBuilder = queryBuilder.where(gte(properties.bedrooms, minBedrooms));
+    }
+    
+    if (maxBedrooms !== undefined) {
+      queryBuilder = queryBuilder.where(lte(properties.bedrooms, maxBedrooms));
+    }
+    
+    if (minBathrooms !== undefined) {
+      queryBuilder = queryBuilder.where(gte(properties.bathrooms, minBathrooms));
+    }
+    
+    if (maxBathrooms !== undefined) {
+      queryBuilder = queryBuilder.where(lte(properties.bathrooms, maxBathrooms));
+    }
+    
+    if (minPrice !== undefined) {
+      queryBuilder = queryBuilder.where(gte(properties.rentAmount, minPrice));
+    }
+    
+    if (maxPrice !== undefined) {
+      queryBuilder = queryBuilder.where(lte(properties.rentAmount, maxPrice));
+    }
+    
+    if (location) {
+      // Search in location, city, and address fields
+      queryBuilder = queryBuilder.where(
+        or(
+          ilike(properties.location, `%${location}%`),
+          ilike(properties.city, `%${location}%`),
+          ilike(properties.address, `%${location}%`)
+        )
+      );
+    }
+    
+    // Text search across multiple fields
+    if (query) {
+      queryBuilder = queryBuilder.where(
+        or(
+          ilike(properties.title, `%${query}%`),
+          ilike(properties.description, `%${query}%`),
+          ilike(properties.location, `%${query}%`),
+          ilike(properties.city, `%${query}%`),
+          ilike(properties.address, `%${query}%`)
+        )
+      );
+    }
+    
+    // Apply sorting
+    if (sortBy === 'price') {
+      queryBuilder = sortOrder === 'asc' 
+        ? queryBuilder.orderBy(asc(properties.rentAmount)) 
+        : queryBuilder.orderBy(desc(properties.rentAmount));
+    } else if (sortBy === 'bedrooms') {
+      queryBuilder = sortOrder === 'asc' 
+        ? queryBuilder.orderBy(asc(properties.bedrooms)) 
+        : queryBuilder.orderBy(desc(properties.bedrooms));
+    } else if (sortBy === 'bathrooms') {
+      queryBuilder = sortOrder === 'asc' 
+        ? queryBuilder.orderBy(asc(properties.bathrooms)) 
+        : queryBuilder.orderBy(desc(properties.bathrooms));
+    } else if (sortBy === 'area') {
+      queryBuilder = sortOrder === 'asc' 
+        ? queryBuilder.orderBy(asc(properties.squareFootage)) 
+        : queryBuilder.orderBy(desc(properties.squareFootage));
+    } else {
+      // Default to creation date
+      queryBuilder = queryBuilder.orderBy(desc(properties.createdAt));
+    }
+    
+    // Apply pagination
+    queryBuilder = queryBuilder.limit(limit).offset(offset);
+    
+    return await queryBuilder;
   }
   
   async clearProperties(): Promise<void> {

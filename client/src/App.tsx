@@ -4,6 +4,7 @@ import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/auth-page";
 import ProvidersSignup from "@/pages/providers-signup";
 import LandingPage from "@/pages/landing-page";
+import PropertySearchPage from "@/pages/property-search-page";
 import { ProtectedRoute } from "./lib/protected-route";
 
 // Shared pages
@@ -47,6 +48,7 @@ function Router() {
       <Route path="/" component={LandingPage} />
       <Route path="/auth" component={AuthPage} />
       <Route path="/providers-signup" component={ProvidersSignup} />
+      <Route path="/properties/search" component={PropertySearchPage} />
       
       {/* Dashboard route - redirect to appropriate dashboard based on role */}
       <ProtectedRoute path="/dashboard" component={(props) => {

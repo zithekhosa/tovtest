@@ -427,6 +427,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Public property search endpoint (no authentication required)
+  app.get("/api/public/properties/search", async (req, res) => {
+    try {
+      // Parse query parameters
+      const query = req.query.query as string | undefined;
+      const propertyType = req.query.propertyType as string | undefined;
+      const minBedrooms = req.query.minBedrooms ? parseInt(req.query.minBedrooms as string) : undefined;
+      const maxBedrooms = req.query.maxBedrooms ? parseInt(req.query.maxBedrooms as string) : undefined;
+      const minBathrooms = req.query.minBathrooms ? parseInt(req.query.minBathrooms as string) : undefined;
+      const maxBathrooms = req.query.maxBathrooms ? parseInt(req.query.maxBathrooms as string) : undefined;
+      const minPrice = req.query.minPrice ? parseInt(req.query.minPrice as string) : undefined;
+      const maxPrice = req.query.maxPrice ? parseInt(req.query.maxPrice as string) : undefined;
+      const location = req.query.location as string | undefined;
+      const sortBy = req.query.sortBy as string | undefined;
+      const sortOrder = req.query.sortOrder as 'asc' | 'desc' | undefined;
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 12;
+      const offset = req.query.offset ? parseInt(req.query.offset as string) : 0;
+      
+      // Build search parameters
+      const searchParams = {
+        query,
+        propertyType,
+        minBedrooms,
+        maxBedrooms,
+        minBathrooms,
+        maxBathrooms,
+        minPrice,
+        maxPrice,
+        location,
+        sortBy,
+        sortOrder,
+        limit,
+        offset
+      };
+      
+      // Validate numeric parameters
+      if (
+        (minBedrooms !== undefined && isNaN(minBedrooms)) ||
+        (maxBedrooms !== undefined && isNaN(maxBedrooms)) ||
+        (minBathrooms !== undefined && isNaN(minBathrooms)) ||
+        (maxBathrooms !== undefined && isNaN(maxBathrooms)) ||
+        (minPrice !== undefined && isNaN(minPrice)) ||
+        (maxPrice !== undefined && isNaN(maxPrice)) ||
+        (limit !== undefined && isNaN(limit)) ||
+        (offset !== undefined && isNaN(offset))
+      ) {
+        return res.status(400).json({ message: "Invalid numeric parameters" });
+      }
+      
+      // Execute search
+      const properties = await storage.searchProperties(searchParams);
+      
+      res.json(properties);
+    } catch (error) {
+      console.error("Error searching properties:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
   // Leases
   app.get("/api/leases/tenant", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
@@ -806,7 +865,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Get available properties for tenant to browse
+  // Get available properties for tenant to browse (authenticated endpoint)
   app.get("/api/properties/available", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     
@@ -815,6 +874,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(properties);
     } catch (error) {
       res.status(500).json({ message: "Error fetching available properties" });
+    }
+  });
+  
+  // Public endpoint for property search with filters (no auth required)
+  app.get("/api/public/properties/search", async (req, res) => {
+    try {
+      const { 
+        query = '', 
+        propertyType = 'all', 
+        minBedrooms, 
+        maxBedrooms,
+        minBathrooms,
+        maxBathrooms,
+        minPrice,
+        maxPrice,
+        location,
+        sortBy = 'createdAt',
+        sortOrder = 'desc',
+        limit = 20,
+        offset = 0
+      } = req.query;
+      
+      // Call the search function in storage
+      const properties = await storage.searchProperties({
+        query: query as string,
+        propertyType: propertyType as string,
+        minBedrooms: minBedrooms ? parseInt(minBedrooms as string) : undefined,
+        maxBedrooms: maxBedrooms ? parseInt(maxBedrooms as string) : undefined,
+        minBathrooms: minBathrooms ? parseInt(minBathrooms as string) : undefined,
+        maxBathrooms: maxBathrooms ? parseInt(maxBathrooms as string) : undefined,
+        minPrice: minPrice ? parseInt(minPrice as string) : undefined,
+        maxPrice: maxPrice ? parseInt(maxPrice as string) : undefined,
+        location: location as string,
+        sortBy: sortBy as string,
+        sortOrder: sortOrder as 'asc' | 'desc',
+        limit: parseInt(limit as string),
+        offset: parseInt(offset as string)
+      });
+      
+      res.json(properties);
+    } catch (error) {
+      console.error('Error searching properties:', error);
+      res.status(500).json({ message: "Error searching properties" });
     }
   });
   

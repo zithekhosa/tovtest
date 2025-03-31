@@ -1,91 +1,87 @@
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { MapPin, BedDouble, Bath, Square, ArrowRight } from "lucide-react";
 import { Property } from "@shared/schema";
-import { formatCurrency } from "@/lib/utils";
-import { Building, Bed, Bath, Home, SquareIcon } from "lucide-react";
 
 interface PropertyCardProps {
   property: Property;
   onClick?: () => void;
-  showActions?: boolean;
-  actionLabel?: string;
-  onAction?: () => void;
+  showViewDetails?: boolean;
 }
 
-export default function PropertyCard({
-  property,
+export default function PropertyCard({ 
+  property, 
   onClick,
-  showActions = false,
-  actionLabel = "View Details",
-  onAction,
+  showViewDetails = true 
 }: PropertyCardProps) {
-  const {
-    address,
-    city,
-    state,
-    zipCode,
-    propertyType,
-    bedrooms,
-    bathrooms,
-    squareFeet,
-    rentAmount,
-    available,
-  } = property;
-
-  const handleClick = () => {
-    if (onClick) onClick();
-  };
-
-  const handleAction = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (onAction) onAction();
+  // Default property image if none available
+  const defaultImage = "https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=1473&auto=format&fit=crop";
+  
+  // Helper function to get property image
+  const getPropertyImage = () => {
+    if (property.images && property.images.length > 0) {
+      return property.images[0];
+    }
+    return defaultImage;
   };
 
   return (
-    <Card 
-      className="overflow-hidden hover:shadow-lg transition-all duration-200 cursor-pointer h-full flex flex-col"
-      onClick={handleClick}
-    >
-      {/* Property image placeholder */}
-      <div className="relative w-full aspect-video bg-gray-200 flex items-center justify-center text-gray-500">
-        <Building size={48} />
-        {available && (
-          <Badge className="absolute top-2 right-2 bg-green-500">Available</Badge>
-        )}
+    <Card className="overflow-hidden group hover:shadow-md transition-all cursor-pointer" onClick={onClick}>
+      <div className="relative h-52 overflow-hidden">
+        <img 
+          src={getPropertyImage()} 
+          alt={property.title || "Property Image"} 
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+        />
+        <div className="absolute top-3 left-3">
+          <Badge className="bg-primary text-white">
+            {property.propertyType === 'apartment' ? 'Apartment' : 
+             property.propertyType === 'house' ? 'House' : 
+             property.propertyType === 'commercial' ? 'Commercial' :
+             property.propertyType === 'office' ? 'Office' :
+             property.propertyType === 'land' ? 'Land' : 'Property'}
+          </Badge>
+        </div>
+        <div className="absolute top-3 right-3">
+          <Badge className="bg-white text-primary">
+            {property.rentAmount.toLocaleString()} BWP/mo
+          </Badge>
+        </div>
       </div>
-
-      <CardContent className="pt-4 flex-grow">
-        <h3 className="text-lg font-semibold line-clamp-1">{address}</h3>
-        <p className="text-gray-500 mb-2">{city}, {state} {zipCode}</p>
-        <p className="text-xl font-bold text-primary mb-4">{formatCurrency(rentAmount)}<span className="text-sm font-normal text-gray-500">/month</span></p>
-        
-        <div className="grid grid-cols-2 gap-2 mt-2">
-          <div className="flex items-center text-gray-600">
-            <Home className="h-4 w-4 mr-1" />
-            <span className="text-sm">{propertyType}</span>
-          </div>
-          <div className="flex items-center text-gray-600">
-            <Bed className="h-4 w-4 mr-1" />
-            <span className="text-sm">{bedrooms} {bedrooms === 1 ? 'Bed' : 'Beds'}</span>
-          </div>
-          <div className="flex items-center text-gray-600">
-            <Bath className="h-4 w-4 mr-1" />
-            <span className="text-sm">{bathrooms} {bathrooms === 1 ? 'Bath' : 'Baths'}</span>
-          </div>
-          {squareFeet && (
+      <CardHeader className="pb-2">
+        <CardTitle className="text-xl">{property.title || `${property.propertyType} in ${property.city}`}</CardTitle>
+        <div className="flex items-center text-gray-500 text-sm">
+          <MapPin className="h-4 w-4 mr-1" />
+          {property.location || property.address}
+        </div>
+      </CardHeader>
+      <CardContent className="pt-0">
+        <div className="flex justify-between items-center">
+          {property.bedrooms !== null && property.bedrooms !== undefined && (
             <div className="flex items-center text-gray-600">
-              <SquareIcon className="h-4 w-4 mr-1" />
-              <span className="text-sm">{squareFeet} sq ft</span>
+              <BedDouble className="h-4 w-4 mr-1" />
+              <span>{property.bedrooms} {property.bedrooms === 1 ? 'Bed' : 'Beds'}</span>
+            </div>
+          )}
+          {property.bathrooms !== null && property.bathrooms !== undefined && (
+            <div className="flex items-center text-gray-600">
+              <Bath className="h-4 w-4 mr-1" />
+              <span>{property.bathrooms} {property.bathrooms === 1 ? 'Bath' : 'Baths'}</span>
+            </div>
+          )}
+          {property.squareFootage !== null && property.squareFootage !== undefined && (
+            <div className="flex items-center text-gray-600">
+              <Square className="h-4 w-4 mr-1" />
+              <span>{property.squareFootage} m²</span>
             </div>
           )}
         </div>
       </CardContent>
-
-      {showActions && (
-        <CardFooter className="border-t p-4">
-          <Button className="w-full" onClick={handleAction}>
-            {actionLabel}
+      {showViewDetails && (
+        <CardFooter className="pt-0 flex justify-between">
+          <Button variant="ghost" className="text-primary p-0 hover:bg-transparent hover:text-primary/80">
+            View Details <ArrowRight className="h-4 w-4 ml-1" />
           </Button>
         </CardFooter>
       )}

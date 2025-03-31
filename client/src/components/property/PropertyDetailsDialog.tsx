@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Dialog,
   DialogContent,
@@ -9,266 +9,214 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { Property } from "@shared/schema";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useAuth } from "@/hooks/use-auth";
-import { useToast } from "@/hooks/use-toast";
-import {
-  Building,
-  MapPin,
-  Bed,
-  Bath,
-  Maximize,
-  Car,
-  Leaf,
-  DollarSign,
-  Calendar,
-  Timer,
-  CornerDownRight,
+import { 
+  MapPin, 
+  BedDouble, 
+  Bath, 
+  Square, 
+  Calendar, 
+  Home, 
+  UserRound,
+  X,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import { useState } from "react";
 
 interface PropertyDetailsDialogProps {
-  property: Property;
+  property: Property | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onRequestToViewProperty?: (property: Property) => void;
+  onApplyForProperty?: (property: Property) => void;
 }
 
 export default function PropertyDetailsDialog({
   property,
   open,
   onOpenChange,
+  onRequestToViewProperty,
+  onApplyForProperty,
 }: PropertyDetailsDialogProps) {
   const { user } = useAuth();
-  const { toast } = useToast();
-  const [applyLoading, setApplyLoading] = useState(false);
-
-  // Format the currency values
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  
+  if (!property) return null;
+  
+  // Default property image if none available
+  const defaultImage = "https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=1473&auto=format&fit=crop";
+  
+  // Helper function to get property images
+  const getPropertyImages = () => {
+    if (property.images && property.images.length > 0) {
+      return property.images;
+    }
+    return [defaultImage];
+  };
+  
+  const images = getPropertyImages();
+  
+  const handlePrevImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  };
+  
+  const handleNextImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  };
+  
+  // Format currency (BWP)
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-BW", {
-      style: "currency",
-      currency: "BWP",
-      minimumFractionDigits: 0,
-    }).format(amount);
+    return amount.toLocaleString() + " BWP";
   };
-
-  // Handle the apply button click
-  const handleApply = async () => {
-    if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "Please login to apply for this property",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      setApplyLoading(true);
-      
-      const response = await apiRequest(
-        "POST", 
-        "/api/applications", 
-        { 
-          propertyId: property.id,
-          status: "pending",
-          moveInDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-          notes: "Interested in this property",
-        }
-      );
-
-      if (response.ok) {
-        queryClient.invalidateQueries({ queryKey: ["/api/applications"] });
-        toast({
-          title: "Application submitted",
-          description: "Your application has been submitted successfully",
-        });
-        onOpenChange(false);
-      } else {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to submit application");
-      }
-    } catch (error) {
-      toast({
-        title: "Application failed",
-        description: error instanceof Error ? error.message : "An error occurred while submitting your application",
-        variant: "destructive",
-      });
-    } finally {
-      setApplyLoading(false);
-    }
-  };
-
+  
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-4xl overflow-y-auto max-h-[90vh]">
-        <DialogHeader>
-          <DialogTitle className="text-2xl">{property.title}</DialogTitle>
-          <DialogDescription className="flex items-center text-gray-500">
-            <MapPin className="h-4 w-4 mr-1 text-gray-400" />
-            {property.location}
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Image gallery */}
-          <div className="space-y-3">
-            {property.images && property.images.length > 0 ? (
-              <div className="rounded-lg overflow-hidden aspect-video bg-gray-100 relative">
-                <img
-                  src={property.images[0]}
-                  alt={property.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ) : (
-              <div className="rounded-lg overflow-hidden aspect-video bg-gray-100 flex items-center justify-center">
-                <Building className="h-16 w-16 text-gray-300" />
-              </div>
-            )}
-
-            {property.images && property.images.length > 1 && (
-              <div className="grid grid-cols-4 gap-2">
-                {property.images.slice(1, 5).map((image, index) => (
+      <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
+        {/* Image Carousel */}
+        <div className="relative h-64 sm:h-80 md:h-96 mb-4 rounded-md overflow-hidden">
+          <img
+            src={images[currentImageIndex]}
+            alt={property.title || "Property Image"}
+            className="w-full h-full object-cover"
+          />
+          
+          {images.length > 1 && (
+            <>
+              <button
+                onClick={handlePrevImage}
+                className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 rounded-full p-2 text-white hover:bg-black/70"
+              >
+                <ChevronLeft className="h-6 w-6" />
+              </button>
+              <button
+                onClick={handleNextImage}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 rounded-full p-2 text-white hover:bg-black/70"
+              >
+                <ChevronRight className="h-6 w-6" />
+              </button>
+              
+              <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1">
+                {images.map((_, index) => (
                   <div
                     key={index}
-                    className="aspect-square rounded overflow-hidden bg-gray-100"
-                  >
-                    <img
-                      src={image}
-                      alt={`${property.title} ${index + 2}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
+                    className={`h-2 w-2 rounded-full ${
+                      index === currentImageIndex ? "bg-white" : "bg-white/50"
+                    }`}
+                  />
                 ))}
               </div>
-            )}
-          </div>
-
-          {/* Details */}
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-xl font-semibold">
-                {formatCurrency(property.rentAmount)}{" "}
-                <span className="text-gray-500 text-sm font-normal">
-                  per month
-                </span>
-              </h3>
-              <Badge
-                variant={
-                  property.propertyType === "Apartment"
-                    ? "default"
-                    : property.propertyType === "House"
-                    ? "outline"
-                    : "secondary"
-                }
-                className="mt-1"
-              >
-                {property.propertyType}
-              </Badge>
-              {property.available && (
-                <Badge variant="outline" className="ml-2 mt-1 bg-green-50 text-green-700 hover:bg-green-50 border-green-200">
-                  Available
-                </Badge>
-              )}
-            </div>
-
-            <Separator />
-
-            <div className="grid grid-cols-2 gap-y-3">
-              <div className="flex items-center">
-                <Bed className="h-4 w-4 mr-2 text-gray-500" />
-                <span className="text-sm">{property.bedrooms} Bedrooms</span>
-              </div>
-              <div className="flex items-center">
-                <Bath className="h-4 w-4 mr-2 text-gray-500" />
-                <span className="text-sm">{property.bathrooms} Bathrooms</span>
-              </div>
-              <div className="flex items-center">
-                <Maximize className="h-4 w-4 mr-2 text-gray-500" />
-                <span className="text-sm">{property.squareFootage} sq ft</span>
-              </div>
-              <div className="flex items-center">
-                <Car className="h-4 w-4 mr-2 text-gray-500" />
-                <span className="text-sm">{property.parkingSpaces} Parking</span>
-              </div>
-              <div className="flex items-center">
-                <Leaf className="h-4 w-4 mr-2 text-gray-500" />
-                <span className="text-sm">
-                  Year built: {property.yearBuilt || "N/A"}
-                </span>
-              </div>
-              <div className="flex items-center">
-                <DollarSign className="h-4 w-4 mr-2 text-gray-500" />
-                <span className="text-sm">
-                  Deposit: {formatCurrency(property.securityDeposit)}
-                </span>
-              </div>
-            </div>
-
-            <Separator />
-
-            <div className="space-y-2">
-              <h4 className="font-medium">Description</h4>
-              <p className="text-sm text-gray-600 whitespace-pre-line">
-                {property.description}
-              </p>
-            </div>
-
-            <Separator />
-
-            <div className="space-y-2">
-              <h4 className="font-medium">Amenities</h4>
-              <div className="grid grid-cols-2 gap-y-2 gap-x-4">
-                {property.amenities &&
-                  property.amenities.map((amenity, index) => (
-                    <div key={index} className="flex items-center text-sm">
-                      <CornerDownRight className="h-3 w-3 mr-2 text-gray-500" />
-                      {amenity}
-                    </div>
-                  ))}
-              </div>
-            </div>
-
-            <Separator />
-
-            <div className="space-y-2">
-              <h4 className="font-medium">Lease Terms</h4>
-              <div className="grid grid-cols-2 gap-y-2">
-                <div className="flex items-center">
-                  <Calendar className="h-4 w-4 mr-2 text-gray-500" />
-                  <span className="text-sm">
-                    Minimum lease: {property.minLeaseTerm || "1"} months
-                  </span>
-                </div>
-                <div className="flex items-center">
-                  <Timer className="h-4 w-4 mr-2 text-gray-500" />
-                  <span className="text-sm">
-                    Available: {new Date(property.availableDate).toLocaleDateString()}
-                  </span>
-                </div>
-              </div>
-            </div>
+            </>
+          )}
+          
+          <div className="absolute top-3 left-3">
+            <Badge className="bg-primary text-white">
+              {property.propertyType === 'apartment' ? 'Apartment' : 
+               property.propertyType === 'house' ? 'House' : 
+               property.propertyType === 'commercial' ? 'Commercial' :
+               property.propertyType === 'office' ? 'Office' :
+               property.propertyType === 'land' ? 'Land' : 'Property'}
+            </Badge>
           </div>
         </div>
-
-        <DialogFooter className="flex-col sm:flex-row gap-2 sm:justify-between">
-          <div className="flex items-center">
-            <span className="text-lg font-semibold">
-              {formatCurrency(property.rentAmount)}
-            </span>
-            <span className="text-sm text-gray-500 ml-1">per month</span>
+        
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-bold">
+            {property.title || `${property.propertyType} in ${property.city}`}
+          </DialogTitle>
+          <DialogDescription className="flex items-center text-primary">
+            <MapPin className="h-4 w-4 mr-1" />
+            {property.location || property.address}, {property.city}
+          </DialogDescription>
+        </DialogHeader>
+        
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 my-4">
+          <div className="flex flex-col items-center p-3 bg-gray-50 rounded-md">
+            <Home className="text-primary mb-1" />
+            <span className="text-sm text-gray-500">Property Type</span>
+            <span className="font-medium">{property.propertyType}</span>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Close
-            </Button>
-            <Button
-              onClick={handleApply}
-              disabled={applyLoading || !property.available}
-            >
-              {applyLoading ? "Applying..." : "Apply Now"}
-            </Button>
+          
+          {property.bedrooms !== null && property.bedrooms !== undefined && (
+            <div className="flex flex-col items-center p-3 bg-gray-50 rounded-md">
+              <BedDouble className="text-primary mb-1" />
+              <span className="text-sm text-gray-500">Bedrooms</span>
+              <span className="font-medium">{property.bedrooms}</span>
+            </div>
+          )}
+          
+          {property.bathrooms !== null && property.bathrooms !== undefined && (
+            <div className="flex flex-col items-center p-3 bg-gray-50 rounded-md">
+              <Bath className="text-primary mb-1" />
+              <span className="text-sm text-gray-500">Bathrooms</span>
+              <span className="font-medium">{property.bathrooms}</span>
+            </div>
+          )}
+          
+          {property.squareFootage !== null && property.squareFootage !== undefined && (
+            <div className="flex flex-col items-center p-3 bg-gray-50 rounded-md">
+              <Square className="text-primary mb-1" />
+              <span className="text-sm text-gray-500">Area</span>
+              <span className="font-medium">{property.squareFootage} m²</span>
+            </div>
+          )}
+        </div>
+        
+        <div className="mb-4">
+          <h3 className="text-lg font-semibold mb-2">Price</h3>
+          <div className="text-2xl font-bold text-primary">
+            {formatCurrency(property.rentAmount)}<span className="text-base font-normal text-gray-500"> / month</span>
+          </div>
+          {property.securityDeposit && (
+            <div className="text-sm text-gray-500 mt-1">
+              Security Deposit: {formatCurrency(property.securityDeposit)}
+            </div>
+          )}
+        </div>
+        
+        {property.description && (
+          <div className="mb-4">
+            <h3 className="text-lg font-semibold mb-2">Description</h3>
+            <p className="text-gray-700 whitespace-pre-line">{property.description}</p>
+          </div>
+        )}
+        
+        <DialogFooter className="flex flex-col sm:flex-row gap-3 sm:justify-between mt-4">
+          <div className="text-sm text-gray-500 flex items-center sm:order-first order-last">
+            <Calendar className="h-4 w-4 mr-1" />
+            {property.createdAt 
+              ? `Listed on ${new Date(property.createdAt).toLocaleDateString()}`
+              : "Available Now"}
+          </div>
+          
+          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+            {user?.role === "tenant" && (
+              <>
+                {onRequestToViewProperty && (
+                  <Button 
+                    variant="outline" 
+                    onClick={() => onRequestToViewProperty(property)}
+                  >
+                    Request Viewing
+                  </Button>
+                )}
+                
+                {onApplyForProperty && (
+                  <Button onClick={() => onApplyForProperty(property)}>
+                    Apply Now
+                  </Button>
+                )}
+              </>
+            )}
+            
+            {(!user || (user.role !== "tenant")) && (
+              <Button onClick={() => onOpenChange(false)}>
+                Close
+              </Button>
+            )}
           </div>
         </DialogFooter>
       </DialogContent>
