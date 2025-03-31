@@ -37,19 +37,19 @@ export function MetricsCard({ title, value, description, icon, trend, progress, 
   }
 
   return (
-    <div className={`tov-metrics-card bg-white rounded-full p-6 shadow-sm hover:shadow-md transition-all aspect-square flex flex-col items-center justify-center text-center ${className || ''}`}>
-      <div className={`h-12 w-12 rounded-full ${bgColorClass} flex items-center justify-center shrink-0 mb-3`}>
+    <div className={`tov-metrics-card bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center text-center ${className || ''}`}>
+      <div className={`h-10 w-10 rounded-full ${bgColorClass} flex items-center justify-center shrink-0 mb-2`}>
         {icon}
       </div>
       <h3 className="text-sm font-medium mb-1 tov-truncate-text">{title}</h3>
-      <div className="text-2xl font-bold mt-1 mb-1">{value}</div>
+      <div className="text-xl font-bold mb-1">{value}</div>
       
       {description && (
         <p className="text-xs text-muted-foreground tov-text-ellipsis">{description}</p>
       )}
       
       {trend && (
-        <div className="flex items-center text-xs mt-2 justify-center">
+        <div className="flex items-center text-xs mt-1 justify-center">
           {trend.isPositive ? (
             <TrendingUp className="mr-1 h-3 w-3 text-green-500 shrink-0" />
           ) : (
@@ -62,7 +62,7 @@ export function MetricsCard({ title, value, description, icon, trend, progress, 
       )}
       
       {progress && (
-        <div className="mt-2 w-full max-w-[120px]">
+        <div className="mt-1 w-full max-w-[100px]">
           <Progress value={(progress.value / progress.max) * 100} className="h-1.5" />
           <p className="text-xs text-muted-foreground mt-1 tov-text-ellipsis">
             {progress.value} of {progress.max}

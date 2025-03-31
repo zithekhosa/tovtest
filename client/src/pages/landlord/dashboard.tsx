@@ -173,20 +173,18 @@ export default function LandlordDashboard() {
           />
 
           {/* Dashboard Metrics Cards */}
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {dashboardMetrics.map((metric, index) => (
-              <div className="flex justify-center" key={index}>
-                <div className="w-[180px]">
-                  <MetricsCard
-                    title={metric.title}
-                    value={metric.value}
-                    description={metric.description}
-                    icon={metric.icon}
-                    trend={metric.trend}
-                    progress={metric.progress}
-                    className="tov-metrics-card shadow-sm hover:shadow-md transition-all"
-                  />
-                </div>
+              <div key={index}>
+                <MetricsCard
+                  title={metric.title}
+                  value={metric.value}
+                  description={metric.description}
+                  icon={metric.icon}
+                  trend={metric.trend}
+                  progress={metric.progress}
+                  className="shadow-sm hover:shadow-md transition-all"
+                />
               </div>
             ))}
           </div>
