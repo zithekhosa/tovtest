@@ -94,6 +94,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Get user by ID - for public profiles (like landlord profiles)
+  app.get("/api/users/:id", async (req, res) => {
+    try {
+      const userId = Number(req.params.id);
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+      
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Remove sensitive information before sending the response
+      const { password, ...safeUser } = user;
+      res.json(safeUser);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Error fetching user details" });
+    }
+  });
+  
   // Debug route to list all users (for testing only - does not require authentication)
   app.get("/api/debug/users", async (req, res) => {
     try {
@@ -348,6 +370,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const properties = await storage.getPropertiesByLandlord(req.user.id);
       res.json(properties);
     } catch (error) {
+      res.status(500).json({ message: "Error fetching landlord properties" });
+    }
+  });
+  
+  // Get properties by specific landlord ID (for landlord profiles)
+  app.get("/api/properties/landlord/:id", async (req, res) => {
+    try {
+      const landlordId = Number(req.params.id);
+      if (isNaN(landlordId)) {
+        return res.status(400).json({ message: "Invalid landlord ID" });
+      }
+      
+      const properties = await storage.getPropertiesByLandlord(landlordId);
+      res.json(properties);
+    } catch (error) {
+      console.error("Error fetching landlord properties:", error);
       res.status(500).json({ message: "Error fetching landlord properties" });
     }
   });
