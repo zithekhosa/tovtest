@@ -15,61 +15,78 @@
 @layer components {
   /* TOV Platform standardized card styling system */
   .tov-card {
-    @apply p-6 rounded-lg border shadow-sm min-w-[250px] min-h-[180px] flex flex-col overflow-hidden;
+    @apply p-4 sm:p-6 rounded-lg border shadow-sm flex flex-col overflow-hidden;
   }
   
   .tov-card-title {
-    @apply text-xl font-semibold mb-3 truncate;
+    @apply text-lg sm:text-xl font-semibold mb-2 sm:mb-3 truncate;
   }
   
   .tov-card-description {
-    @apply text-muted-foreground text-sm line-clamp-3 mb-3;
+    @apply text-muted-foreground text-sm line-clamp-2 mb-2 sm:mb-3;
   }
   
   .tov-card-content {
-    @apply flex-grow overflow-y-auto min-h-0 space-y-2;
+    @apply flex-grow overflow-hidden min-h-0 space-y-2;
   }
   
   .tov-dashboard-card {
-    @apply flex flex-col p-6 rounded-lg border shadow-sm min-h-[180px] min-w-[250px];
+    @apply flex flex-col p-4 sm:p-6 rounded-lg border shadow-sm overflow-hidden;
   }
   
   .tov-metrics-card {
-    @apply flex flex-col p-6 rounded-lg border shadow-sm min-h-[150px] min-w-[250px];
+    @apply flex flex-col p-4 sm:p-6 rounded-lg border shadow-sm overflow-hidden;
   }
   
   .tov-analytics-card {
-    @apply p-6 rounded-lg border shadow-sm min-h-[250px] min-w-[300px] flex flex-col;
+    @apply p-4 sm:p-6 rounded-lg border shadow-sm flex flex-col overflow-hidden;
   }
   
   .tov-provider-card {
-    @apply p-6 rounded-lg border shadow-sm min-h-[200px] min-w-[250px];
+    @apply p-4 sm:p-6 rounded-lg border shadow-sm overflow-hidden;
   }
   
   /* Text management utilities */
   .tov-truncate-text {
-    @apply truncate;
+    @apply truncate max-w-full;
   }
   
   .tov-text-ellipsis {
-    @apply overflow-hidden text-ellipsis whitespace-nowrap;
+    @apply overflow-hidden text-ellipsis whitespace-nowrap max-w-full;
   }
   
   .tov-text-wrap {
-    @apply break-words;
+    @apply break-words overflow-hidden;
+  }
+  
+  .tov-line-clamp-1 {
+    @apply line-clamp-1 overflow-hidden;
   }
   
   .tov-line-clamp-2 {
-    @apply line-clamp-2;
+    @apply line-clamp-2 overflow-hidden;
   }
   
   .tov-line-clamp-3 {
-    @apply line-clamp-3;
+    @apply line-clamp-3 overflow-hidden;
+  }
+  
+  /* Mobile text sizing utilities */
+  .tov-text-mobile {
+    @apply text-sm sm:text-base;
+  }
+  
+  .tov-heading-mobile {
+    @apply text-lg sm:text-xl md:text-2xl font-semibold;
+  }
+  
+  .tov-subheading-mobile {
+    @apply text-base sm:text-lg font-medium;
   }
   
   /* Layout utilities */
   .tov-grid-layout {
-    @apply grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+    @apply grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
   }
   
   .tov-flex-center {
@@ -86,6 +103,53 @@
   
   /* Icon containers */
   .tov-icon-container {
-    @apply flex items-center justify-center h-10 w-10 rounded-full shrink-0;
+    @apply flex items-center justify-center h-8 w-8 sm:h-10 sm:w-10 rounded-full shrink-0;
+  }
+  
+  /* Facebook-style social card */
+  .tov-social-card {
+    @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden mb-3;
+  }
+  
+  .tov-social-card-header {
+    @apply p-4 flex items-center space-x-3;
+  }
+  
+  .tov-social-card-content {
+    @apply px-4 pb-3 whitespace-pre-line break-words;
+  }
+  
+  .tov-social-card-actions {
+    @apply px-4 py-3 border-t border-gray-100 dark:border-gray-700 flex justify-around;
+  }
+  
+  /* Mobile-optimized containers */
+  .tov-mobile-container {
+    @apply w-full px-3 sm:px-4 md:px-6 max-w-3xl mx-auto;
+  }
+  
+  .tov-content-feed {
+    @apply max-w-[600px] mx-auto w-full px-1 sm:px-2;
+  }
+  
+  /* Prevent layout shifts with fixed aspect ratios */
+  .tov-aspect-video {
+    @apply relative overflow-hidden;
+    aspect-ratio: 16 / 9;
+  }
+  
+  .tov-aspect-square {
+    @apply relative overflow-hidden;
+    aspect-ratio: 1 / 1;
+  }
+  
+  /* Remove scrollbars but maintain functionality */
+  .tov-hide-scrollbar {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+  
+  .tov-hide-scrollbar::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
   }
 }

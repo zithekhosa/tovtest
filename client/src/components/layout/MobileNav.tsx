@@ -5,9 +5,20 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { 
   Menu, X, Home, Building, Users, Wrench, FileText, 
-  MessageSquare, Settings, LogOut, DollarSign 
+  MessageSquare, Settings, LogOut, DollarSign, 
+  Search, Bell, User as UserIcon
 } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserRoleType } from "@shared/schema";
+import type { LucideIcon } from "lucide-react";
+
+interface NavItem {
+  href: string;
+  icon: LucideIcon;
+  label: string;
+  active: boolean;
+  notification?: number;
+}
 
 interface MobileNavProps {
   role: UserRoleType;
@@ -25,12 +36,12 @@ export default function MobileNav({ role }: MobileNavProps) {
   };
 
   // Determine navigation items based on user role
-  const getNavItems = () => {
-    const baseItems = [
+  const getNavItems = (): NavItem[] => {
+    const baseItems: NavItem[] = [
       {
         href: role === "tenant" ? "/tenant/dashboard" : role === "landlord" ? "/landlord/dashboard" : role === "agency" ? "/agency/dashboard" : "/maintenance/dashboard",
         icon: Home,
-        label: "Dashboard",
+        label: "Home",
         active: location.includes("dashboard"),
       },
       {
@@ -38,10 +49,11 @@ export default function MobileNav({ role }: MobileNavProps) {
         icon: MessageSquare,
         label: "Messages",
         active: location.includes("messages"),
+        notification: 2,
       }
     ];
 
-    const roleSpecificItems = {
+    const roleSpecificItems: Record<UserRoleType, NavItem[]> = {
       landlord: [
         {
           href: "/landlord/properties",
@@ -58,7 +70,7 @@ export default function MobileNav({ role }: MobileNavProps) {
         {
           href: "/landlord/financial-management",
           icon: DollarSign,
-          label: "Financial Management",
+          label: "Finances",
           active: location.includes("financial-management"),
         },
         {
@@ -66,6 +78,7 @@ export default function MobileNav({ role }: MobileNavProps) {
           icon: Wrench,
           label: "Maintenance",
           active: location.includes("maintenance"),
+          notification: 3,
         },
         {
           href: "/landlord/documents",
@@ -120,6 +133,7 @@ export default function MobileNav({ role }: MobileNavProps) {
           icon: Wrench,
           label: "Jobs",
           active: location.includes("jobs"),
+          notification: 5,
         },
         {
           href: "/maintenance/documents",
@@ -130,10 +144,11 @@ export default function MobileNav({ role }: MobileNavProps) {
       ],
     };
 
-    return [...roleSpecificItems[role], ...baseItems];
+    return [...baseItems, ...roleSpecificItems[role]];
   };
 
-  const navItems = getNavItems();
+  const navItems: NavItem[] = getNavItems();
+  const tabItems = navItems.slice(0, 5); // Show only 5 items in the tab bar
 
   const handleLogout = async () => {
     await logoutMutation.mutateAsync();
@@ -141,38 +156,57 @@ export default function MobileNav({ role }: MobileNavProps) {
 
   return (
     <>
-      {/* Mobile Menu Button */}
-      <div className="fixed bottom-4 right-4 z-50 md:hidden">
-        <Button
-          variant="outline"
-          size="icon"
-          className="h-12 w-12 rounded-full shadow-lg bg-primary hover:bg-primary/90 text-white border-0"
-          onClick={() => setIsOpen(true)}
-        >
-          <Menu className="h-6 w-6" />
-          <span className="sr-only">Open menu</span>
-        </Button>
+      {/* Facebook-like Mobile Top Navigation */}
+      <div className="fixed top-0 left-0 right-0 z-40 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 md:hidden">
+        <div className="flex items-center justify-between px-4 py-2">
+          <div className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
+              <span className="text-primary-foreground font-bold text-lg">T</span>
+            </div>
+            <span className="font-bold text-lg dark:text-white">TOV</span>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Button variant="ghost" size="icon" className="rounded-full bg-gray-100 dark:bg-gray-800">
+              <Search className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+            </Button>
+            
+            <Button variant="ghost" size="icon" className="rounded-full bg-gray-100 dark:bg-gray-800 relative">
+              <Bell className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+              <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+            </Button>
+            
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="rounded-full bg-gray-100 dark:bg-gray-800"
+              onClick={() => setIsOpen(true)}
+            >
+              <Menu className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+            </Button>
+          </div>
+        </div>
       </div>
 
-      {/* Mobile Bottom Navigation for Most Used Functions */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 py-2 px-4 md:hidden">
-        <div className="flex justify-around items-center">
-          {navItems.slice(0, 4).map((item, i) => (
+      {/* Facebook-style Mobile Bottom Tab Bar */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 md:hidden">
+        <div className="flex justify-around items-center py-1">
+          {tabItems.map((item, i) => (
             <Link
               key={i}
               href={item.href}
               className={cn(
-                "flex flex-col items-center px-1 py-1 rounded-md",
+                "flex flex-col items-center px-2 py-1 rounded-md relative",
                 item.active 
                   ? "text-primary" 
                   : "text-gray-500 dark:text-gray-400"
               )}
             >
-              <item.icon className="h-5 w-5 mb-1" />
-              <span className="text-xs">{item.label}</span>
-              {item.label === "Messages" && (
-                <span className="absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 bg-primary text-primary-foreground text-xs font-medium w-4 h-4 flex items-center justify-center rounded-full">
-                  2
+              <item.icon className="h-6 w-6 mb-0.5" />
+              <span className="text-[10px] font-medium">{item.label}</span>
+              {item.notification && (
+                <span className="absolute top-0 right-1/4 bg-red-500 text-white text-[10px] font-medium min-w-[16px] h-4 flex items-center justify-center rounded-full px-1">
+                  {item.notification}
                 </span>
               )}
             </Link>
@@ -180,81 +214,116 @@ export default function MobileNav({ role }: MobileNavProps) {
         </div>
       </div>
 
-      {/* Full-screen drawer menu */}
+      {/* Full-screen Facebook-style drawer menu */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 bg-gray-900/80 dark:bg-black/80 md:hidden">
-          <div className="h-full w-full max-w-[280px] sm:max-w-sm ml-auto bg-white dark:bg-gray-900 flex flex-col shadow-2xl animate-in slide-in-from-right">
-            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
-                  <span className="text-primary-foreground font-bold text-lg">T</span>
-                </div>
-                <span className="font-bold text-lg dark:text-white">TOV Platform</span>
-              </div>
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm md:hidden">
+          <div className="h-full w-full max-w-[320px] sm:max-w-sm ml-auto bg-white dark:bg-gray-900 flex flex-col shadow-2xl animate-in slide-in-from-right">
+            <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-800">
+              <div className="text-xl font-semibold">Menu</div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                className="rounded-full p-2 bg-gray-100 dark:bg-gray-800 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
               >
-                <X className="h-6 w-6" />
+                <X className="h-5 w-5" />
               </button>
             </div>
 
-            <div className="p-4 border-b border-gray-200 dark:border-gray-800">
+            {/* User profile section */}
+            <div className="p-4">
               <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 rounded-full bg-primary/10 dark:bg-primary/20 flex items-center justify-center">
-                  <span className="text-primary font-medium text-lg">
+                <Avatar className="h-12 w-12 border-2 border-primary">
+                  <AvatarFallback className="bg-primary/10 text-primary">
                     {user.firstName && user.lastName 
                       ? getInitials(user.firstName, user.lastName) 
                       : user.username.substring(0, 2).toUpperCase()}
-                  </span>
-                </div>
-                <div>
-                  <p className="font-medium text-gray-900 dark:text-white">
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-lg truncate">
                     {user.firstName && user.lastName 
                       ? `${user.firstName} ${user.lastName}` 
                       : user.username}
                   </p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 capitalize">{role}</p>
+                  <Link 
+                    href={`/${role}/profile`}
+                    className="text-sm text-primary hover:underline truncate"
+                  >
+                    View your profile
+                  </Link>
                 </div>
               </div>
             </div>
+            
+            {/* Shortcuts section */}
+            <div className="px-4 py-2 border-t border-gray-100 dark:border-gray-800">
+              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2 px-1">Shortcuts</h3>
+              <div className="grid grid-cols-2 gap-2">
+                {navItems.slice(0, 4).map((item, i) => (
+                  <Link
+                    key={i}
+                    href={item.href}
+                    onClick={() => setIsOpen(false)}
+                    className={cn(
+                      "flex flex-col items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg",
+                      item.active && "bg-primary/5 dark:bg-primary/10"
+                    )}
+                  >
+                    <div className={cn(
+                      "w-10 h-10 rounded-full flex items-center justify-center mb-2",
+                      item.active ? "bg-primary/10 text-primary" : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400" 
+                    )}>
+                      <item.icon className="h-5 w-5" />
+                    </div>
+                    <span className="text-xs font-medium truncate max-w-full">{item.label}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
 
-            <div className="flex-1 overflow-y-auto py-2">
-              <div className="space-y-1">
+            {/* All menu items section */}
+            <div className="flex-1 overflow-y-auto py-2 px-2 border-t border-gray-100 dark:border-gray-800">
+              <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2 px-3 pt-2">All menu</h3>
+              <div className="space-y-0.5">
                 {navItems.map((item, i) => (
                   <Link
                     key={i}
                     href={item.href}
                     onClick={() => setIsOpen(false)}
                     className={cn(
-                      "flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md mx-2",
-                      item.active && "bg-primary/10 dark:bg-primary/20 text-primary font-medium"
+                      "flex items-center px-3 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg",
+                      item.active && "bg-primary/5 dark:bg-primary/10 text-primary"
                     )}
                   >
-                    <item.icon className="h-5 w-5 mr-3 shrink-0" />
-                    <span>{item.label}</span>
-                    {item.label === "Messages" && (
-                      <span className="ml-auto bg-primary text-primary-foreground text-xs font-medium px-2 py-0.5 rounded-full">
-                        2
+                    <div className={cn(
+                      "w-8 h-8 rounded-full flex items-center justify-center mr-3",
+                      item.active ? "bg-primary/10 text-primary" : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400" 
+                    )}>
+                      <item.icon className="h-4 w-4" />
+                    </div>
+                    <span className="font-medium">{item.label}</span>
+                    {item.notification && (
+                      <span className="ml-auto bg-red-500 text-white text-xs font-medium min-w-[20px] h-5 flex items-center justify-center rounded-full px-1">
+                        {item.notification}
                       </span>
                     )}
                   </Link>
                 ))}
-              </div>
-
-              <div className="mt-6 px-4">
+                
                 <Link
                   href={`/${role}/settings`}
                   onClick={() => setIsOpen(false)}
-                  className="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md"
+                  className="flex items-center px-3 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
                 >
-                  <Settings className="h-5 w-5 mr-3 shrink-0" />
-                  <span>Settings</span>
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center mr-3 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400">
+                    <Settings className="h-4 w-4" />
+                  </div>
+                  <span className="font-medium">Settings</span>
                 </Link>
               </div>
             </div>
 
-            <div className="p-4 border-t border-gray-200 dark:border-gray-800">
+            {/* Logout section */}
+            <div className="p-4 border-t border-gray-100 dark:border-gray-800">
               <Button
                 variant="outline"
                 className="w-full justify-start text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"

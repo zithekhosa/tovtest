@@ -58,7 +58,7 @@ export function ScrollableGrid({
 }) {
   return (
     <div className={cn(
-      "flex overflow-x-auto pb-4 -mx-4 px-4 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4",
+      "flex overflow-x-auto pb-4 -mx-4 px-4 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 scrollbar-hide",
       gap,
       className
     )}>
@@ -67,6 +67,83 @@ export function ScrollableGrid({
           {child}
         </div>
       ))}
+    </div>
+  );
+}
+
+// Social media style feed layout (optimized for mobile)
+export function SocialFeed({
+  children,
+  className,
+  gap = "gap-3",
+}: {
+  children: React.ReactNode;
+  className?: string;
+  gap?: string;
+}) {
+  return (
+    <div className={cn(
+      "flex flex-col w-full max-w-[640px] mx-auto",
+      gap,
+      className
+    )}>
+      {children}
+    </div>
+  );
+}
+
+// Two-column grid that automatically adapts to a single column on mobile
+export function AdaptiveGrid({
+  children,
+  className,
+  sidebar,
+  reversed = false,
+  gap = "gap-4",
+}: {
+  children: React.ReactNode;
+  className?: string;
+  sidebar: React.ReactNode;
+  reversed?: boolean;
+  gap?: string;
+}) {
+  return (
+    <div className={cn(
+      "grid grid-cols-1 lg:grid-cols-12",
+      gap,
+      className
+    )}>
+      <div className={cn(
+        "lg:col-span-8",
+        reversed ? "lg:order-2" : "lg:order-1",
+        "order-1"
+      )}>
+        {children}
+      </div>
+      <div className={cn(
+        "lg:col-span-4",
+        reversed ? "lg:order-1" : "lg:order-2",
+        "order-2"
+      )}>
+        {sidebar}
+      </div>
+    </div>
+  );
+}
+
+// Responsive grid list optimized for mobile displays
+export function FluidList({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cn(
+      "flex flex-col space-y-2",
+      className
+    )}>
+      {children}
     </div>
   );
 }
