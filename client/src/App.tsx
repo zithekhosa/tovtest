@@ -31,6 +31,7 @@ import TenantLeaseHistory from "@/pages/tenant/lease-history";
 
 // Landlord pages
 import LandlordDashboard from "@/pages/landlord/dashboard";
+import FacebookLandlordDashboard from "@/pages/landlord/facebook-dashboard";
 import LandlordProperties from "@/pages/landlord/properties";
 import FinancialManagement from "@/pages/landlord/financial-management";
 import DocumentManagement from "@/pages/landlord/document-management";
@@ -59,7 +60,7 @@ function Router() {
       {/* Dashboard route - redirect to appropriate dashboard based on role */}
       <ProtectedRoute path="/dashboard" component={(props) => {
         const user = props?.user;
-        if (user?.role === 'landlord') return <LandlordDashboard />;
+        if (user?.role === 'landlord') return <FacebookLandlordDashboard />;
         if (user?.role === 'tenant') return <TenantDashboard />;
         if (user?.role === 'agency') return <AgencyDashboard />;
         if (user?.role === 'maintenance') return <MaintenanceDashboard />;
@@ -84,7 +85,8 @@ function Router() {
       <ProtectedRoute path="/tenant/properties" component={Properties} role="tenant" />
       
       {/* Landlord routes */}
-      <ProtectedRoute path="/landlord/dashboard" component={LandlordDashboard} role="landlord" />
+      <ProtectedRoute path="/landlord/dashboard" component={FacebookLandlordDashboard} role="landlord" />
+      <ProtectedRoute path="/landlord/classic-dashboard" component={LandlordDashboard} role="landlord" />
       <ProtectedRoute path="/landlord/properties" component={LandlordProperties} role="landlord" />
       <ProtectedRoute path="/landlord/tenants" component={Tenants} role="landlord" />
       <ProtectedRoute path="/landlord/maintenance" component={Maintenance} role="landlord" />
