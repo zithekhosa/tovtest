@@ -411,45 +411,10 @@ export default function FacebookLandlordDashboard() {
                   </div>
                 </div>
               }
-              content={
-                <div className="space-y-4">
-                  <p>{activity.description}</p>
-                  {activity.image && (
-                    <div className="w-full aspect-video rounded-lg overflow-hidden">
-                      <img 
-                        src={activity.image} 
-                        alt={activity.title} 
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )}
-                  {activity.actionUrl && activity.actionLabel && (
-                    <div className="flex justify-end">
-                      <Button variant="outline" size="sm" asChild>
-                        <Link href={activity.actionUrl}>
-                          {activity.actionLabel}
-                        </Link>
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              }
-              actions={
-                <div className="flex justify-around">
-                  <Button variant="ghost" className="flex-1 flex items-center justify-center gap-2 text-gray-600 dark:text-gray-300">
-                    <ThumbsUp className="h-4 w-4" />
-                    <span>Like</span>
-                  </Button>
-                  <Button variant="ghost" className="flex-1 flex items-center justify-center gap-2 text-gray-600 dark:text-gray-300">
-                    <MessageCircle className="h-4 w-4" />
-                    <span>Comment</span>
-                  </Button>
-                  <Button variant="ghost" className="flex-1 flex items-center justify-center gap-2 text-gray-600 dark:text-gray-300">
-                    <Share className="h-4 w-4" />
-                    <span>Share</span>
-                  </Button>
-                </div>
-              }
+              content={activity.description}
+              image={activity.image}
+              actionUrl={activity.actionUrl}
+              actionLabel={activity.actionLabel}
             />
           ))}
         </SocialFeed>

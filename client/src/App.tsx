@@ -62,8 +62,8 @@ function Router() {
       {/* Dashboard route - redirect to appropriate dashboard based on role */}
       <ProtectedRoute path="/dashboard" component={(props) => {
         const user = props?.user;
-        if (!user) return <AuthPage />;
-        if (user?.role === 'landlord') return <FacebookLandlordDashboard />;
+        if (!user) return null;
+        if (user?.role === 'landlord') return <LandlordDashboard />;
         if (user?.role === 'tenant') return <TenantDashboard />;
         if (user?.role === 'agency') return <AgencyDashboard />;
         if (user?.role === 'maintenance') return <MaintenanceDashboard />;
@@ -88,8 +88,8 @@ function Router() {
       <ProtectedRoute path="/tenant/properties" component={Properties} role="tenant" />
       
       {/* Landlord routes */}
-      <ProtectedRoute path="/landlord/dashboard" component={FacebookLandlordDashboard} role="landlord" />
-      <ProtectedRoute path="/landlord/classic-dashboard" component={LandlordDashboard} role="landlord" />
+      <ProtectedRoute path="/landlord/dashboard" component={LandlordDashboard} role="landlord" />
+      <ProtectedRoute path="/landlord/facebook-dashboard" component={FacebookLandlordDashboard} role="landlord" />
       <ProtectedRoute path="/landlord/properties" component={LandlordProperties} role="landlord" />
       <ProtectedRoute path="/landlord/tenants" component={Tenants} role="landlord" />
       <ProtectedRoute path="/landlord/maintenance" component={Maintenance} role="landlord" />

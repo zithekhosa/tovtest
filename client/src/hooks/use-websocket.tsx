@@ -31,89 +31,81 @@ export function useWebSocket(onMessage?: (data: any) => void): UseWebSocketRetur
       reconnectTimeoutRef.current = null;
     }
     
-    // Create WebSocket connection
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}/ws`;
-    
-    const socket = new WebSocket(wsUrl);
-    socketRef.current = socket;
-    
-    socket.onopen = () => {
-      console.log('WebSocket connected');
-      // Authenticate with user ID
-      socket.send(JSON.stringify({
-        type: 'auth',
-        userId: user.id
-      }));
-    };
-    
-    socket.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        console.log('WebSocket message received:', data);
-        
-        // Authentication confirmation
-        if (data.type === 'auth_success') {
-          setConnected(true);
-        }
-        
-        // Handle other message types
-        if (onMessage && data.type !== 'auth_success') {
-          onMessage(data);
-          
-          // Show toast notification for certain message types
-          if (data.type === 'maintenance_update') {
-            toast({
-              title: 'Maintenance Update',
-              description: data.message || 'A maintenance request has been updated',
-              variant: 'default'
-            });
-          } else if (data.type === 'property_notification') {
-            toast({
-              title: 'Property Update',
-              description: data.message || 'There is an update for your property',
-              variant: 'default'
-            });
-          } else if (data.type === 'chat_message') {
-            toast({
-              title: 'New Message',
-              description: 'You have received a new message',
-              variant: 'default'
-            });
-          }
-        }
-      } catch (error) {
-        console.error('Error parsing WebSocket message:', error);
-      }
-    };
-    
-    socket.onerror = (error) => {
-      console.error('WebSocket error:', error);
-      setConnected(false);
-    };
-    
-    socket.onclose = () => {
-      console.log('WebSocket disconnected');
-      setConnected(false);
+    try {
+      // Create WebSocket connection
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${protocol}//${window.location.host}/ws`;
       
-      // Attempt to reconnect after a delay
-      reconnectTimeoutRef.current = setTimeout(() => {
-        console.log('Attempting to reconnect WebSocket...');
-        connect();
-      }, 5000);
-    };
-  }, [user?.id, onMessage, toast]);
+      const socket = new WebSocket(wsUrl);
+      socketRef.current = socket;
+      
+      socket.onopen = () => {
+        console.log('WebSocket connection established');
+        setConnected(true);
+        
+        // Send authentication message immediately after connection
+        if (user?.id) {
+          socket.send(JSON.stringify({
+            type: 'auth',
+            userId: user.id
+          }));
+        }
+      };
+      
+      socket.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          console.log('WebSocket message received:', data);
+          
+          // Call the onMessage callback if provided
+          if (onMessage) {
+            onMessage(data);
+          }
+        } catch (error) {
+          console.error('Error parsing WebSocket message:', error);
+        }
+      };
+      
+      socket.onclose = (event) => {
+        console.log('WebSocket connection closed. Code:', event.code);
+        setConnected(false);
+        
+        // Attempt to reconnect after 5 seconds
+        reconnectTimeoutRef.current = setTimeout(() => {
+          console.log('Attempting to reconnect WebSocket...');
+          connect();
+        }, 5000);
+      };
+      
+      socket.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        toast({
+          title: "Connection error",
+          description: "Failed to connect to real-time updates.",
+          variant: "destructive",
+        });
+      };
+    } catch (error) {
+      console.error('Error setting up WebSocket connection:', error);
+      setConnected(false);
+    }
+  }, [user, onMessage, toast]);
   
   // Send message through the WebSocket
   const sendMessage = useCallback((message: WebSocketMessage) => {
-    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+    if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) {
+      console.warn('Cannot send message, WebSocket is not connected');
+      return;
+    }
+    
+    try {
       socketRef.current.send(JSON.stringify(message));
-    } else {
-      console.error('WebSocket is not connected');
+    } catch (error) {
+      console.error('Error sending WebSocket message:', error);
       toast({
-        title: 'Connection Error',
-        description: 'Unable to send message. Please try again later.',
-        variant: 'destructive'
+        title: "Message error",
+        description: "Failed to send real-time message.",
+        variant: "destructive",
       });
     }
   }, [toast]);

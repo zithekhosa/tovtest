@@ -12,7 +12,7 @@ export function ProtectedRoute({
   role,
 }: {
   path: string;
-  component: (props?: { user?: any }) => React.JSX.Element;
+  component: (props?: { user?: any }) => React.JSX.Element | null;
   role?: UserRoleType;
 }) {
   const { user, isLoading } = useAuth();
