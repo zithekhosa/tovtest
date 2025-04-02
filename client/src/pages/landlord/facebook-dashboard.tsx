@@ -7,7 +7,7 @@ import { FeedContainer } from "@/components/layout/ContentContainer";
 import { SocialCard } from "@/components/ui/mobile-optimized-card";
 import { formatCurrency, formatDate, cn } from "@/lib/utils";
 import { SocialFeed } from "@/components/ui/responsive-grid";
-import { MetricsCard } from "@/components/dashboard/DashboardMetrics";
+import { getLandlordMetrics } from "@/components/dashboard/DashboardMetrics";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

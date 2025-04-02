@@ -41,6 +41,37 @@ export function ResponsiveGrid({
   );
 }
 
+interface ScrollableGridProps {
+  children: React.ReactNode;
+  className?: string;
+  itemWidth?: string;
+  gap?: string;
+}
+
+export function ScrollableGrid({
+  children,
+  className,
+  itemWidth = "min-w-[280px]",
+  gap = "gap-4",
+}: ScrollableGridProps) {
+  return (
+    <div className={cn(
+      "flex overflow-x-auto pb-3 tov-hide-scrollbar",
+      gap,
+      className
+    )}>
+      {Array.isArray(children)
+        ? children.map((child, index) => (
+            <div key={index} className={cn("shrink-0", itemWidth)}>
+              {child}
+            </div>
+          ))
+        : <div className={cn("shrink-0", itemWidth)}>{children}</div>
+      }
+    </div>
+  );
+}
+
 export function SocialFeed({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
     <div className={cn("w-full max-w-[600px] mx-auto", className)}>

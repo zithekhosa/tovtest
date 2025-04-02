@@ -19,6 +19,7 @@ import LandlordProfile from "@/pages/landlord-profile";
 import TenantProfile from "@/pages/tenant-profile";
 import AgencyProfile from "@/pages/agency-profile";
 import MaintenanceProfile from "@/pages/maintenance-profile";
+import TestFacebookDashboard from "@/pages/test-facebook-dashboard";
 
 // Tenant pages
 import TenantDashboard from "@/pages/tenant/dashboard";
@@ -56,10 +57,12 @@ function Router() {
       <Route path="/auth" component={AuthPage} />
       <Route path="/providers-signup" component={ProvidersSignup} />
       <Route path="/properties/search" component={PropertySearchPage} />
+      <Route path="/test-facebook" component={TestFacebookDashboard} />
       
       {/* Dashboard route - redirect to appropriate dashboard based on role */}
       <ProtectedRoute path="/dashboard" component={(props) => {
         const user = props?.user;
+        if (!user) return <AuthPage />;
         if (user?.role === 'landlord') return <FacebookLandlordDashboard />;
         if (user?.role === 'tenant') return <TenantDashboard />;
         if (user?.role === 'agency') return <AgencyDashboard />;
