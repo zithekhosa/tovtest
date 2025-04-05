@@ -922,30 +922,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     try {
+      console.log(`Fetching leases for tenant ${req.user.id}...`);
       // Find active leases for this tenant
       const leases = await storage.getLeasesByTenant(req.user.id);
+      console.log(`Found ${leases.length} total leases for tenant ${req.user.id}`);
+      
       const activeLeases = leases.filter(lease => lease.active);
+      console.log(`Found ${activeLeases.length} active leases for tenant ${req.user.id}`);
       
       if (activeLeases.length === 0) {
+        console.log(`No active leases found for tenant ${req.user.id}, returning empty array`);
         return res.json([]);
       }
       
       // Get properties for these leases
       const properties = [];
       for (const lease of activeLeases) {
+        console.log(`Fetching property ${lease.propertyId} for lease ${lease.id}...`);
         const property = await storage.getProperty(lease.propertyId);
         if (property) {
+          console.log(`Found property: ${property.title}`);
           properties.push({
             ...property,
             lease: lease,
           });
+        } else {
+          console.error(`Property ${lease.propertyId} not found for lease ${lease.id}`);
         }
       }
       
+      console.log(`Returning ${properties.length} properties for tenant ${req.user.id}`);
       res.json(properties);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching tenant properties:", error);
-      res.status(500).json({ message: "Error fetching property" });
+      res.status(500).json({ 
+        message: "Error fetching property", 
+        error: String(error),
+        errorName: error.name,
+        errorStack: error.stack
+      });
     }
   });
   
@@ -958,19 +973,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     try {
+      console.log(`Fetching lease history for tenant ${req.user.id}...`);
       const leases = await storage.getLeasesByTenant(req.user.id);
+      console.log(`Found ${leases.length} leases for tenant ${req.user.id}`);
       
       // For each lease, fetch property details
       const leasesWithProperties = await Promise.all(
         leases.map(async (lease) => {
+          console.log(`Fetching property ${lease.propertyId} for lease ${lease.id}...`);
           const property = await storage.getProperty(lease.propertyId);
+          if (property) {
+            console.log(`Found property: ${property.title}`);
+          } else {
+            console.error(`Property ${lease.propertyId} not found for lease ${lease.id}`);
+          }
           return { ...lease, property };
         })
       );
       
+      console.log(`Returning ${leasesWithProperties.length} leases with properties for tenant ${req.user.id}`);
       res.json(leasesWithProperties);
-    } catch (error) {
-      res.status(500).json({ message: "Error fetching lease history" });
+    } catch (error: any) {
+      console.error("Error fetching tenant lease history:", error);
+      res.status(500).json({ 
+        message: "Error fetching lease history", 
+        error: String(error),
+        errorName: error.name,
+        errorStack: error.stack
+      });
     }
   });
   
@@ -1083,7 +1113,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         securityDeposit: property.rentAmount,
         active: false,
         status: "pending_approval",
-        createdAt: new Date(),
+        // createdAt is auto-generated in the DB
       });
       
       res.status(201).json(lease);
