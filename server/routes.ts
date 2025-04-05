@@ -687,6 +687,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Payments
+  app.get("/api/payments/landlord", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    if (req.user.role !== 'landlord') {
+      return res.status(403).json({ message: "Access denied" });
+    }
+    
+    try {
+      // Get properties owned by landlord
+      const properties = await storage.getPropertiesByLandlord(req.user.id);
+      
+      // Get leases for these properties
+      const leases = [];
+      for (const property of properties) {
+        const propertyLeases = await storage.getLeasesByProperty(property.id);
+        leases.push(...propertyLeases);
+      }
+      
+      // Get payments for these leases
+      const payments = [];
+      for (const lease of leases) {
+        const leasePayments = await storage.getPaymentsByLease(lease.id);
+        payments.push(...leasePayments);
+      }
+      
+      res.json(payments);
+    } catch (error) {
+      res.status(500).json({ message: "Error fetching landlord payments" });
+    }
+  });
+  
   app.get("/api/payments/tenant", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     

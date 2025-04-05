@@ -81,10 +81,10 @@ export function StandardLayout({
           active: location.includes("tenants"),
         },
         {
-          href: "/landlord/financial-management",
+          href: "/landlord/finances",
           icon: DollarSign,
           label: "Finances",
-          active: location.includes("financial-management"),
+          active: location.includes("finances"),
         },
         {
           href: "/landlord/maintenance",
