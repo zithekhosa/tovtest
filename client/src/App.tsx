@@ -34,6 +34,8 @@ import TenantLeaseHistory from "@/pages/tenant/lease-history";
 import LandlordDashboard from "@/pages/landlord/dashboard";
 import FacebookLandlordDashboard from "@/pages/landlord/facebook-dashboard";
 import LandlordProperties from "@/pages/landlord/properties";
+import LandlordTenants from "@/pages/landlord/tenants";
+import Finances from "@/pages/landlord/finances";
 import FinancialManagement from "@/pages/landlord/financial-management";
 import DocumentManagement from "@/pages/landlord/document-management";
 import MarketIntelligence from "@/pages/landlord/market-intelligence";
@@ -91,13 +93,21 @@ function Router() {
       <ProtectedRoute path="/landlord/dashboard" component={LandlordDashboard} role="landlord" />
       <ProtectedRoute path="/landlord/facebook-dashboard" component={FacebookLandlordDashboard} role="landlord" />
       <ProtectedRoute path="/landlord/properties" component={LandlordProperties} role="landlord" />
-      <ProtectedRoute path="/landlord/tenants" component={Tenants} role="landlord" />
+      <ProtectedRoute path="/landlord/tenants" component={LandlordTenants} role="landlord" />
+      <ProtectedRoute path="/landlord/finances" component={Finances} role="landlord" />
       <ProtectedRoute path="/landlord/maintenance" component={Maintenance} role="landlord" />
       <ProtectedRoute path="/landlord/messages" component={Messages} role="landlord" />
       <ProtectedRoute path="/landlord/documents" component={Documents} role="landlord" />
       <ProtectedRoute path="/landlord/document-management" component={DocumentManagement} role="landlord" />
       <ProtectedRoute path="/landlord/financial-management" component={FinancialManagement} role="landlord" />
       <ProtectedRoute path="/landlord/market-intelligence" component={MarketIntelligence} role="landlord" />
+      
+      {/* Add routes for payments and other potential subpages */}
+      <ProtectedRoute path="/landlord/payments/record" component={Finances} role="landlord" />
+      <ProtectedRoute path="/landlord/finances/transactions" component={Finances} role="landlord" />
+      <ProtectedRoute path="/landlord/messages/tenant/:id" component={Messages} role="landlord" />
+      <ProtectedRoute path="/landlord/documents/tenant/:id" component={Documents} role="landlord" />
+      <ProtectedRoute path="/landlord/leases/:id" component={DocumentManagement} role="landlord" />
       
       {/* Agency routes */}
       <ProtectedRoute path="/agency/dashboard" component={AgencyDashboard} role="agency" />

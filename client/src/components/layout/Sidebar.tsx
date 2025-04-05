@@ -63,10 +63,10 @@ export default function Sidebar({ role }: SidebarProps) {
           active: location.includes("tenants"),
         },
         {
-          href: "/landlord/financial-management",
+          href: "/landlord/finances",
           icon: DollarSign,
-          label: "Financial Management",
-          active: location.includes("financial-management"),
+          label: "Finances",
+          active: location.includes("finance"),
         },
         {
           href: "/landlord/market-intelligence",

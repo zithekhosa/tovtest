@@ -59,10 +59,10 @@ export default function MobileNav({ role }: MobileNavProps) {
           active: location.includes("tenants"),
         },
         {
-          href: "/landlord/financial-management",
+          href: "/landlord/finances",
           icon: DollarSign,
           label: "Finances",
-          active: location.includes("financial-management"),
+          active: location.includes("finance"),
         },
         {
           href: "/landlord/maintenance",
