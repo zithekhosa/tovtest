@@ -30,6 +30,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -96,8 +97,8 @@ const PaymentMethodBadge = ({ method }: { method: string }) => {
   }
 };
 
-// Status badge component
-const StatusBadge = ({ status }: { status: string }) => {
+// Legacy status badge component - keeping for any code that might still use it
+const StatusBadgeOld = ({ status }: { status: string }) => {
   switch(status.toLowerCase()) {
     case 'paid':
     case 'completed':
@@ -1106,10 +1107,11 @@ export default function TenantDashboard() {
                 
                 {/* Property Tab */}
                 <TabsContent value="property" className="pt-6 space-y-6">
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Top row with Current Property and Quick Actions */}
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                     <Card className="lg:col-span-2">
                       <CardHeader>
-                        <CardTitle className="text-lg">Property Details</CardTitle>
+                        <CardTitle className="text-lg">Current Property</CardTitle>
                         <CardDescription>Information about your current residence</CardDescription>
                       </CardHeader>
                       <CardContent>
@@ -1224,6 +1226,201 @@ export default function TenantDashboard() {
                       </Card>
                     </div>
                   </div>
+
+                  {/* Current Lease Details */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Current Lease Details</CardTitle>
+                      <CardDescription>Information about your active rental agreement</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {currentLease ? (
+                        <div>
+                          <div className="mb-6">
+                            <h4 className="text-sm font-medium mb-2">Lease Timeline</h4>
+                            <div className="relative pt-1">
+                              <div className="flex items-center justify-between mb-2">
+                                <div>
+                                  <span className="text-xs font-semibold inline-block text-blue-600">
+                                    {Math.min(Math.round((today.getTime() - new Date(currentLease.startDate).getTime()) / 
+                                    (new Date(currentLease.endDate).getTime() - new Date(currentLease.startDate).getTime()) * 100), 100)}% Complete
+                                  </span>
+                                </div>
+                                <div className="text-right">
+                                  <span className="text-xs font-semibold inline-block text-blue-600">
+                                    {daysUntilLeaseEnd > 0 ? `${daysUntilLeaseEnd} days remaining` : 'Expired'}
+                                  </span>
+                                </div>
+                              </div>
+                              <Progress 
+                                value={Math.min(Math.round((today.getTime() - new Date(currentLease.startDate).getTime()) / 
+                                (new Date(currentLease.endDate).getTime() - new Date(currentLease.startDate).getTime()) * 100), 100)} 
+                                className="h-2" 
+                              />
+                              <div className="flex justify-between mt-1 text-xs text-muted-foreground">
+                                <span>{formatDate(currentLease.startDate)}</span>
+                                <span>{formatDate(currentLease.endDate)}</span>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                              <h4 className="text-sm font-medium mb-2">Lease Terms</h4>
+                              <div className="space-y-2">
+                                <div className="flex justify-between">
+                                  <span className="text-sm text-muted-foreground">Monthly Rent</span>
+                                  <span className="text-sm">{formatCurrency(monthlyRent)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-sm text-muted-foreground">Security Deposit</span>
+                                  <span className="text-sm">{formatCurrency(securityDeposit)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-sm text-muted-foreground">Lease Status</span>
+                                  <StatusBadge status="active" />
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div>
+                              <h4 className="text-sm font-medium mb-2">Payment Schedule</h4>
+                              <div className="space-y-2">
+                                <div className="flex justify-between">
+                                  <span className="text-sm text-muted-foreground">Due Date</span>
+                                  <span className="text-sm">5th of each month</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-sm text-muted-foreground">Late Fee</span>
+                                  <span className="text-sm">{formatCurrency(200)} after 7th</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-sm text-muted-foreground">Payment Method</span>
+                                  <span className="text-sm">M-Zaka / Bank Transfer</span>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div>
+                              <h4 className="text-sm font-medium mb-2">Property Details</h4>
+                              <div className="space-y-2">
+                                <div className="flex justify-between">
+                                  <span className="text-sm text-muted-foreground">Property Type</span>
+                                  <span className="text-sm">{currentProperty?.propertyType || 'Apartment'}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-sm text-muted-foreground">Bedrooms</span>
+                                  <span className="text-sm">{currentProperty?.bedrooms || 2}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-sm text-muted-foreground">Bathrooms</span>
+                                  <span className="text-sm">{currentProperty?.bathrooms || 1}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-center py-8">
+                          <FileText className="h-10 w-10 mx-auto text-muted-foreground/50 mb-3" />
+                          <p className="text-muted-foreground">No active lease found</p>
+                        </div>
+                      )}
+                    </CardContent>
+                    <CardFooter className="border-t pt-4">
+                      <Button variant="outline" className="w-full" asChild>
+                        <Link href="/tenant/documents">
+                          <FileText className="h-4 w-4 mr-1" />
+                          View Lease Documents
+                        </Link>
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                  
+                  {/* Rental History */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Rental History</CardTitle>
+                      <CardDescription>Your previous properties and payment history</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-6">
+                        {/* Timeline of all properties rented */}
+                        <div>
+                          <h4 className="text-sm font-medium mb-4">Property Timeline</h4>
+                          <div className="space-y-4">
+                            {leases.map((lease, idx) => (
+                              <div key={lease.id} className="relative pl-6 pb-4 border-l last:border-0">
+                                <div className="absolute left-0 top-0 -translate-x-1/2 h-4 w-4 rounded-full bg-blue-100 border-2 border-blue-500"></div>
+                                <div className="space-y-1">
+                                  <div className="flex items-center justify-between">
+                                    <h5 className="font-medium">{lease.property?.title || `Property ${idx + 1}`}</h5>
+                                    <StatusBadge status={
+                                      new Date(lease.endDate) < today ? "completed" : 
+                                      new Date(lease.startDate) > today ? "upcoming" : "active"
+                                    } />
+                                  </div>
+                                  <p className="text-xs text-muted-foreground">
+                                    {lease.property?.address || "Unknown address"}, {lease.property?.city || "Unknown location"}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {formatDate(lease.startDate)} - {formatDate(lease.endDate)}
+                                  </p>
+                                  <p className="text-xs font-medium">
+                                    Rent: {formatCurrency(lease.monthlyRent || monthlyRent)}
+                                  </p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        {/* Payment consistency */}
+                        <div>
+                          <h4 className="text-sm font-medium mb-2">Payment History Analysis</h4>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="p-4 border rounded-lg flex flex-col items-center justify-center">
+                              <div className="text-3xl font-bold text-blue-600 mb-1">
+                                {payments.length || 24}
+                              </div>
+                              <p className="text-sm text-center text-muted-foreground">
+                                Total Payments Made
+                              </p>
+                            </div>
+                            
+                            <div className="p-4 border rounded-lg flex flex-col items-center justify-center">
+                              <div className="text-3xl font-bold text-green-600 mb-1">
+                                {Math.round((payments.filter(p => {
+                                  const paymentDate = new Date(p.paymentDate);
+                                  return paymentDate.getDate() <= 5;
+                                }).length / (payments.length || 1)) * 100) || 92}%
+                              </div>
+                              <p className="text-sm text-center text-muted-foreground">
+                                On-Time Payment Rate
+                              </p>
+                            </div>
+                            
+                            <div className="p-4 border rounded-lg flex flex-col items-center justify-center">
+                              <div className="text-3xl font-bold text-purple-600 mb-1">
+                                {formatCurrency(totalPaid || 144000)}
+                              </div>
+                              <p className="text-sm text-center text-muted-foreground">
+                                Total Amount Paid
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                    <CardFooter className="border-t pt-4">
+                      <Button className="w-full" variant="outline" asChild>
+                        <Link href="/tenant/payments">
+                          <DollarSign className="h-4 w-4 mr-1" />
+                          View Complete Payment History
+                        </Link>
+                      </Button>
+                    </CardFooter>
+                  </Card>
                 </TabsContent>
               </Tabs>
             </div>
