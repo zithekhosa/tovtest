@@ -2,13 +2,19 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { DashLayout } from "@/layout/dash-layout";
 import { useAuth } from "@/hooks/use-auth";
-import { Lease, MaintenanceRequest, Property } from "@shared/schema";
+import { Lease, MaintenanceRequest as BaseMaintenanceRequest, Property } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { cn, formatDateTime } from "@/lib/utils";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+
+// Extended type to include additional fields used in the UI but not in the DB schema
+type MaintenanceRequest = BaseMaintenanceRequest & {
+  allowEntry?: boolean;
+  preferredTime?: string;
+};
 
 // UI Components
 import {
@@ -466,141 +472,250 @@ export default function MaintenancePortal() {
     );
   }
 
-  // Main UI - Airbnb inspired (simplified version)
+  // Main UI - True Airbnb inspired version (premium design)
   return (
     <DashLayout>
       <div className="py-6">
-        {/* Header - Simplified, Airbnb-style */}
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-medium">Maintenance</h1>
-          <Button 
-            onClick={() => setIsNewRequestOpen(true)} 
-            className="rounded-full shadow-sm"
-            size="sm"
-          >
-            <Plus className="h-3.5 w-3.5 mr-1.5" />
-            New Request
-          </Button>
-        </div>
-
-        {/* Quick Stats - Inline, Airbnb Style */}
-        <div className="flex items-center space-x-6 mb-6 text-sm">
-          <div className="flex items-center">
-            <div className="p-1.5 bg-blue-50 rounded-full mr-2">
-              <Clock className="h-3.5 w-3.5 text-blue-500" />
+        <div className="max-w-5xl mx-auto">
+          {/* Hero Section - Airbnb Style */}
+          <div className="mb-10 text-center relative overflow-hidden rounded-xl">
+            <div className="absolute inset-0 bg-gradient-to-r from-amber-50 via-white to-amber-50 opacity-50 -z-10"></div>
+            <div className="py-10 px-6">
+              <div className="mb-3">
+                <div className="inline-flex p-2 rounded-full bg-amber-100 mb-3">
+                  <Wrench className="h-6 w-6 text-amber-600" />
+                </div>
+              </div>
+              <h1 className="text-2xl md:text-3xl font-medium mb-2">Property Maintenance Hub</h1>
+              <p className="text-muted-foreground max-w-lg mx-auto mb-6">Expert maintenance for your home, just a few clicks away. Fast, reliable, and hassle-free repairs when you need them.</p>
+              
+              <Button 
+                onClick={() => setIsNewRequestOpen(true)} 
+                className="bg-amber-500 hover:bg-amber-600 text-white rounded-full shadow-md py-2 px-5 h-auto"
+                size="lg"
+              >
+                <Plus className="h-4 w-4 mr-1.5" />
+                Request Maintenance
+              </Button>
             </div>
-            <span><span className="font-medium">{activeRequests.length}</span> Active</span>
           </div>
           
-          <div className="flex items-center">
-            <div className="p-1.5 bg-green-50 rounded-full mr-2">
-              <CheckCircle className="h-3.5 w-3.5 text-green-500" />
+          {/* Status Cards - Modern Apple/Airbnb inspired design */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <div className="flex items-center mb-3">
+                <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center mr-3">
+                  <Clock className="h-5 w-5 text-blue-500" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Active Requests</p>
+                  <h3 className="text-2xl font-semibold">{activeRequests.length}</h3>
+                </div>
+              </div>
+              {activeRequests.length > 0 && (
+                <div className="text-xs text-muted-foreground">
+                  {activeRequests.length === 1 ? 'Currently being processed' : 'Being handled by our team'}
+                </div>
+              )}
             </div>
-            <span><span className="font-medium">{completedRequests.length}</span> Completed</span>
+            
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <div className="flex items-center mb-3">
+                <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center mr-3">
+                  <CheckCircle className="h-5 w-5 text-green-500" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Completed</p>
+                  <h3 className="text-2xl font-semibold">{completedRequests.length}</h3>
+                </div>
+              </div>
+              {completedRequests.length > 0 && (
+                <div className="text-xs text-muted-foreground">
+                  Most recent: {formatDateTime(completedRequests[0]?.updatedAt || new Date()).split(' at')[0]}
+                </div>
+              )}
+            </div>
+            
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+              <div className="flex items-center mb-3">
+                <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center mr-3">
+                  <Tool className="h-5 w-5 text-gray-500" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Requests</p>
+                  <h3 className="text-2xl font-semibold">{maintenanceRequests.length}</h3>
+                </div>
+              </div>
+              <div className="text-xs text-muted-foreground">
+                Lifetime maintenance history
+              </div>
+            </div>
           </div>
           
-          <div className="flex items-center">
-            <div className="p-1.5 bg-gray-50 rounded-full mr-2">
-              <Tool className="h-3.5 w-3.5 text-gray-500" />
-            </div>
-            <span><span className="font-medium">{maintenanceRequests.length}</span> Total</span>
-          </div>
-        </div>
-
-        {/* Search and Tabs - Simplified */}
-        <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <Tabs defaultValue="active" value={activeTab} onValueChange={setActiveTab} className="w-full sm:w-auto">
-            <TabsList className="grid grid-cols-3 w-full sm:w-[300px]">
-              <TabsTrigger value="active">Active</TabsTrigger>
-              <TabsTrigger value="completed">Completed</TabsTrigger>
-              <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
-            </TabsList>
-          </Tabs>
-          
-          <div className="relative w-full sm:w-[220px]">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input 
-              placeholder="Search requests..."
-              className="pl-9 h-9"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-        </div>
-
-        {/* Main Content - Clean and Simple */}
-        <TabsContent value="active" className="mt-0">
-          {filteredRequests.length > 0 ? (
-            <div className="grid gap-3 md:grid-cols-2">
-              {filteredRequests.map((request) => (
-                <RequestCard 
-                  key={request.id} 
-                  request={request} 
-                  onClick={() => handleViewRequest(request)} 
-                />
+          {/* Category Filters - Horizontal scrolling with images (Airbnb style) */}
+          <div className="mb-8">
+            <h2 className="text-xl font-medium mb-4">Filter by Category</h2>
+            <div className="flex overflow-x-auto pb-3 space-x-4 scrollbar-hide">
+              {categories.map((category) => (
+                <div 
+                  key={category.id}
+                  className={`flex-shrink-0 cursor-pointer ${searchTerm === category.label ? 'ring-2 ring-amber-400 scale-105' : ''}`}
+                  onClick={() => setSearchTerm(category.label)}
+                >
+                  <div className={`w-24 h-24 rounded-lg flex items-center justify-center ${category.id === 'plumbing' ? 'bg-blue-50' : category.id === 'electrical' ? 'bg-yellow-50' : category.id === 'appliance' ? 'bg-green-50' : category.id === 'structural' ? 'bg-orange-50' : 'bg-gray-50'} border border-gray-100 hover:shadow-md transition-all mb-2`}>
+                    <div className="text-center">
+                      {category.icon}
+                      <div className="mt-2 text-xs font-medium">{category.label}</div>
+                    </div>
+                  </div>
+                </div>
               ))}
+              <div 
+                className="flex-shrink-0 cursor-pointer"
+                onClick={() => setSearchTerm("")}
+              >
+                <div className="w-24 h-24 rounded-lg flex items-center justify-center bg-purple-50 border border-gray-100 hover:shadow-md transition-all mb-2">
+                  <div className="text-center">
+                    <RotateCcw className="h-4 w-4 text-purple-500 mx-auto" />
+                    <div className="mt-2 text-xs font-medium">Clear Filter</div>
+                  </div>
+                </div>
+              </div>
             </div>
-          ) : (
-            <EmptyState
-              icon={<Wrench className="h-10 w-10 text-muted-foreground/30" />}
-              title="No active requests"
-              description={searchTerm ? "No matching requests found." : "You don't have any active maintenance requests."}
-              action={
-                !searchTerm && (
+          </div>
+          
+          {/* Main Content Area with Tabs */}
+          <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
+            {/* Tabs and Search - Simplified */}
+            <div className="flex flex-col md:flex-row gap-3 items-start md:items-center justify-between mb-6">
+              <Tabs defaultValue="active" value={activeTab} onValueChange={setActiveTab} className="w-full md:w-auto">
+                <TabsList className="grid grid-cols-3 w-full md:w-[300px]">
+                  <TabsTrigger value="active">Active</TabsTrigger>
+                  <TabsTrigger value="completed">Completed</TabsTrigger>
+                  <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
+                </TabsList>
+              </Tabs>
+              
+              <div className="relative w-full md:w-[250px]">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input 
+                  placeholder="Search requests..."
+                  className="pl-9 h-9"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+            </div>
+            
+            {/* Request List Views */}
+            <TabsContent value="active" className="mt-0">
+              {filteredRequests.length > 0 ? (
+                <div className="grid gap-3 md:grid-cols-2">
+                  {filteredRequests.map((request) => (
+                    <RequestCard 
+                      key={request.id} 
+                      request={request} 
+                      onClick={() => handleViewRequest(request)} 
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="bg-amber-50/30 border border-dashed border-amber-200 rounded-lg p-8 text-center">
+                  <Wrench className="h-10 w-10 text-amber-300 mx-auto mb-3" />
+                  <h3 className="text-lg font-medium text-gray-800 mb-1">No active maintenance requests</h3>
+                  <p className="text-muted-foreground mb-5 max-w-md mx-auto">
+                    Your home looking perfect? Great! If you need anything fixed or repaired, submit a new request anytime.
+                  </p>
                   <Button 
-                    onClick={() => setIsNewRequestOpen(true)} 
-                    variant="outline"
-                    size="sm"
-                    className="mt-2"
+                    onClick={() => setIsNewRequestOpen(true)}
+                    className="bg-amber-500 hover:bg-amber-600 text-white"
                   >
-                    <Plus className="h-3.5 w-3.5 mr-1.5" />
-                    Create Request
+                    <Plus className="h-4 w-4 mr-1" />
+                    Request Service
                   </Button>
-                )
-              }
-            />
-          )}
-        </TabsContent>
-        
-        <TabsContent value="completed" className="mt-0">
-          {filteredRequests.length > 0 ? (
-            <div className="grid gap-3 md:grid-cols-2">
-              {filteredRequests.map((request) => (
-                <RequestCard 
-                  key={request.id} 
-                  request={request} 
-                  onClick={() => handleViewRequest(request)} 
-                />
-              ))}
+                </div>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="completed" className="mt-0">
+              {filteredRequests.length > 0 ? (
+                <div className="grid gap-3 md:grid-cols-2">
+                  {filteredRequests.map((request) => (
+                    <RequestCard 
+                      key={request.id} 
+                      request={request} 
+                      onClick={() => handleViewRequest(request)} 
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="bg-green-50/30 border border-dashed border-green-200 rounded-lg p-8 text-center">
+                  <CheckCircle className="h-10 w-10 text-green-300 mx-auto mb-3" />
+                  <h3 className="text-lg font-medium text-gray-800 mb-1">No completed maintenance requests</h3>
+                  <p className="text-muted-foreground mb-3 max-w-md mx-auto">
+                    Once your maintenance requests are completed, they'll appear here for your reference.
+                  </p>
+                </div>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="cancelled" className="mt-0">
+              {filteredRequests.length > 0 ? (
+                <div className="grid gap-3 md:grid-cols-2">
+                  {filteredRequests.map((request) => (
+                    <RequestCard 
+                      key={request.id} 
+                      request={request} 
+                      onClick={() => handleViewRequest(request)} 
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="bg-gray-50 border border-dashed border-gray-200 rounded-lg p-8 text-center">
+                  <X className="h-10 w-10 text-gray-300 mx-auto mb-3" />
+                  <h3 className="text-lg font-medium text-gray-800 mb-1">No cancelled maintenance requests</h3>
+                  <p className="text-muted-foreground mb-3 max-w-md mx-auto">
+                    Any maintenance requests you cancel will be stored here for your records.
+                  </p>
+                </div>
+              )}
+            </TabsContent>
+          </div>
+          
+          {/* How it works section */}
+          <div className="mt-10 mb-8">
+            <h2 className="text-xl font-medium mb-6">How Maintenance Works</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="text-center">
+                <div className="w-14 h-14 flex items-center justify-center rounded-full bg-amber-100 text-amber-600 mx-auto mb-4">
+                  <Plus className="h-6 w-6" />
+                </div>
+                <h3 className="font-medium mb-2">1. Submit a Request</h3>
+                <p className="text-sm text-muted-foreground">
+                  Describe your issue in detail. Add photos for faster diagnosis.
+                </p>
+              </div>
+              <div className="text-center">
+                <div className="w-14 h-14 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 mx-auto mb-4">
+                  <Tool className="h-6 w-6" />
+                </div>
+                <h3 className="font-medium mb-2">2. Professional Assignment</h3>
+                <p className="text-sm text-muted-foreground">
+                  An experienced local provider will be assigned to your case.
+                </p>
+              </div>
+              <div className="text-center">
+                <div className="w-14 h-14 flex items-center justify-center rounded-full bg-green-100 text-green-600 mx-auto mb-4">
+                  <CheckCircle className="h-6 w-6" />
+                </div>
+                <h3 className="font-medium mb-2">3. Resolution</h3>
+                <p className="text-sm text-muted-foreground">
+                  The professional completes the work and you confirm it's resolved.
+                </p>
+              </div>
             </div>
-          ) : (
-            <EmptyState
-              icon={<CheckCircle className="h-10 w-10 text-muted-foreground/30" />}
-              title="No completed requests"
-              description={searchTerm ? "No matching requests found." : "You don't have any completed maintenance requests."}
-            />
-          )}
-        </TabsContent>
-        
-        <TabsContent value="cancelled" className="mt-0">
-          {filteredRequests.length > 0 ? (
-            <div className="grid gap-3 md:grid-cols-2">
-              {filteredRequests.map((request) => (
-                <RequestCard 
-                  key={request.id} 
-                  request={request} 
-                  onClick={() => handleViewRequest(request)} 
-                />
-              ))}
-            </div>
-          ) : (
-            <EmptyState
-              icon={<X className="h-10 w-10 text-muted-foreground/30" />}
-              title="No cancelled requests"
-              description={searchTerm ? "No matching requests found." : "You don't have any cancelled maintenance requests."}
-            />
-          )}
-        </TabsContent>
+          </div>
+        </div>
       </div>
 
       {/* Create Maintenance Request Dialog - Simplified Airbnb style */}

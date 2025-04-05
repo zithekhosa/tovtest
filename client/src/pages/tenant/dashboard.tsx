@@ -824,50 +824,114 @@ export default function TenantDashboard() {
     </Card>
   );
 
-  // Recent maintenance requests component
-  const RecentMaintenance = () => (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg">Maintenance Requests</CardTitle>
-        <CardDescription>Recent repair and maintenance activity</CardDescription>
-      </CardHeader>
-      <CardContent>
-        {recentMaintenanceRequests.length > 0 ? (
-          <div className="space-y-4">
-            {recentMaintenanceRequests.map(request => (
-              <div key={request.id} className="flex items-center gap-4 pb-4 border-b last:border-0 last:pb-0">
-                <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center">
-                  <Wrench className="h-5 w-5" />
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-medium">{request.title || 'Maintenance Request'}</h4>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Submitted on {formatDate(request.createdAt || new Date())}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <StatusBadge status={request.status || 'pending'} />
-                </div>
-              </div>
-            ))}
+  // Modern, Airbnb-style maintenance marketplace component
+  const RecentMaintenance = () => {
+    const statusColor = (status: string) => {
+      switch(status.toLowerCase()) {
+        case 'completed': return 'bg-green-500';
+        case 'in progress': return 'bg-blue-500';
+        case 'cancelled': return 'bg-gray-400';
+        case 'pending':
+        default: return 'bg-amber-500';
+      }
+    };
+    
+    return (
+      <Card className="overflow-hidden relative">
+        {/* Background gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-amber-50 to-white opacity-50 z-0"></div>
+        
+        <CardHeader className="relative z-10 pb-0">
+          <div className="flex justify-between items-center">
+            <div>
+              <CardTitle className="text-lg flex items-center">
+                <Wrench className="h-5 w-5 mr-2 text-amber-600" />
+                Maintenance Hub
+              </CardTitle>
+              <CardDescription>Quick fixes and repairs</CardDescription>
+            </div>
+            
+            {activeRequests.length > 0 && (
+              <Badge className="bg-amber-100 text-amber-800 border-0 font-normal">
+                {activeRequests.length} Active
+              </Badge>
+            )}
           </div>
-        ) : (
-          <div className="text-center py-8">
-            <Wrench className="h-10 w-10 mx-auto text-muted-foreground/50 mb-3" />
-            <p className="text-muted-foreground">No maintenance requests found</p>
-          </div>
+        </CardHeader>
+        
+        <CardContent className="relative z-10 pt-4">
+          {recentMaintenanceRequests.length > 0 ? (
+            <div className="space-y-2">
+              {recentMaintenanceRequests.slice(0, 2).map(request => (
+                <div 
+                  key={request.id} 
+                  className="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all cursor-pointer"
+                  onClick={() => window.location.href = '/tenant/maintenance'}
+                >
+                  <div className="relative">
+                    <div className="w-9 h-9 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center">
+                      {(() => {
+                        switch(request.category?.toLowerCase()) {
+                          case 'plumbing': return <Droplets className="h-4 w-4" />;
+                          case 'electrical': return <Zap className="h-4 w-4" />;
+                          case 'structural': return <Building className="h-4 w-4" />;
+                          default: return <Wrench className="h-4 w-4" />;
+                        }
+                      })()}
+                    </div>
+                    <div className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-2 border-white ${statusColor(request.status)}`}></div>
+                  </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-medium text-sm truncate">{request.title || 'Maintenance Request'}</h4>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {formatDate(request.createdAt || new Date())} · {request.status}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-lg border border-dashed border-amber-200 bg-amber-50/50 p-5 text-center">
+              <Wrench className="h-8 w-8 mx-auto text-amber-500/60 mb-2" />
+              <p className="text-sm font-medium text-amber-800/70 mb-1">Home maintenance made easy</p>
+              <p className="text-xs text-amber-600/70 mb-4">Quick response from verified professionals</p>
+              <Button size="sm" className="bg-amber-500 hover:bg-amber-600 text-white" asChild>
+                <Link href="/tenant/maintenance">
+                  Request Service
+                </Link>
+              </Button>
+            </div>
+          )}
+          
+          {recentMaintenanceRequests.length > 0 && (
+            <div className="mt-4 flex items-center justify-between">
+              <p className="text-xs text-muted-foreground">
+                {completedRequests.length} completed in total
+              </p>
+              <Button variant="ghost" size="sm" className="text-xs h-8 px-2" asChild>
+                <Link href="/tenant/maintenance">
+                  View All
+                  <ChevronRight className="h-3.5 w-3.5 ml-1" />
+                </Link>
+              </Button>
+            </div>
+          )}
+        </CardContent>
+        
+        {recentMaintenanceRequests.length > 0 && (
+          <CardFooter className="border-t pt-3 pb-3 relative z-10">
+            <Button className="w-full bg-amber-500 hover:bg-amber-600 text-white" asChild>
+              <Link href="/tenant/maintenance">
+                <Plus className="h-3.5 w-3.5 mr-1.5" />
+                New Maintenance Request
+              </Link>
+            </Button>
+          </CardFooter>
         )}
-      </CardContent>
-      <CardFooter className="border-t pt-4">
-        <Button className="w-full" asChild>
-          <Link href="/tenant/maintenance">
-            <Wrench className="h-4 w-4 mr-1" />
-            New Maintenance Request
-          </Link>
-        </Button>
-      </CardFooter>
-    </Card>
-  );
+      </Card>
+    );
+  };
 
   // Lease details component
   const LeaseDetails = () => (
