@@ -1,35 +1,45 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
-import { User, Lease } from "@shared/schema";
-import { format } from "date-fns";
+import { User, Lease, Property } from "@shared/schema";
+import { format, differenceInDays } from "date-fns";
+import { StandardLayout } from "@/components/layout/StandardLayout";
 import { 
   Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
+  CardContent
 } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Search, Plus, MessageSquare, Ban, FileText, User as UserIcon } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { 
+  Loader2, 
+  Search, 
+  Plus, 
+  MessageSquare, 
+  FileText, 
+  User as UserIcon,
+  Phone, 
+  Mail, 
+  Home,
+  Calendar,
+  DollarSign,
+  Wallet,
+  ChevronRight,
+  Filter,
+  CheckCircle,
+  XCircle,
+  Clock
+} from "lucide-react";
 
 export default function TenantsPage() {
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTenant, setSelectedTenant] = useState<User | null>(null);
-  const [tenantFilter, setTenantFilter] = useState("all");
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [tenantStatus, setTenantStatus] = useState("all");
 
   // Fetch tenants
   const { data: tenants, isLoading: isLoadingTenants } = useQuery<User[]>({
@@ -40,231 +50,483 @@ export default function TenantsPage() {
   const { data: leases, isLoading: isLoadingLeases } = useQuery<Lease[]>({
     queryKey: ["/api/leases/landlord"],
   });
+  
+  // Fetch properties
+  const { data: properties, isLoading: isLoadingProperties } = useQuery<Property[]>({
+    queryKey: ["/api/properties/landlord"],
+  });
 
-  const isLoading = isLoadingTenants || isLoadingLeases;
+  const isLoading = isLoadingTenants || isLoadingLeases || isLoadingProperties;
 
   // Filter tenants based on search term and filter type
   const filteredTenants = tenants?.filter(tenant => {
     const fullName = `${tenant.firstName} ${tenant.lastName}`.toLowerCase();
-    const matchesSearch = 
+    const matchesSearch = searchTerm === "" ||
       fullName.includes(searchTerm.toLowerCase()) ||
       tenant.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (tenant.phone && tenant.phone.includes(searchTerm));
 
-    if (tenantFilter === "all") return matchesSearch;
+    if (tenantStatus === "all") return matchesSearch;
     
     // Find leases for this tenant
     const tenantLeases = leases?.filter(lease => lease.tenantId === tenant.id) || [];
     const hasPendingPayment = tenantLeases.some(lease => lease.status === "pending");
     const hasActiveLeases = tenantLeases.some(lease => lease.active);
     
-    if (tenantFilter === "active" && hasActiveLeases) return matchesSearch;
-    if (tenantFilter === "pending" && hasPendingPayment) return matchesSearch;
+    if (tenantStatus === "active" && hasActiveLeases) return matchesSearch;
+    if (tenantStatus === "pending" && hasPendingPayment) return matchesSearch;
     
     return false;
   });
 
-  // Get tenant status for display
-  const getTenantStatusBadge = (tenantId: number) => {
+  // Get tenant status info
+  const getTenantStatus = (tenantId: number) => {
     const tenantLeases = leases?.filter(lease => lease.tenantId === tenantId) || [];
     
     if (tenantLeases.some(lease => lease.status === "pending")) {
-      return <Badge variant="outline" className="bg-yellow-50 text-yellow-600 border-yellow-200">Pending</Badge>;
+      return {
+        label: "Payment Pending",
+        className: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800",
+        icon: <Clock className="h-3.5 w-3.5 mr-1.5" />
+      };
     }
     
     if (tenantLeases.some(lease => lease.active)) {
-      return <Badge variant="outline" className="bg-green-50 text-green-600 border-green-200">Active</Badge>;
+      return {
+        label: "Active",
+        className: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800",
+        icon: <CheckCircle className="h-3.5 w-3.5 mr-1.5" />
+      };
     }
 
-    return <Badge variant="outline" className="bg-gray-100 text-gray-600">Inactive</Badge>;
+    return {
+      label: "Inactive",
+      className: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-700",
+      icon: <XCircle className="h-3.5 w-3.5 mr-1.5" />
+    };
   };
 
-  // Get lease information for a tenant
-  const getTenantLeaseInfo = (tenantId: number) => {
-    const tenantLeases = leases?.filter(lease => lease.tenantId === tenantId) || [];
-    const activeLeases = tenantLeases.filter(lease => lease.active);
+  // Get tenant's property and lease info
+  const getTenantPropertyInfo = (tenantId: number) => {
+    const tenantLeases = leases?.filter(lease => lease.tenantId === tenantId && lease.active) || [];
     
-    if (activeLeases.length === 0) {
-      return "No active leases";
+    if (tenantLeases.length === 0) {
+      return null;
     }
     
-    // Just show info for the first active lease if there are multiple
-    const lease = activeLeases[0];
-    const property = lease.propertyId ? "Property #" + lease.propertyId : "Unknown property";
-    const endDate = lease.endDate ? format(new Date(lease.endDate), "MMM d, yyyy") : "N/A";
+    const lease = tenantLeases[0];
+    const property = properties?.find(p => p.id === lease.propertyId);
     
-    return `${property} · Ends ${endDate}`;
+    if (!property) return null;
+    
+    const daysUntilEnd = lease.endDate ? differenceInDays(new Date(lease.endDate), new Date()) : 0;
+    
+    return {
+      property,
+      lease,
+      daysUntilEnd
+    };
   };
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
+      <StandardLayout title="Tenants">
+        <div className="flex justify-center items-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </StandardLayout>
     );
   }
 
   return (
-    <div className="animate-fade-in">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
-        <div>
-          <h1 className="text-2xl font-bold mb-1">Tenants</h1>
-          <p className="text-gray-500">Manage your tenant relationships</p>
+    <StandardLayout
+      title="Tenants"
+      subtitle="Manage your tenant relationships"
+    >
+      {/* Search and Filters */}
+      <div className="grid gap-4 md:grid-cols-[2fr,1fr] mb-6">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Input
+            placeholder="Search by name, email or phone..."
+            className="pl-9 h-12 bg-white dark:bg-gray-900"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
-        <Button>
-          <Plus className="h-4 w-4 mr-2 shrink-0" />
-          Add Tenant
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            className="h-12 w-full md:w-auto px-4 bg-white dark:bg-gray-900 font-normal"
+            onClick={() => setFilterOpen(!filterOpen)}
+          >
+            <Filter className="h-4 w-4 mr-2" />
+            Filter
+          </Button>
+          <Button className="h-12 flex-1">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Tenant
+          </Button>
+        </div>
       </div>
 
-      <Card className="mb-8">
-        <CardContent className="p-4 sm:p-6">
-          <div className="flex flex-col sm:flex-row gap-4 items-center">
-            <div className="relative w-full sm:max-w-xs">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                placeholder="Search tenants..."
-                className="pl-9"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+      {/* Filters */}
+      {filterOpen && (
+        <Card className="mb-6 border bg-white dark:bg-gray-900">
+          <CardContent className="p-4">
+            <div className="flex flex-wrap gap-2">
+              <Button 
+                variant={tenantStatus === "all" ? "default" : "outline"} 
+                size="sm"
+                onClick={() => setTenantStatus("all")}
+                className="rounded-full"
+              >
+                All Tenants
+              </Button>
+              <Button 
+                variant={tenantStatus === "active" ? "default" : "outline"} 
+                size="sm"
+                onClick={() => setTenantStatus("active")}
+                className="rounded-full"
+              >
+                Active
+              </Button>
+              <Button 
+                variant={tenantStatus === "pending" ? "default" : "outline"} 
+                size="sm"
+                onClick={() => setTenantStatus("pending")}
+                className="rounded-full"
+              >
+                Payment Pending
+              </Button>
             </div>
-            <Tabs defaultValue="all" value={tenantFilter} onValueChange={setTenantFilter} className="w-full sm:w-auto">
-              <TabsList className="grid grid-cols-3 min-w-[240px]">
-                <TabsTrigger value="all" className="px-4 py-2">All</TabsTrigger>
-                <TabsTrigger value="active" className="px-4 py-2">Active</TabsTrigger>
-                <TabsTrigger value="pending" className="px-4 py-2">Pending</TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
-      {/* Tenants Table */}
-      <Card>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[250px]">Tenant</TableHead>
-                  <TableHead className="w-[150px]">Status</TableHead>
-                  <TableHead className="hidden md:table-cell">Lease Information</TableHead>
-                  <TableHead className="w-[120px] text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredTenants && filteredTenants.length > 0 ? (
-                  filteredTenants.map((tenant) => (
-                    <TableRow key={tenant.id}>
-                      <TableCell className="font-medium">
-                        <div className="flex items-center">
-                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center mr-3 flex-shrink-0">
-                            <UserIcon className="h-4 w-4 text-primary" />
-                          </div>
-                          <div>
-                            <div>{tenant.firstName} {tenant.lastName}</div>
-                            <div className="text-sm text-gray-500">{tenant.email}</div>
-                          </div>
+      {/* Tenants Grid */}
+      {filteredTenants && filteredTenants.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredTenants.map((tenant) => {
+            const statusInfo = getTenantStatus(tenant.id);
+            const propertyInfo = getTenantPropertyInfo(tenant.id);
+            
+            return (
+              <Card 
+                key={tenant.id}
+                className="overflow-hidden bg-white dark:bg-gray-900 hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => setSelectedTenant(tenant)}
+              >
+                <CardContent className="p-0">
+                  <div className="p-4 border-b border-gray-100 dark:border-gray-800">
+                    <div className="flex items-center">
+                      <Avatar className="h-12 w-12 mr-3">
+                        <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                          {tenant.firstName?.charAt(0)}{tenant.lastName?.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-medium text-base truncate">{tenant.firstName} {tenant.lastName}</h3>
+                        <div className="flex items-center mt-0.5">
+                          <Badge className={`text-xs px-2 py-0.5 font-normal flex items-center ${statusInfo.className}`}>
+                            {statusInfo.icon}
+                            {statusInfo.label}
+                          </Badge>
                         </div>
-                      </TableCell>
-                      <TableCell>{getTenantStatusBadge(tenant.id)}</TableCell>
-                      <TableCell className="hidden md:table-cell text-gray-500">
-                        {getTenantLeaseInfo(tenant.id)}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button variant="ghost" size="icon" onClick={() => setSelectedTenant(tenant)}>
-                            <FileText className="h-4 w-4" />
-                            <span className="sr-only">View Details</span>
-                          </Button>
-                          <Button variant="ghost" size="icon">
-                            <MessageSquare className="h-4 w-4" />
-                            <span className="sr-only">Message</span>
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center">
-                      {searchTerm ? (
-                        <div className="flex flex-col items-center justify-center py-6">
-                          <p className="text-gray-500 mb-2">No tenants match your search criteria.</p>
-                          <Button variant="outline" size="sm" onClick={() => setSearchTerm("")}>
-                            Clear Search
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="flex flex-col items-center justify-center py-6">
-                          <p className="text-gray-500 mb-2">You don't have any tenants yet.</p>
-                          <Button size="sm">
-                            <Plus className="h-4 w-4 mr-1" />
-                            Add Your First Tenant
-                          </Button>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="p-4">
+                    <div className="space-y-3">
+                      <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                        <Mail className="h-4 w-4 mr-2 flex-shrink-0 text-gray-400 dark:text-gray-500" />
+                        <span className="truncate">{tenant.email}</span>
+                      </div>
+                      
+                      {tenant.phone && (
+                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                          <Phone className="h-4 w-4 mr-2 flex-shrink-0 text-gray-400 dark:text-gray-500" />
+                          <span>{tenant.phone}</span>
                         </div>
                       )}
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                      
+                      {propertyInfo ? (
+                        <div className="border-t border-gray-100 dark:border-gray-800 pt-3 mt-3">
+                          <div className="flex items-center text-sm mb-2">
+                            <Home className="h-4 w-4 mr-2 flex-shrink-0 text-gray-400 dark:text-gray-500" />
+                            <span className="font-medium truncate">{propertyInfo.property.title}</span>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-2 text-xs mt-2">
+                            <div className="flex items-center">
+                              <Calendar className="h-3.5 w-3.5 mr-1.5 text-gray-400 dark:text-gray-500" />
+                              <span className="text-gray-600 dark:text-gray-400">
+                                {propertyInfo.daysUntilEnd > 0 
+                                  ? `${propertyInfo.daysUntilEnd} days left` 
+                                  : "Expired"}
+                              </span>
+                            </div>
+                            <div className="flex items-center">
+                              <DollarSign className="h-3.5 w-3.5 mr-1.5 text-gray-400 dark:text-gray-500" />
+                              <span className="text-gray-600 dark:text-gray-400">
+                                P{propertyInfo.lease.rentAmount.toLocaleString()}/mo
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="border-t border-gray-100 dark:border-gray-800 pt-3 mt-3">
+                          <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                            <Home className="h-4 w-4 mr-2 flex-shrink-0 text-gray-400 dark:text-gray-500" />
+                            <span>No active lease</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="bg-gray-50 dark:bg-gray-800/50 py-2 px-4 flex justify-between items-center">
+                    <div className="flex space-x-2">
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" asChild>
+                        <Link href={`/landlord/messages/tenant/${tenant.id}`} onClick={(e) => e.stopPropagation()}>
+                          <MessageSquare className="h-4 w-4" />
+                          <span className="sr-only">Message</span>
+                        </Link>
+                      </Button>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" asChild>
+                        <Link href={`/landlord/documents/tenant/${tenant.id}`} onClick={(e) => e.stopPropagation()}>
+                          <FileText className="h-4 w-4" />
+                          <span className="sr-only">Documents</span>
+                        </Link>
+                      </Button>
+                    </div>
+                    <Button variant="ghost" size="sm" className="h-8 text-xs font-normal">
+                      View Profile
+                      <ChevronRight className="h-3.5 w-3.5 ml-1" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      ) : (
+        <Card className="bg-white dark:bg-gray-900 text-center p-8 my-12">
+          <div className="mx-auto w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+            <UserIcon className="h-8 w-8 text-gray-500 dark:text-gray-400" />
           </div>
-        </CardContent>
-      </Card>
+          <h3 className="text-xl font-semibold mb-2">No Tenants Found</h3>
+          {searchTerm || tenantStatus !== "all" ? (
+            <>
+              <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
+                No tenants match your current filters. Try changing your search criteria or filters.
+              </p>
+              <Button variant="outline" onClick={() => {
+                setSearchTerm('');
+                setTenantStatus('all');
+              }}>
+                Reset Filters
+              </Button>
+            </>
+          ) : (
+            <>
+              <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
+                You haven't added any tenants yet. Add your first tenant to get started.
+              </p>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Your First Tenant
+              </Button>
+            </>
+          )}
+        </Card>
+      )}
 
       {/* Tenant Details Dialog */}
       {selectedTenant && (
         <Dialog open={!!selectedTenant} onOpenChange={() => setSelectedTenant(null)}>
-          <DialogContent className="sm:max-w-[500px]">
+          <DialogContent className="sm:max-w-md overflow-auto max-h-[90vh]">
             <DialogHeader>
-              <DialogTitle>Tenant Details</DialogTitle>
+              <DialogTitle className="text-xl">Tenant Profile</DialogTitle>
             </DialogHeader>
+            
             <div className="py-4">
+              {/* Profile header */}
               <div className="flex items-center mb-6">
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mr-4">
-                  <UserIcon className="h-6 w-6 text-primary" />
-                </div>
+                <Avatar className="h-16 w-16 mr-4">
+                  <AvatarFallback className="bg-primary/10 text-primary text-lg font-medium">
+                    {selectedTenant.firstName?.charAt(0)}{selectedTenant.lastName?.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
                 <div>
-                  <h3 className="text-lg font-semibold">{selectedTenant.firstName} {selectedTenant.lastName}</h3>
-                  <p className="text-gray-500">{selectedTenant.email}</p>
+                  <h3 className="text-xl font-semibold">{selectedTenant.firstName} {selectedTenant.lastName}</h3>
+                  <div className="flex items-center mt-1">
+                    {getTenantStatus(selectedTenant.id).icon}
+                    <span className="text-sm">{getTenantStatus(selectedTenant.id).label}</span>
+                  </div>
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-gray-500">Phone</p>
-                    <p>{selectedTenant.phone || "Not provided"}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-500">Status</p>
-                    <div className="mt-1">{getTenantStatusBadge(selectedTenant.id)}</div>
+              {/* Contact information */}
+              <div className="space-y-3 mb-6">
+                <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400">Contact Information</h4>
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+                  <div className="space-y-3">
+                    <div className="flex items-center text-sm">
+                      <Mail className="h-4 w-4 mr-3 text-gray-400 dark:text-gray-500" />
+                      <span>{selectedTenant.email}</span>
+                    </div>
+                    <div className="flex items-center text-sm">
+                      <Phone className="h-4 w-4 mr-3 text-gray-400 dark:text-gray-500" />
+                      <span>{selectedTenant.phone || "Not provided"}</span>
+                    </div>
                   </div>
                 </div>
-
-                <div>
-                  <p className="text-sm text-gray-500 mb-1">Lease Information</p>
-                  <Card className="bg-gray-50">
-                    <CardContent className="p-3">
-                      <p className="text-sm">{getTenantLeaseInfo(selectedTenant.id)}</p>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                <div className="pt-4 flex justify-between">
-                  <Button variant="outline">View Documents</Button>
-                  <Button>
-                    <MessageSquare className="h-4 w-4 mr-2" />
-                    Message
-                  </Button>
+              </div>
+              
+              {/* Lease information */}
+              <div className="space-y-3 mb-6">
+                <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400">Lease Information</h4>
+                
+                {(() => {
+                  const info = getTenantPropertyInfo(selectedTenant.id);
+                  
+                  if (!info) {
+                    return (
+                      <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 text-center">
+                        <Home className="h-6 w-6 mx-auto mb-2 text-gray-400 dark:text-gray-500" />
+                        <p className="text-sm text-gray-500 dark:text-gray-400">No active lease</p>
+                        <Button variant="outline" size="sm" className="mt-3">
+                          <Plus className="h-3.5 w-3.5 mr-1.5" />
+                          Add Lease
+                        </Button>
+                      </div>
+                    );
+                  }
+                  
+                  return (
+                    <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="font-medium">{info.property.title}</div>
+                        <Badge 
+                          className={
+                            info.daysUntilEnd > 30 
+                              ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" 
+                              : info.daysUntilEnd > 0 
+                                ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400" 
+                                : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+                          }
+                        >
+                          {info.daysUntilEnd > 0 ? `${info.daysUntilEnd} days left` : "Expired"}
+                        </Badge>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <div className="text-gray-500 dark:text-gray-400 mb-1">Monthly Rent</div>
+                          <div className="font-semibold">P{info.lease.rentAmount.toLocaleString()}</div>
+                        </div>
+                        <div>
+                          <div className="text-gray-500 dark:text-gray-400 mb-1">Security Deposit</div>
+                          <div className="font-semibold">P{info.lease.securityDeposit.toLocaleString()}</div>
+                        </div>
+                        <div>
+                          <div className="text-gray-500 dark:text-gray-400 mb-1">Start Date</div>
+                          <div>{format(new Date(info.lease.startDate), "MMM d, yyyy")}</div>
+                        </div>
+                        <div>
+                          <div className="text-gray-500 dark:text-gray-400 mb-1">End Date</div>
+                          <div>{format(new Date(info.lease.endDate), "MMM d, yyyy")}</div>
+                        </div>
+                      </div>
+                      
+                      <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 flex justify-between">
+                        <Button variant="outline" size="sm" asChild>
+                          <Link href={`/landlord/properties/${info.property.id}`}>
+                            <Home className="h-3.5 w-3.5 mr-1.5" />
+                            View Property
+                          </Link>
+                        </Button>
+                        
+                        <Button variant="outline" size="sm" asChild>
+                          <Link href={`/landlord/leases/${info.lease.id}`}>
+                            <FileText className="h-3.5 w-3.5 mr-1.5" />
+                            View Lease
+                          </Link>
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+              
+              {/* Financial information */}
+              <div className="space-y-3 mb-6">
+                <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400">Payment History</h4>
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                  <div className="flex justify-between items-center mb-3">
+                    <div className="text-sm font-medium">Recent Payments</div>
+                    <Button variant="ghost" size="sm" className="h-7 text-xs font-normal p-0">
+                      <Link href={`/landlord/financial-management?tenant=${selectedTenant.id}`}>
+                        View All
+                        <ChevronRight className="h-3.5 w-3.5 ml-1" />
+                      </Link>
+                    </Button>
+                  </div>
+                  
+                  <div className="space-y-2 mb-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <Wallet className="h-4 w-4 mr-2 text-gray-400 dark:text-gray-500" />
+                        <span className="text-sm">March 2025 Rent</span>
+                      </div>
+                      <div className="text-sm font-medium">P3,500</div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <Wallet className="h-4 w-4 mr-2 text-gray-400 dark:text-gray-500" />
+                        <span className="text-sm">February 2025 Rent</span>
+                      </div>
+                      <div className="text-sm font-medium">P3,500</div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <Wallet className="h-4 w-4 mr-2 text-gray-400 dark:text-gray-500" />
+                        <span className="text-sm">January 2025 Rent</span>
+                      </div>
+                      <div className="text-sm font-medium">P3,500</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
+            
+            <DialogFooter className="flex-col sm:flex-row sm:justify-between gap-2">
+              <Button variant="outline" asChild>
+                <Link href={`/landlord/messages/tenant/${selectedTenant.id}`}>
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  Send Message
+                </Link>
+              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" asChild>
+                  <Link href={`/landlord/documents/tenant/${selectedTenant.id}`}>
+                    <FileText className="h-4 w-4 mr-2" />
+                    Documents
+                  </Link>
+                </Button>
+                <Button asChild>
+                  <Link href={`/landlord/payments/record?tenant=${selectedTenant.id}`}>
+                    <DollarSign className="h-4 w-4 mr-2" />
+                    Record Payment
+                  </Link>
+                </Button>
+              </div>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       )}
-    </div>
+    </StandardLayout>
   );
 }

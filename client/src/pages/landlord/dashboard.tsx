@@ -416,7 +416,13 @@ export default function LandlordDashboard() {
                     </td>
                     <td className="py-3 px-4">
                       {tenantLease ? (
-                        <Badge variant={tenantLease.status === "active" ? "success" : tenantLease.status === "pending" ? "warning" : "default"}>
+                        <Badge className={
+                          tenantLease.status === "active" 
+                            ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800" 
+                            : tenantLease.status === "pending" 
+                              ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800" 
+                              : ""
+                        }>
                           {tenantLease.status}
                         </Badge>
                       ) : (
