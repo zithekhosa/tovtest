@@ -1,0 +1,179 @@
+
+### 1. LANDLORD PORTAL
+
+#### Dashboard
+- **Financial Overview Widgets:**
+  - Total property value (card with visualization)
+  - Monthly rental income (current month with comparison to previous)
+  - Total expenses (maintenance, mortgage, etc.)
+  - Net profit visualization (line chart)
+  - Occupancy rate visualization
+  - Average days to fill vacancy metric
+- **Quick Action Buttons:**
+  - Add new property
+  - Add new tenant
+  - Upload document
+  - Request maintenance
+  - Issue eviction notice
+  - Send rent increase notification
+- **Notification Center:**
+  - Upcoming lease expirations
+  - Pending maintenance requests
+  - Late payments
+  - Messages from tenants/agents
+  - Tenant termination notices
+  - Legal compliance reminders
+- **Search functionality** across all properties and tenants
+- **Calendar view** showing important dates (rent due, lease expirations, scheduled maintenance)
+
+#### Properties Management
+- List view and grid view options
+- Property cards with:
+  - High-quality image
+  - Location (with map integration)
+  - Current rental status
+  - Monthly income
+  - Current tenant info
+  - Days vacant (if applicable)
+- Detailed property view showing:
+  - All images/virtual tour
+  - Current tenant details
+  - Lease information
+  - Maintenance history
+  - Financial metrics (ROI, expenses, mortgage details)
+  - Property value history (with AI valuation)
+  - Utility information and payment history
+  - Property compliance status (certificates, inspections, etc.)
+
+#### Financial Management
+- **Income Tracking:**
+  - Rent collection status
+  - Monthly/annual income reports
+  - Expense categorization
+  - Multiple currency support (Botswana Pula, USD, etc.)
+- **Expense Tracking:**
+  - Maintenance costs
+  - Mortgage payments
+  - Property taxes
+  - Insurance
+  - Agent commissions
+  - Utility payments
+- **Financial Tools:**
+  - ROI calculator
+  - Tax report generator
+  - Balance sheet generator
+  - Cash flow projections
+  - Property value estimator (AI-powered)
+  - Rent price optimizer based on market data
+  - Budget planning tool
+- **Payment Processing:**
+  - Integration with M-Zaka
+  - Integration with Orange Money
+  - Integration with Visa/Mastercard
+  - Integration with Mobile Money platforms
+  - Bank transfer options
+  - Cash payment recording system
+  - Payment reconciliation tools
+
+#### Legal and Compliance
+- **Eviction Management:**
+  - Step-by-step eviction workflow compliant with local laws
+  - Notice templates specific to Botswana and other African countries
+  - Document generation for legal filings
+  - Timeline tracking with legal deadlines
+  - Option to involve legal professionals
+- **Lease Management:**
+  - Customizable lease templates by country/region
+  - Automatic lease renewal reminders
+  - Lease amendment tools
+  - Rent increase notice generator with local compliance checks
+  - Security deposit management with interest calculation
+- **Compliance Dashboard:**
+  - Property certification tracking
+  - Inspection scheduling
+  - Tax compliance calendar
+  - Regulatory requirement checklist by jurisdiction
+
+#### Communication Hub
+- Integrated messaging system connecting all stakeholders
+- Template messages for common scenarios
+- File/document sharing
+- Read receipts and status indicators
+- Bulk messaging capabilities for building-wide announcements
+- Automated message scheduling
+- Translation services for regional languages
+
+#### Maintenance Management
+- **Request System:**
+  - Create detailed maintenance requests
+  - Set priority levels
+  - Attach photos/videos of issues
+  - Submit to marketplace
+  - Emergency maintenance flagging
+  - Recurring maintenance scheduling
+- **Vendor Management:**
+  - Browse maintenance professionals
+  - View ratings and reviews
+  - Compare quotes
+  - Schedule appointments
+  - Track job status
+  - Preferred vendor list
+  - Background check integration
+
+#### Document Manager
+- **Document Categories:**
+  - Lease agreements
+  - Maintenance contracts
+  - Property certificates
+  - Tax documents
+  - Insurance policies
+  - Eviction notices
+  - Tenant communications
+  - Inspection reports
+- **Document Features:**
+  - Template generation
+  - Digital signing capability
+  - Version history
+  - Automatic reminders for expiring documents
+  - Permission-based sharing
+  - Document tagging and categorization
+  - Full-text search functionality
+  - QR code generation for physical reference
+
+#### Tenant Management
+- **Tenant Profiles:**
+  - Contact information
+  - Lease details
+  - Payment history
+  - Maintenance requests
+  - Communication history
+  - Emergency contacts
+  - Vehicle information
+  - Pet information
+- **Tenant Lifecycle:**
+  - Onboarding workflow
+  - Lease renewal process
+  - Move-out procedures
+  - Rating system
+  - Tenant screening tools
+  - Reference checking system
+- **Tenant Relations:**
+  - Complaint tracking
+  - Dispute resolution workflow
+  - Tenant reward programs
+  - Satisfaction surveys
+
+#### Agent Management
+- **Agent Profiles:**
+  - Performance metrics
+  - Properties managed
+  - Commission structure
+  - Rating and reviews
+  - Licensing information
+  - Specialization areas
+- **Commission Tracking:**
+  - Automatic calculation
+  - Payment scheduling
+  - Historical data
+  - Performance-based incentives
+  - Custom commission structures
