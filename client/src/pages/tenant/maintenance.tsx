@@ -108,7 +108,7 @@ const categories = [
   { id: "other", label: "Other", icon: <Tool className="h-4 w-4" />, color: "bg-gray-500" },
 ];
 
-// Simple Empty State component
+// Simple Empty State component - Airbnb style
 function EmptyState({ 
   icon, 
   title, 
@@ -121,12 +121,12 @@ function EmptyState({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-      <div className="bg-muted/30 p-6 rounded-full mb-5">
+    <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
+      <div className="bg-gray-50 p-4 rounded-full mb-4">
         {icon}
       </div>
-      <h3 className="text-lg font-medium mb-2">{title}</h3>
-      <p className="text-muted-foreground max-w-md mb-5">{description}</p>
+      <h3 className="text-base font-medium mb-1">{title}</h3>
+      <p className="text-muted-foreground text-sm max-w-md mb-3">{description}</p>
       {action}
     </div>
   );
@@ -195,65 +195,57 @@ function RequestCard({
   };
 
   return (
-    <Card 
-      className="cursor-pointer hover:shadow-md transition-all border border-gray-100 overflow-hidden"
+    <div 
+      className="cursor-pointer hover:shadow-sm transition-all border border-gray-100 bg-white rounded-xl overflow-hidden"
       onClick={onClick}
     >
-      <div className="p-4">
-        <div className="flex items-start justify-between gap-4">
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2 mb-1.5">
-              <h3 className="font-medium line-clamp-1">{request.title}</h3>
-              {getPriorityBadge(request.priority)}
+      <div className="p-3">
+        <div className="flex justify-between items-start">
+          {/* Left Side - Main Content */}
+          <div className="space-y-1.5 flex-1 min-w-0 pr-2">
+            <div className="flex items-center gap-1.5">
+              <h3 className="font-medium text-sm line-clamp-1">{request.title}</h3>
             </div>
             
-            <p className="text-sm text-gray-600 line-clamp-2 mb-1.5">
+            <p className="text-xs text-muted-foreground line-clamp-1">
               {request.description}
             </p>
             
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1.5">
-                <Clock className="h-3.5 w-3.5" />
+            {/* Footer with metadata */}
+            <div className="flex flex-wrap pt-1 text-[11px] text-gray-500">
+              <div className="flex items-center mr-3">
+                <Clock className="h-3 w-3 mr-1 opacity-70" />
                 {getRelativeTime(new Date(request.createdAt))}
-              </span>
-              
-              <span className="flex items-center gap-1.5">
-                <MapPin className="h-3.5 w-3.5" />
-                Property #{request.propertyId}
-              </span>
+              </div>
               
               {request.category && (
-                <span className="flex items-center gap-1.5 capitalize">
-                  <Tool className="h-3.5 w-3.5" />
+                <div className="flex items-center capitalize mr-3">
+                  <Tool className="h-3 w-3 mr-1 opacity-70" />
                   {request.category}
-                </span>
+                </div>
               )}
+              
+              {getStatusBadge(request.status)}
             </div>
           </div>
           
-          <div className="flex flex-col items-end space-y-1">
-            {getStatusBadge(request.status)}
-            <Button variant="ghost" size="icon" className="mt-2">
-              <ArrowRight className="h-4 w-4" />
-            </Button>
+          {/* Right Side - Priority indicator */}
+          <div>
+            {getPriorityBadge(request.priority)}
           </div>
         </div>
         
+        {/* Progress bar for pending/in progress */}
         {(request.status === "in progress" || request.status === "pending") && (
-          <div className="mt-3 pt-3 border-t">
-            <div className="flex items-center justify-between text-xs mb-1.5">
-              <span className="text-muted-foreground">
-                {request.status === "in progress" ? 'Work in progress' : 'Awaiting assignment'}
-              </span>
-              <span className="font-medium">
-                {request.status === "in progress" ? '50%' : '0%'}
-              </span>
-            </div>
-            <Progress value={request.status === "in progress" ? 50 : 0} className="h-1.5" />
+          <div className="mt-2">
+            <Progress 
+              value={request.status === "in progress" ? 50 : 5} 
+              className="h-1 bg-gray-100" 
+            />
           </div>
         )}
       </div>
-    </Card>
+    </div>
   );
 }
 
@@ -474,188 +466,144 @@ export default function MaintenancePortal() {
     );
   }
 
-  // Main UI - Airbnb inspired
+  // Main UI - Airbnb inspired (simplified version)
   return (
     <DashLayout>
-      <div className="container py-8 max-w-6xl">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold">Maintenance</h1>
-              <p className="text-muted-foreground mt-1">
-                Request repairs and track maintenance for your rental property
-              </p>
+      <div className="py-6">
+        {/* Header - Simplified, Airbnb-style */}
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-medium">Maintenance</h1>
+          <Button 
+            onClick={() => setIsNewRequestOpen(true)} 
+            className="rounded-full shadow-sm"
+            size="sm"
+          >
+            <Plus className="h-3.5 w-3.5 mr-1.5" />
+            New Request
+          </Button>
+        </div>
+
+        {/* Quick Stats - Inline, Airbnb Style */}
+        <div className="flex items-center space-x-6 mb-6 text-sm">
+          <div className="flex items-center">
+            <div className="p-1.5 bg-blue-50 rounded-full mr-2">
+              <Clock className="h-3.5 w-3.5 text-blue-500" />
             </div>
-            <Button onClick={() => setIsNewRequestOpen(true)} className="rounded-full h-10 px-5">
-              <Plus className="h-4 w-4 mr-2" />
-              New Request
-            </Button>
+            <span><span className="font-medium">{activeRequests.length}</span> Active</span>
+          </div>
+          
+          <div className="flex items-center">
+            <div className="p-1.5 bg-green-50 rounded-full mr-2">
+              <CheckCircle className="h-3.5 w-3.5 text-green-500" />
+            </div>
+            <span><span className="font-medium">{completedRequests.length}</span> Completed</span>
+          </div>
+          
+          <div className="flex items-center">
+            <div className="p-1.5 bg-gray-50 rounded-full mr-2">
+              <Tool className="h-3.5 w-3.5 text-gray-500" />
+            </div>
+            <span><span className="font-medium">{maintenanceRequests.length}</span> Total</span>
           </div>
         </div>
 
-        {/* Stats Row */}
-        <div className="grid grid-cols-3 gap-5 mb-8">
-          <Card className="border border-gray-100">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-muted-foreground">Active Requests</p>
-                  <p className="text-2xl font-bold">{activeRequests.length}</p>
-                </div>
-                <div className="p-3 bg-blue-100 rounded-full">
-                  <Clock className="h-5 w-5 text-blue-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Search and Tabs - Simplified */}
+        <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <Tabs defaultValue="active" value={activeTab} onValueChange={setActiveTab} className="w-full sm:w-auto">
+            <TabsList className="grid grid-cols-3 w-full sm:w-[300px]">
+              <TabsTrigger value="active">Active</TabsTrigger>
+              <TabsTrigger value="completed">Completed</TabsTrigger>
+              <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
+            </TabsList>
+          </Tabs>
           
-          <Card className="border border-gray-100">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-muted-foreground">Completed</p>
-                  <p className="text-2xl font-bold">{completedRequests.length}</p>
-                </div>
-                <div className="p-3 bg-green-100 rounded-full">
-                  <CheckCircle className="h-5 w-5 text-green-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="border border-gray-100">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-muted-foreground">Total</p>
-                  <p className="text-2xl font-bold">{maintenanceRequests.length}</p>
-                </div>
-                <div className="p-3 bg-gray-100 rounded-full">
-                  <Tool className="h-5 w-5 text-gray-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="relative w-full sm:w-[220px]">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input 
+              placeholder="Search requests..."
+              className="pl-9 h-9"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
         </div>
 
-        {/* Main Content */}
-        <Card className="border border-gray-100 overflow-hidden">
-          <CardHeader className="pb-0 pt-6">
-            <div className="flex items-center justify-between">
-              <CardTitle>Maintenance Requests</CardTitle>
-              <div className="flex items-center space-x-2">
-                <div className="relative w-[250px]">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                    placeholder="Search requests..."
-                    className="pl-9 h-9"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => refetchRequests()}>
-                        <RotateCcw className="h-4 w-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Refresh</TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
+        {/* Main Content - Clean and Simple */}
+        <TabsContent value="active" className="mt-0">
+          {filteredRequests.length > 0 ? (
+            <div className="grid gap-3 md:grid-cols-2">
+              {filteredRequests.map((request) => (
+                <RequestCard 
+                  key={request.id} 
+                  request={request} 
+                  onClick={() => handleViewRequest(request)} 
+                />
+              ))}
             </div>
-          </CardHeader>
-          
-          <CardContent className="pt-6">
-            <Tabs defaultValue="active" value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="w-full max-w-md mx-auto grid grid-cols-3 mb-8 h-10">
-                <TabsTrigger value="active" className="relative">
-                  Active
-                  {activeRequests.length > 0 && (
-                    <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
-                      {activeRequests.length}
-                    </span>
-                  )}
-                </TabsTrigger>
-                <TabsTrigger value="completed">Completed</TabsTrigger>
-                <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="active" className="space-y-4">
-                {filteredRequests.length > 0 ? (
-                  <div className="grid gap-4 md:grid-cols-2">
-                    {filteredRequests.map((request) => (
-                      <RequestCard 
-                        key={request.id} 
-                        request={request} 
-                        onClick={() => handleViewRequest(request)} 
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <EmptyState
-                    icon={<Wrench className="h-12 w-12 text-muted-foreground/30" />}
-                    title="No active requests"
-                    description={searchTerm ? "No matching requests found. Try a different search term." : "You don't have any active maintenance requests."}
-                    action={
-                      !searchTerm && (
-                        <Button onClick={() => setIsNewRequestOpen(true)}>
-                          <Plus className="h-4 w-4 mr-2" />
-                          Create Request
-                        </Button>
-                      )
-                    }
-                  />
-                )}
-              </TabsContent>
-              
-              <TabsContent value="completed" className="space-y-4">
-                {filteredRequests.length > 0 ? (
-                  <div className="grid gap-4 md:grid-cols-2">
-                    {filteredRequests.map((request) => (
-                      <RequestCard 
-                        key={request.id} 
-                        request={request} 
-                        onClick={() => handleViewRequest(request)} 
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <EmptyState
-                    icon={<CheckCircle className="h-12 w-12 text-muted-foreground/30" />}
-                    title="No completed requests"
-                    description={searchTerm ? "No matching requests found. Try a different search term." : "You don't have any completed maintenance requests."}
-                  />
-                )}
-              </TabsContent>
-              
-              <TabsContent value="cancelled" className="space-y-4">
-                {filteredRequests.length > 0 ? (
-                  <div className="grid gap-4 md:grid-cols-2">
-                    {filteredRequests.map((request) => (
-                      <RequestCard 
-                        key={request.id} 
-                        request={request} 
-                        onClick={() => handleViewRequest(request)} 
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <EmptyState
-                    icon={<X className="h-12 w-12 text-muted-foreground/30" />}
-                    title="No cancelled requests"
-                    description={searchTerm ? "No matching requests found. Try a different search term." : "You don't have any cancelled maintenance requests."}
-                  />
-                )}
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
+          ) : (
+            <EmptyState
+              icon={<Wrench className="h-10 w-10 text-muted-foreground/30" />}
+              title="No active requests"
+              description={searchTerm ? "No matching requests found." : "You don't have any active maintenance requests."}
+              action={
+                !searchTerm && (
+                  <Button 
+                    onClick={() => setIsNewRequestOpen(true)} 
+                    variant="outline"
+                    size="sm"
+                    className="mt-2"
+                  >
+                    <Plus className="h-3.5 w-3.5 mr-1.5" />
+                    Create Request
+                  </Button>
+                )
+              }
+            />
+          )}
+        </TabsContent>
+        
+        <TabsContent value="completed" className="mt-0">
+          {filteredRequests.length > 0 ? (
+            <div className="grid gap-3 md:grid-cols-2">
+              {filteredRequests.map((request) => (
+                <RequestCard 
+                  key={request.id} 
+                  request={request} 
+                  onClick={() => handleViewRequest(request)} 
+                />
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              icon={<CheckCircle className="h-10 w-10 text-muted-foreground/30" />}
+              title="No completed requests"
+              description={searchTerm ? "No matching requests found." : "You don't have any completed maintenance requests."}
+            />
+          )}
+        </TabsContent>
+        
+        <TabsContent value="cancelled" className="mt-0">
+          {filteredRequests.length > 0 ? (
+            <div className="grid gap-3 md:grid-cols-2">
+              {filteredRequests.map((request) => (
+                <RequestCard 
+                  key={request.id} 
+                  request={request} 
+                  onClick={() => handleViewRequest(request)} 
+                />
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              icon={<X className="h-10 w-10 text-muted-foreground/30" />}
+              title="No cancelled requests"
+              description={searchTerm ? "No matching requests found." : "You don't have any cancelled maintenance requests."}
+            />
+          )}
+        </TabsContent>
       </div>
 
-      {/* Create Maintenance Request Dialog */}
+      {/* Create Maintenance Request Dialog - Simplified Airbnb style */}
       <Dialog open={isNewRequestOpen} onOpenChange={(open) => {
         setIsNewRequestOpen(open);
         if (!open) {
@@ -663,25 +611,27 @@ export default function MaintenancePortal() {
           form.reset();
         }
       }}>
-        <DialogContent className="sm:max-w-[550px]">
-          <DialogHeader>
-            <DialogTitle>New Maintenance Request</DialogTitle>
-            <DialogDescription>
-              Submit a request for repairs or maintenance at your property
+        <DialogContent className="sm:max-w-[500px] rounded-xl p-6">
+          <DialogHeader className="mb-5">
+            <DialogTitle className="text-xl">Report an issue</DialogTitle>
+            <DialogDescription className="text-sm">
+              Let us know what needs repair or maintenance
             </DialogDescription>
           </DialogHeader>
           
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-5">
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+              {/* Title field */}
               <FormField
                 control={form.control}
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Issue Title</FormLabel>
+                    <FormLabel className="text-sm font-medium">What's the issue?</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="E.g., Leaking bathroom sink"
+                        placeholder="e.g., Leaking faucet, broken AC"
+                        className="h-10"
                         {...field}
                       />
                     </FormControl>
@@ -690,17 +640,18 @@ export default function MaintenancePortal() {
                 )}
               />
               
+              {/* Two-column layout for category and priority */}
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="category"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Category</FormLabel>
+                      <FormLabel className="text-sm font-medium">Category</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select category" />
+                          <SelectTrigger className="h-10">
+                            <SelectValue placeholder="Select" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -724,35 +675,35 @@ export default function MaintenancePortal() {
                   name="priority"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Priority</FormLabel>
+                      <FormLabel className="text-sm font-medium">Priority</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select priority" />
+                          <SelectTrigger className="h-10">
+                            <SelectValue placeholder="Select" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="low">
                             <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 rounded-full bg-blue-500" />
+                              <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />
                               <span>Low</span>
                             </div>
                           </SelectItem>
                           <SelectItem value="medium">
                             <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                              <div className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
                               <span>Medium</span>
                             </div>
                           </SelectItem>
                           <SelectItem value="high">
                             <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 rounded-full bg-orange-500" />
+                              <div className="w-2.5 h-2.5 rounded-full bg-orange-500" />
                               <span>High</span>
                             </div>
                           </SelectItem>
                           <SelectItem value="urgent">
                             <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 rounded-full bg-red-500" />
+                              <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
                               <span>Urgent</span>
                             </div>
                           </SelectItem>
@@ -764,16 +715,17 @@ export default function MaintenancePortal() {
                 />
               </div>
               
+              {/* Description field */}
               <FormField
                 control={form.control}
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel className="text-sm font-medium">Describe the issue</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Please describe the issue in detail"
-                        className="min-h-[120px]"
+                        placeholder="Please provide details about the problem..."
+                        className="resize-none min-h-[90px]"
                         {...field}
                       />
                     </FormControl>
@@ -782,82 +734,81 @@ export default function MaintenancePortal() {
                 )}
               />
               
+              {/* Simplified allow entry toggle */}
               <FormField
                 control={form.control}
                 name="allow_entry"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormItem className="flex items-center justify-between space-y-0 rounded-md border p-3">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-sm">Allow entry when absent</FormLabel>
+                      <FormDescription className="text-xs">
+                        Maintenance staff may enter if you're not home
+                      </FormDescription>
+                    </div>
                     <FormControl>
-                      <Checkbox
+                      <Switch
                         checked={field.value}
                         onCheckedChange={field.onChange}
                       />
                     </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>Allow Entry</FormLabel>
-                      <FormDescription>
-                        Maintenance staff may enter the property if you are not present
-                      </FormDescription>
-                    </div>
                   </FormItem>
                 )}
               />
               
+              {/* Simplified time selection */}
               <FormField
                 control={form.control}
                 name="preferred_time"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Preferred Time</FormLabel>
-                    <FormControl>
-                      <RadioGroup
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                        className="flex flex-col space-y-1"
+                    <FormLabel className="text-sm font-medium">Preferred time</FormLabel>
+                    <div className="grid grid-cols-3 gap-2 mt-1.5">
+                      <Button 
+                        type="button"
+                        variant={field.value === "morning" ? "default" : "outline"}
+                        size="sm"
+                        className="h-9"
+                        onClick={() => field.onChange("morning")}
                       >
-                        <FormItem className="flex items-center space-x-3 space-y-0">
-                          <FormControl>
-                            <RadioGroupItem value="morning" />
-                          </FormControl>
-                          <FormLabel className="font-normal">
-                            Morning (8am - 12pm)
-                          </FormLabel>
-                        </FormItem>
-                        <FormItem className="flex items-center space-x-3 space-y-0">
-                          <FormControl>
-                            <RadioGroupItem value="afternoon" />
-                          </FormControl>
-                          <FormLabel className="font-normal">
-                            Afternoon (12pm - 5pm)
-                          </FormLabel>
-                        </FormItem>
-                        <FormItem className="flex items-center space-x-3 space-y-0">
-                          <FormControl>
-                            <RadioGroupItem value="anytime" />
-                          </FormControl>
-                          <FormLabel className="font-normal">
-                            Anytime
-                          </FormLabel>
-                        </FormItem>
-                      </RadioGroup>
-                    </FormControl>
+                        Morning
+                      </Button>
+                      <Button 
+                        type="button"
+                        variant={field.value === "afternoon" ? "default" : "outline"}
+                        size="sm"
+                        className="h-9"
+                        onClick={() => field.onChange("afternoon")}
+                      >
+                        Afternoon
+                      </Button>
+                      <Button 
+                        type="button"
+                        variant={field.value === "anytime" ? "default" : "outline"}
+                        size="sm"
+                        className="h-9"
+                        onClick={() => field.onChange("anytime")}
+                      >
+                        Anytime
+                      </Button>
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
               />
               
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setIsNewRequestOpen(false)}>
+              <DialogFooter className="mt-6 gap-2">
+                <Button type="button" variant="outline" size="sm" className="h-9" onClick={() => setIsNewRequestOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit" disabled={createRequestMutation.isPending}>
+                <Button type="submit" size="sm" className="h-9 px-5" disabled={createRequestMutation.isPending}>
                   {createRequestMutation.isPending ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
                       Submitting...
                     </>
                   ) : (
-                    <>Submit Request</>
+                    <>Submit</>
                   )}
                 </Button>
               </DialogFooter>
@@ -866,90 +817,109 @@ export default function MaintenancePortal() {
         </DialogContent>
       </Dialog>
       
-      {/* Request Details Dialog */}
+      {/* Request Details Dialog - Airbnb style */}
       {selectedRequest && (
         <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-          <DialogContent className="sm:max-w-[600px]">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <span>Maintenance Request</span>
-                <Badge className="ml-2">#{selectedRequest.id}</Badge>
+          <DialogContent className="sm:max-w-[500px] rounded-xl p-6">
+            <DialogHeader className="space-y-1 mb-4">
+              <DialogTitle className="text-xl font-semibold">
+                {selectedRequest.title}
               </DialogTitle>
-              <DialogDescription>
-                Submitted on {formatDateTime(selectedRequest.createdAt)}
-              </DialogDescription>
+              <div className="flex items-center flex-wrap gap-2">
+                <Badge variant="outline" className={
+                  selectedRequest.status === "pending" ? "bg-amber-50 text-amber-600 border-amber-200" :
+                  selectedRequest.status === "in progress" ? "bg-blue-50 text-blue-600 border-blue-200" :
+                  selectedRequest.status === "completed" ? "bg-green-50 text-green-600 border-green-200" :
+                  "bg-gray-50 text-gray-600 border-gray-200"
+                }>
+                  {selectedRequest.status.charAt(0).toUpperCase() + selectedRequest.status.slice(1)}
+                </Badge>
+                <Badge variant="outline" className={
+                  selectedRequest.priority === "low" ? "bg-blue-50 text-blue-600 border-blue-200" :
+                  selectedRequest.priority === "medium" ? "bg-yellow-50 text-yellow-600 border-yellow-200" :
+                  selectedRequest.priority === "high" ? "bg-orange-50 text-orange-600 border-orange-200" :
+                  selectedRequest.priority === "urgent" ? "bg-red-50 text-red-600 border-red-200" :
+                  "bg-gray-50 text-gray-600 border-gray-200"
+                }>
+                  {selectedRequest.priority.charAt(0).toUpperCase() + selectedRequest.priority.slice(1)} Priority
+                </Badge>
+                <span className="text-xs text-muted-foreground">
+                  Submitted {formatDateTime(selectedRequest.createdAt)}
+                </span>
+              </div>
             </DialogHeader>
             
-            <div className="space-y-6">
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Title</p>
-                <p className="text-lg font-semibold">{selectedRequest.title}</p>
+            <div className="space-y-5 text-sm">
+              {/* Category with icon */}
+              <div className="flex items-center gap-1.5">
+                <div className="p-1.5 bg-gray-50 rounded-full">
+                  <Tool className="h-3.5 w-3.5 text-gray-500" />
+                </div>
+                <span className="text-muted-foreground">
+                  <span className="capitalize">{selectedRequest.category || 'Other'}</span> issue
+                </span>
               </div>
               
-              <Separator />
-              
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-1">Status</p>
-                  <Badge variant="outline" className={
-                    selectedRequest.status === "pending" ? "bg-amber-50 text-amber-600 border-amber-200" :
-                    selectedRequest.status === "in progress" ? "bg-blue-50 text-blue-600 border-blue-200" :
-                    selectedRequest.status === "completed" ? "bg-green-50 text-green-600 border-green-200" :
-                    "bg-gray-50 text-gray-600 border-gray-200"
-                  }>
-                    {selectedRequest.status.charAt(0).toUpperCase() + selectedRequest.status.slice(1)}
-                  </Badge>
-                </div>
-                
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-1">Priority</p>
-                  <Badge variant="outline" className={
-                    selectedRequest.priority === "low" ? "bg-blue-50 text-blue-600 border-blue-200" :
-                    selectedRequest.priority === "medium" ? "bg-yellow-50 text-yellow-600 border-yellow-200" :
-                    selectedRequest.priority === "high" ? "bg-orange-50 text-orange-600 border-orange-200" :
-                    selectedRequest.priority === "urgent" ? "bg-red-50 text-red-600 border-red-200" :
-                    "bg-gray-50 text-gray-600 border-gray-200"
-                  }>
-                    {selectedRequest.priority.charAt(0).toUpperCase() + selectedRequest.priority.slice(1)}
-                  </Badge>
-                </div>
-                
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-1">Category</p>
-                  <p className="text-sm capitalize">{selectedRequest.category || 'Other'}</p>
-                </div>
+              {/* Description */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <p className="font-medium mb-1">Description</p>
+                <p className="text-muted-foreground whitespace-pre-line">
+                  {selectedRequest.description}
+                </p>
               </div>
               
-              <Separator />
-              
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">Description</p>
-                <p className="text-sm whitespace-pre-line">{selectedRequest.description}</p>
-              </div>
-              
-              {selectedRequest.status === "pending" && (
-                <>
-                  <Separator />
-                  <div className="flex justify-end">
-                    <Button 
-                      variant="destructive" 
-                      onClick={handleCancelRequest}
-                      disabled={cancelRequestMutation.isPending}
-                    >
-                      {cancelRequestMutation.isPending ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Cancelling...
-                        </>
-                      ) : (
-                        <>
-                          <X className="mr-2 h-4 w-4" />
-                          Cancel Request
-                        </>
-                      )}
-                    </Button>
+              {/* Progress indicator for in-progress requests */}
+              {selectedRequest.status === "in progress" && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-muted-foreground">Work in progress</p>
+                    <p className="text-xs font-medium">50%</p>
                   </div>
-                </>
+                  <Progress value={50} className="h-1.5" />
+                </div>
+              )}
+              
+              {/* Preferences */}
+              {(selectedRequest.allowEntry !== undefined || selectedRequest.preferredTime) && (
+                <div className="border rounded-lg p-4 space-y-3">
+                  <p className="font-medium">Your preferences</p>
+                  
+                  {selectedRequest.allowEntry !== undefined && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Allow entry when absent</span>
+                      <span>{selectedRequest.allowEntry ? "Yes" : "No"}</span>
+                    </div>
+                  )}
+                  
+                  {selectedRequest.preferredTime && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Preferred time</span>
+                      <span className="capitalize">{selectedRequest.preferredTime}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {/* Cancel button for pending requests */}
+              {selectedRequest.status === "pending" && (
+                <div className="pt-2">
+                  <Button 
+                    variant="outline"
+                    size="sm"
+                    className="w-full h-9 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                    onClick={handleCancelRequest}
+                    disabled={cancelRequestMutation.isPending}
+                  >
+                    {cancelRequestMutation.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                        Cancelling...
+                      </>
+                    ) : (
+                      <>Cancel this request</>
+                    )}
+                  </Button>
+                </div>
               )}
             </div>
           </DialogContent>

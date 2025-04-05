@@ -17,11 +17,11 @@ export function DashLayout({ children }: DashLayoutProps) {
   const role = (Object.values(userRoles).includes(user.role) ? user.role : userRoles.TENANT) as any;
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-gray-50">
+    <div className="min-h-screen flex flex-col md:flex-row bg-white">
       <Sidebar role={role} />
       <MobileNav role={role} />
-      <main className="flex-1 overflow-auto pt-4 pb-5 md:ml-64">
-        <div className="px-4 md:px-6 max-w-7xl mx-auto">
+      <main className="flex-1 overflow-auto md:ml-64">
+        <div className="px-3 md:px-5 max-w-5xl mx-auto">
           {children}
         </div>
       </main>
