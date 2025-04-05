@@ -56,21 +56,16 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
 
 // Icons
 import {
   Activity,
   AlertTriangle,
-  ArrowRight,
   Building,
   Calendar,
   Check,
   CheckCircle,
-  ChevronRight,
   Clock,
   Droplets,
   FileText,
@@ -79,18 +74,14 @@ import {
   Loader2,
   MapPin,
   MessageSquare,
-  Phone,
   Plus,
   RotateCcw,
   Search,
   Wrench as Tool,
-  Trash,
-  Upload,
   Wrench,
   X,
   Zap,
 } from "lucide-react";
-import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 // Form schema
 const maintenanceFormSchema = z.object({
@@ -114,70 +105,14 @@ const categories = [
   { id: "other", label: "Other", icon: <Tool className="h-4 w-4" />, color: "bg-gray-500" },
 ];
 
-// Simple Empty State component - Airbnb style
-function EmptyState({ 
-  icon, 
-  title, 
-  description, 
-  action 
-}: { 
-  icon: React.ReactNode; 
-  title: string; 
-  description: string; 
-  action?: React.ReactNode;
-}) {
-  return (
-    <div className="flex flex-col items-center justify-center py-10 px-4 text-center">
-      <div className="bg-gray-50 p-4 rounded-full mb-4">
-        {icon}
-      </div>
-      <h3 className="text-base font-medium mb-1">{title}</h3>
-      <p className="text-muted-foreground text-sm max-w-md mb-3">{description}</p>
-      {action}
-    </div>
-  );
-}
-
-// Request Card component
-function RequestCard({ 
+// Job Card component
+function JobCard({ 
   request, 
   onClick 
 }: { 
   request: MaintenanceRequest; 
   onClick: () => void;
 }) {
-  // Format priority label
-  const getPriorityBadge = (priority: string) => {
-    switch (priority) {
-      case "low":
-        return <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">Low</Badge>;
-      case "medium":
-        return <Badge variant="outline" className="bg-yellow-50 text-yellow-600 border-yellow-200">Medium</Badge>;
-      case "high":
-        return <Badge variant="outline" className="bg-orange-50 text-orange-600 border-orange-200">High</Badge>;
-      case "urgent":
-        return <Badge variant="outline" className="bg-red-50 text-red-600 border-red-200">Urgent</Badge>;
-      default:
-        return <Badge variant="outline">Unknown</Badge>;
-    }
-  };
-
-  // Format status badge
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "pending":
-        return <Badge variant="outline" className="bg-amber-50 text-amber-600 border-amber-200">Pending</Badge>;
-      case "in progress":
-        return <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">In Progress</Badge>;
-      case "completed":
-        return <Badge variant="outline" className="bg-green-50 text-green-600 border-green-200">Completed</Badge>;
-      case "cancelled":
-        return <Badge variant="outline" className="bg-gray-50 text-gray-600 border-gray-200">Cancelled</Badge>;
-      default:
-        return <Badge variant="outline">Unknown</Badge>;
-    }
-  };
-
   // Format relative time
   const getRelativeTime = (date: Date) => {
     const now = new Date();
@@ -200,56 +135,61 @@ function RequestCard({
     }
   };
 
+  // Function to get icon for category
+  const getCategoryIcon = (categoryId: string) => {
+    const category = categories.find(c => c.id === categoryId);
+    return category ? category.icon : <Tool className="h-5 w-5 text-gray-500" />;
+  };
+
   return (
     <div 
-      className="cursor-pointer hover:shadow-sm transition-all border border-gray-100 bg-white rounded-xl overflow-hidden"
       onClick={onClick}
+      className="bg-white rounded-lg border overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
     >
-      <div className="p-3">
-        <div className="flex justify-between items-start">
-          {/* Left Side - Main Content */}
-          <div className="space-y-1.5 flex-1 min-w-0 pr-2">
-            <div className="flex items-center gap-1.5">
-              <h3 className="font-medium text-sm line-clamp-1">{request.title}</h3>
-            </div>
-            
-            <p className="text-xs text-muted-foreground line-clamp-1">
-              {request.description}
-            </p>
-            
-            {/* Footer with metadata */}
-            <div className="flex flex-wrap pt-1 text-[11px] text-gray-500">
-              <div className="flex items-center mr-3">
-                <Clock className="h-3 w-3 mr-1 opacity-70" />
-                {getRelativeTime(new Date(request.createdAt))}
-              </div>
-              
-              {request.category && (
-                <div className="flex items-center capitalize mr-3">
-                  <Tool className="h-3 w-3 mr-1 opacity-70" />
-                  {request.category}
-                </div>
-              )}
-              
-              {getStatusBadge(request.status)}
-            </div>
+      <div className="p-5">
+        {/* Provider/Property info */}
+        <div className="flex items-center mb-4">
+          <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center mr-3">
+            {request.category && getCategoryIcon(request.category)}
           </div>
-          
-          {/* Right Side - Priority indicator */}
           <div>
-            {getPriorityBadge(request.priority)}
+            <h3 className="font-medium">{request.title}</h3>
+            <div className="flex items-center text-sm text-gray-500">
+              <Clock className="h-3.5 w-3.5 mr-1" />
+              {getRelativeTime(new Date(request.createdAt))}
+            </div>
           </div>
         </div>
         
-        {/* Progress bar for pending/in progress */}
-        {(request.status === "in progress" || request.status === "pending") && (
-          <div className="mt-2">
-            <Progress 
-              value={request.status === "in progress" ? 50 : 5} 
-              className="h-1 bg-gray-100" 
-            />
-          </div>
-        )}
+        {/* Job description */}
+        <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+          {request.description}
+        </p>
+        
+        {/* Tags row */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          {request.category && (
+            <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded text-xs">
+              {request.category}
+            </span>
+          )}
+          <span className={`px-2 py-1 rounded text-xs ${
+            request.priority === "urgent" ? "bg-red-100 text-red-800" :
+            request.priority === "high" ? "bg-orange-100 text-orange-800" :
+            request.priority === "medium" ? "bg-yellow-100 text-yellow-800" :
+            "bg-blue-100 text-blue-800"
+          }`}>
+            {request.priority} priority
+          </span>
+          <span className={`px-2 py-1 rounded text-xs ${
+            request.status === "pending" ? "bg-amber-100 text-amber-800" :
+            request.status === "in progress" ? "bg-blue-100 text-blue-800" :
+            request.status === "completed" ? "bg-green-100 text-green-800" :
+            "bg-gray-100 text-gray-800"
+          }`}>
+            {request.status}
+          </span>
+        </div>
       </div>
     </div>
   );
@@ -264,6 +204,7 @@ export default function MaintenancePortal() {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<MaintenanceRequest | null>(null);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   // Fetch active lease for the tenant
   const {
@@ -289,7 +230,6 @@ export default function MaintenancePortal() {
   const {
     data: maintenanceRequests = [],
     isLoading: isLoadingRequests,
-    refetch: refetchRequests
   } = useQuery<MaintenanceRequest[]>({
     queryKey: ["/api/maintenance/tenant"],
   });
@@ -408,10 +348,18 @@ export default function MaintenancePortal() {
         requests = maintenanceRequests;
     }
     
+    // Filter by search term
     if (searchTerm) {
-      return requests.filter(request => 
+      requests = requests.filter(request => 
         request.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         request.description.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    // Filter by category
+    if (selectedCategory) {
+      requests = requests.filter(request => 
+        request.category === selectedCategory
       );
     }
     
@@ -472,309 +420,302 @@ export default function MaintenancePortal() {
     );
   }
 
-  // Main UI - True Airbnb inspired version (premium design)
+  // Main UI - Behance inspired design
   return (
     <DashLayout>
-      <div className="py-6">
-        <div className="max-w-5xl mx-auto">
-          {/* Hero Section - Airbnb Style */}
-          <div className="mb-10 text-center relative overflow-hidden rounded-xl">
-            <div className="absolute inset-0 bg-gradient-to-r from-amber-50 via-white to-amber-50 opacity-50 -z-10"></div>
-            <div className="py-10 px-6">
-              <div className="mb-3">
-                <div className="inline-flex p-2 rounded-full bg-amber-100 mb-3">
-                  <Wrench className="h-6 w-6 text-amber-600" />
-                </div>
-              </div>
-              <h1 className="text-2xl md:text-3xl font-medium mb-2">Property Maintenance Hub</h1>
-              <p className="text-muted-foreground max-w-lg mx-auto mb-6">Expert maintenance for your home, just a few clicks away. Fast, reliable, and hassle-free repairs when you need them.</p>
-              
-              <Button 
-                onClick={() => setIsNewRequestOpen(true)} 
-                className="bg-amber-500 hover:bg-amber-600 text-white rounded-full shadow-md py-2 px-5 h-auto"
-                size="lg"
+      {/* Hero section with colorful background */}
+      <div className="bg-gradient-to-r from-blue-900 via-indigo-800 to-purple-900 text-white">
+        <div className="max-w-6xl mx-auto px-4 py-12 md:py-16">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">Maintenance Jobs</h1>
+          <p className="text-xl opacity-90 mb-8 max-w-2xl">
+            Find reliable professionals or post your property maintenance needs
+          </p>
+          <Button 
+            onClick={() => setIsNewRequestOpen(true)} 
+            className="bg-blue-500 hover:bg-blue-600 text-white rounded-md"
+          >
+            Post a job
+          </Button>
+        </div>
+      </div>
+
+      {/* Search bar and filters */}
+      <div className="bg-white border-b">
+        <div className="max-w-6xl mx-auto px-4 py-4">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input 
+                placeholder="Search jobs by keyword" 
+                className="pl-10 bg-white border-gray-300"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Select 
+                value={activeTab}
+                onValueChange={setActiveTab}
               >
-                <Plus className="h-4 w-4 mr-1.5" />
-                Request Maintenance
-              </Button>
-            </div>
-          </div>
-          
-          {/* Status Cards - Modern Apple/Airbnb inspired design */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-              <div className="flex items-center mb-3">
-                <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center mr-3">
-                  <Clock className="h-5 w-5 text-blue-500" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Active Requests</p>
-                  <h3 className="text-2xl font-semibold">{activeRequests.length}</h3>
-                </div>
-              </div>
-              {activeRequests.length > 0 && (
-                <div className="text-xs text-muted-foreground">
-                  {activeRequests.length === 1 ? 'Currently being processed' : 'Being handled by our team'}
-                </div>
-              )}
-            </div>
-            
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-              <div className="flex items-center mb-3">
-                <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center mr-3">
-                  <CheckCircle className="h-5 w-5 text-green-500" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Completed</p>
-                  <h3 className="text-2xl font-semibold">{completedRequests.length}</h3>
-                </div>
-              </div>
-              {completedRequests.length > 0 && (
-                <div className="text-xs text-muted-foreground">
-                  Most recent: {formatDateTime(completedRequests[0]?.updatedAt || new Date()).split(' at')[0]}
-                </div>
-              )}
-            </div>
-            
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-              <div className="flex items-center mb-3">
-                <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center mr-3">
-                  <Tool className="h-5 w-5 text-gray-500" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Total Requests</p>
-                  <h3 className="text-2xl font-semibold">{maintenanceRequests.length}</h3>
-                </div>
-              </div>
-              <div className="text-xs text-muted-foreground">
-                Lifetime maintenance history
-              </div>
-            </div>
-          </div>
-          
-          {/* Category Filters - Horizontal scrolling with images (Airbnb style) */}
-          <div className="mb-8">
-            <h2 className="text-xl font-medium mb-4">Filter by Category</h2>
-            <div className="flex overflow-x-auto pb-3 space-x-4 scrollbar-hide">
-              {categories.map((category) => (
-                <div 
-                  key={category.id}
-                  className={`flex-shrink-0 cursor-pointer ${searchTerm === category.label ? 'ring-2 ring-amber-400 scale-105' : ''}`}
-                  onClick={() => setSearchTerm(category.label)}
-                >
-                  <div className={`w-24 h-24 rounded-lg flex items-center justify-center ${category.id === 'plumbing' ? 'bg-blue-50' : category.id === 'electrical' ? 'bg-yellow-50' : category.id === 'appliance' ? 'bg-green-50' : category.id === 'structural' ? 'bg-orange-50' : 'bg-gray-50'} border border-gray-100 hover:shadow-md transition-all mb-2`}>
-                    <div className="text-center">
-                      {category.icon}
-                      <div className="mt-2 text-xs font-medium">{category.label}</div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-              <div 
-                className="flex-shrink-0 cursor-pointer"
-                onClick={() => setSearchTerm("")}
-              >
-                <div className="w-24 h-24 rounded-lg flex items-center justify-center bg-purple-50 border border-gray-100 hover:shadow-md transition-all mb-2">
-                  <div className="text-center">
-                    <RotateCcw className="h-4 w-4 text-purple-500 mx-auto" />
-                    <div className="mt-2 text-xs font-medium">Clear Filter</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          {/* Main Content Area with Tabs */}
-          <div className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-            {/* Tabs and Search - Simplified */}
-            <div className="flex flex-col md:flex-row gap-3 items-start md:items-center justify-between mb-6">
-              <Tabs defaultValue="active" value={activeTab} onValueChange={setActiveTab} className="w-full md:w-auto">
-                <TabsList className="grid grid-cols-3 w-full md:w-[300px]">
-                  <TabsTrigger value="active">Active</TabsTrigger>
-                  <TabsTrigger value="completed">Completed</TabsTrigger>
-                  <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
-                </TabsList>
-              </Tabs>
+                <SelectTrigger className="w-[140px] border-gray-300">
+                  <SelectValue placeholder="Job Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active Jobs</SelectItem>
+                  <SelectItem value="completed">Completed Jobs</SelectItem>
+                  <SelectItem value="cancelled">Cancelled Jobs</SelectItem>
+                </SelectContent>
+              </Select>
               
-              <div className="relative w-full md:w-[250px]">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input 
-                  placeholder="Search requests..."
-                  className="pl-9 h-9"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-            </div>
-            
-            {/* Request List Views */}
-            <TabsContent value="active" className="mt-0">
-              {filteredRequests.length > 0 ? (
-                <div className="grid gap-3 md:grid-cols-2">
-                  {filteredRequests.map((request) => (
-                    <RequestCard 
-                      key={request.id} 
-                      request={request} 
-                      onClick={() => handleViewRequest(request)} 
-                    />
+              <Select 
+                value={selectedCategory || "all-categories"} 
+                onValueChange={(value) => setSelectedCategory(value === "all-categories" ? null : value)}
+              >
+                <SelectTrigger className="w-[180px] border-gray-300">
+                  <SelectValue placeholder="All Categories" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all-categories">All Categories</SelectItem>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      <div className="flex items-center">
+                        {category.icon}
+                        <span className="ml-2">{category.label}</span>
+                      </div>
+                    </SelectItem>
                   ))}
-                </div>
-              ) : (
-                <div className="bg-amber-50/30 border border-dashed border-amber-200 rounded-lg p-8 text-center">
-                  <Wrench className="h-10 w-10 text-amber-300 mx-auto mb-3" />
-                  <h3 className="text-lg font-medium text-gray-800 mb-1">No active maintenance requests</h3>
-                  <p className="text-muted-foreground mb-5 max-w-md mx-auto">
-                    Your home looking perfect? Great! If you need anything fixed or repaired, submit a new request anytime.
-                  </p>
-                  <Button 
-                    onClick={() => setIsNewRequestOpen(true)}
-                    className="bg-amber-500 hover:bg-amber-600 text-white"
-                  >
-                    <Plus className="h-4 w-4 mr-1" />
-                    Request Service
-                  </Button>
-                </div>
-              )}
-            </TabsContent>
-            
-            <TabsContent value="completed" className="mt-0">
-              {filteredRequests.length > 0 ? (
-                <div className="grid gap-3 md:grid-cols-2">
-                  {filteredRequests.map((request) => (
-                    <RequestCard 
-                      key={request.id} 
-                      request={request} 
-                      onClick={() => handleViewRequest(request)} 
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="bg-green-50/30 border border-dashed border-green-200 rounded-lg p-8 text-center">
-                  <CheckCircle className="h-10 w-10 text-green-300 mx-auto mb-3" />
-                  <h3 className="text-lg font-medium text-gray-800 mb-1">No completed maintenance requests</h3>
-                  <p className="text-muted-foreground mb-3 max-w-md mx-auto">
-                    Once your maintenance requests are completed, they'll appear here for your reference.
-                  </p>
-                </div>
-              )}
-            </TabsContent>
-            
-            <TabsContent value="cancelled" className="mt-0">
-              {filteredRequests.length > 0 ? (
-                <div className="grid gap-3 md:grid-cols-2">
-                  {filteredRequests.map((request) => (
-                    <RequestCard 
-                      key={request.id} 
-                      request={request} 
-                      onClick={() => handleViewRequest(request)} 
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="bg-gray-50 border border-dashed border-gray-200 rounded-lg p-8 text-center">
-                  <X className="h-10 w-10 text-gray-300 mx-auto mb-3" />
-                  <h3 className="text-lg font-medium text-gray-800 mb-1">No cancelled maintenance requests</h3>
-                  <p className="text-muted-foreground mb-3 max-w-md mx-auto">
-                    Any maintenance requests you cancel will be stored here for your records.
-                  </p>
-                </div>
-              )}
-            </TabsContent>
-          </div>
-          
-          {/* How it works section */}
-          <div className="mt-10 mb-8">
-            <h2 className="text-xl font-medium mb-6">How Maintenance Works</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="text-center">
-                <div className="w-14 h-14 flex items-center justify-center rounded-full bg-amber-100 text-amber-600 mx-auto mb-4">
-                  <Plus className="h-6 w-6" />
-                </div>
-                <h3 className="font-medium mb-2">1. Submit a Request</h3>
-                <p className="text-sm text-muted-foreground">
-                  Describe your issue in detail. Add photos for faster diagnosis.
-                </p>
-              </div>
-              <div className="text-center">
-                <div className="w-14 h-14 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 mx-auto mb-4">
-                  <Tool className="h-6 w-6" />
-                </div>
-                <h3 className="font-medium mb-2">2. Professional Assignment</h3>
-                <p className="text-sm text-muted-foreground">
-                  An experienced local provider will be assigned to your case.
-                </p>
-              </div>
-              <div className="text-center">
-                <div className="w-14 h-14 flex items-center justify-center rounded-full bg-green-100 text-green-600 mx-auto mb-4">
-                  <CheckCircle className="h-6 w-6" />
-                </div>
-                <h3 className="font-medium mb-2">3. Resolution</h3>
-                <p className="text-sm text-muted-foreground">
-                  The professional completes the work and you confirm it's resolved.
-                </p>
-              </div>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Create Maintenance Request Dialog - Simplified Airbnb style */}
-      <Dialog open={isNewRequestOpen} onOpenChange={(open) => {
-        setIsNewRequestOpen(open);
-        if (!open) {
-          setUploadedImages([]);
-          form.reset();
-        }
-      }}>
-        <DialogContent className="sm:max-w-[500px] rounded-xl p-6">
-          <DialogHeader className="mb-5">
-            <DialogTitle className="text-xl">Report an issue</DialogTitle>
-            <DialogDescription className="text-sm">
-              Let us know what needs repair or maintenance
+      {/* Main content */}
+      <div className="bg-gray-50 min-h-screen">
+        <div className="max-w-6xl mx-auto px-4 py-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold">
+              {activeTab === "active" ? "Active Jobs" : 
+               activeTab === "completed" ? "Completed Jobs" : 
+               "Cancelled Jobs"}
+              <span className="ml-2 text-sm text-gray-500">
+                {filteredRequests.length} {filteredRequests.length === 1 ? "job" : "jobs"}
+              </span>
+            </h2>
+            
+            <Button 
+              onClick={() => {
+                setSearchTerm("");
+                setSelectedCategory(null);
+              }}
+              variant="outline"
+              className="text-sm"
+            >
+              <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
+              Clear Filters
+            </Button>
+          </div>
+
+          {/* No jobs state */}
+          {filteredRequests.length === 0 && (
+            <div className="bg-white rounded-lg border p-12 text-center">
+              <div className="bg-gray-100 h-16 w-16 rounded-full flex items-center justify-center mx-auto mb-5">
+                <Tool className="h-8 w-8 text-gray-500" />
+              </div>
+              <h3 className="text-xl font-semibold mb-2">No maintenance jobs found</h3>
+              <p className="text-gray-500 max-w-md mx-auto mb-6">
+                {searchTerm || selectedCategory ? 
+                  "Try adjusting your search criteria for better results." :
+                  activeTab === "active" ? 
+                    "There are no active maintenance jobs at the moment." :
+                    activeTab === "completed" ?
+                      "You don't have any completed maintenance jobs yet." :
+                      "You don't have any cancelled maintenance jobs."
+                }
+              </p>
+              {activeTab === "active" && !searchTerm && !selectedCategory && (
+                <Button onClick={() => setIsNewRequestOpen(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Post a job
+                </Button>
+              )}
+            </div>
+          )}
+
+          {/* Job listings in a grid */}
+          {filteredRequests.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredRequests.map((request) => (
+                <JobCard
+                  key={request.id}
+                  request={request}
+                  onClick={() => handleViewRequest(request)}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Featured Providers Section */}
+          {activeTab === "active" && (
+            <div className="mt-12">
+              <h2 className="text-xl font-semibold mb-6">Top Maintenance Providers</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-white rounded-lg border overflow-hidden">
+                  <div className="p-5">
+                    <div className="flex items-center mb-4">
+                      <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                        <Droplets className="h-6 w-6 text-blue-500" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium">Mpho Khumalo</h3>
+                        <div className="flex items-center text-sm text-gray-500">
+                          Plumbing Specialist
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center mb-3">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <svg 
+                          key={star} 
+                          xmlns="http://www.w3.org/2000/svg" 
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          className={`h-4 w-4 ${star <= 5 ? "text-yellow-400" : "text-gray-300"}`}
+                        >
+                          <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
+                        </svg>
+                      ))}
+                      <span className="ml-2 text-sm text-gray-600">4.9/5</span>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Specializing in all types of plumbing repairs and installations with 8+ years of experience.
+                    </p>
+                    <Button variant="outline" className="w-full">View Profile</Button>
+                  </div>
+                </div>
+                
+                <div className="bg-white rounded-lg border overflow-hidden">
+                  <div className="p-5">
+                    <div className="flex items-center mb-4">
+                      <div className="h-12 w-12 rounded-full bg-yellow-100 flex items-center justify-center mr-3">
+                        <Zap className="h-6 w-6 text-yellow-500" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium">Tebogo Moitwa</h3>
+                        <div className="flex items-center text-sm text-gray-500">
+                          Electrical Contractor
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center mb-3">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <svg 
+                          key={star} 
+                          xmlns="http://www.w3.org/2000/svg" 
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          className={`h-4 w-4 ${star <= 4 ? "text-yellow-400" : "text-gray-300"}`}
+                        >
+                          <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
+                        </svg>
+                      ))}
+                      <span className="ml-2 text-sm text-gray-600">4.1/5</span>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Licensed electrician with expertise in residential and commercial electrical systems.
+                    </p>
+                    <Button variant="outline" className="w-full">View Profile</Button>
+                  </div>
+                </div>
+                
+                <div className="bg-white rounded-lg border overflow-hidden">
+                  <div className="p-5">
+                    <div className="flex items-center mb-4">
+                      <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center mr-3">
+                        <Building className="h-6 w-6 text-green-500" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium">Lesego Selina</h3>
+                        <div className="flex items-center text-sm text-gray-500">
+                          General Contractor
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center mb-3">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <svg 
+                          key={star} 
+                          xmlns="http://www.w3.org/2000/svg" 
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          className={`h-4 w-4 ${star <= 5 ? "text-yellow-400" : "text-gray-300"}`}
+                        >
+                          <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
+                        </svg>
+                      ))}
+                      <span className="ml-2 text-sm text-gray-600">4.8/5</span>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Full-service contractor specializing in structural repairs, renovations and installations.
+                    </p>
+                    <Button variant="outline" className="w-full">View Profile</Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Dialog for new maintenance request */}
+      <Dialog open={isNewRequestOpen} onOpenChange={setIsNewRequestOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Post a maintenance job</DialogTitle>
+            <DialogDescription>
+              Describe the maintenance issue you need help with. Be as detailed as possible.
             </DialogDescription>
           </DialogHeader>
           
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-              {/* Title field */}
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
               <FormField
                 control={form.control}
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium">What's the issue?</FormLabel>
+                    <FormLabel>Job Title</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="e.g., Leaking faucet, broken AC"
-                        className="h-10"
-                        {...field}
-                      />
+                      <Input placeholder="e.g., Leaking Kitchen Faucet" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
               
-              {/* Two-column layout for category and priority */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="category"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium">Category</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormLabel>Category</FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        defaultValue={field.value}
+                      >
                         <FormControl>
-                          <SelectTrigger className="h-10">
-                            <SelectValue placeholder="Select" />
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a category" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           {categories.map((category) => (
                             <SelectItem key={category.id} value={category.id}>
-                              <div className="flex items-center gap-2">
-                                {category.icon}
-                                <span>{category.label}</span>
+                              <div className="flex items-center">
+                                <span className="mr-2">{category.icon}</span>
+                                {category.label}
                               </div>
                             </SelectItem>
                           ))}
@@ -790,38 +731,21 @@ export default function MaintenancePortal() {
                   name="priority"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium">Priority</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormLabel>Priority</FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        defaultValue={field.value}
+                      >
                         <FormControl>
-                          <SelectTrigger className="h-10">
-                            <SelectValue placeholder="Select" />
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select priority" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="low">
-                            <div className="flex items-center gap-2">
-                              <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />
-                              <span>Low</span>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="medium">
-                            <div className="flex items-center gap-2">
-                              <div className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
-                              <span>Medium</span>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="high">
-                            <div className="flex items-center gap-2">
-                              <div className="w-2.5 h-2.5 rounded-full bg-orange-500" />
-                              <span>High</span>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="urgent">
-                            <div className="flex items-center gap-2">
-                              <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
-                              <span>Urgent</span>
-                            </div>
-                          </SelectItem>
+                          <SelectItem value="low">Low Priority</SelectItem>
+                          <SelectItem value="medium">Medium Priority</SelectItem>
+                          <SelectItem value="high">High Priority</SelectItem>
+                          <SelectItem value="urgent">Urgent</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -830,18 +754,17 @@ export default function MaintenancePortal() {
                 />
               </div>
               
-              {/* Description field */}
               <FormField
                 control={form.control}
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium">Describe the issue</FormLabel>
+                    <FormLabel>Job Description</FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder="Please provide details about the problem..."
-                        className="resize-none min-h-[90px]"
-                        {...field}
+                      <Textarea 
+                        placeholder="Please describe the issue in detail..." 
+                        className="min-h-[120px]" 
+                        {...field} 
                       />
                     </FormControl>
                     <FormMessage />
@@ -849,82 +772,85 @@ export default function MaintenancePortal() {
                 )}
               />
               
-              {/* Simplified allow entry toggle */}
               <FormField
                 control={form.control}
                 name="allow_entry"
                 render={({ field }) => (
-                  <FormItem className="flex items-center justify-between space-y-0 rounded-md border p-3">
-                    <div className="space-y-0.5">
-                      <FormLabel className="text-sm">Allow entry when absent</FormLabel>
-                      <FormDescription className="text-xs">
-                        Maintenance staff may enter if you're not home
-                      </FormDescription>
-                    </div>
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                     <FormControl>
-                      <Switch
+                      <Checkbox
                         checked={field.value}
                         onCheckedChange={field.onChange}
                       />
                     </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Allow Entry When Not Home</FormLabel>
+                      <FormDescription>
+                        If checked, maintenance personnel may enter your unit when you're not present.
+                      </FormDescription>
+                    </div>
                   </FormItem>
                 )}
               />
               
-              {/* Simplified time selection */}
               <FormField
                 control={form.control}
                 name="preferred_time"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium">Preferred time</FormLabel>
-                    <div className="grid grid-cols-3 gap-2 mt-1.5">
-                      <Button 
-                        type="button"
-                        variant={field.value === "morning" ? "default" : "outline"}
-                        size="sm"
-                        className="h-9"
-                        onClick={() => field.onChange("morning")}
-                      >
-                        Morning
-                      </Button>
-                      <Button 
-                        type="button"
-                        variant={field.value === "afternoon" ? "default" : "outline"}
-                        size="sm"
-                        className="h-9"
-                        onClick={() => field.onChange("afternoon")}
-                      >
-                        Afternoon
-                      </Button>
-                      <Button 
-                        type="button"
-                        variant={field.value === "anytime" ? "default" : "outline"}
-                        size="sm"
-                        className="h-9"
-                        onClick={() => field.onChange("anytime")}
-                      >
-                        Anytime
-                      </Button>
-                    </div>
+                    <FormLabel>Preferred Maintenance Time</FormLabel>
+                    <RadioGroup 
+                      onValueChange={field.onChange} 
+                      defaultValue={field.value}
+                      className="grid grid-cols-2 sm:grid-cols-4 gap-2"
+                    >
+                      <FormItem className="flex items-center space-x-1 space-y-0">
+                        <FormControl>
+                          <RadioGroupItem value="morning" />
+                        </FormControl>
+                        <FormLabel className="font-normal text-sm">Morning</FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-1 space-y-0">
+                        <FormControl>
+                          <RadioGroupItem value="afternoon" />
+                        </FormControl>
+                        <FormLabel className="font-normal text-sm">Afternoon</FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-1 space-y-0">
+                        <FormControl>
+                          <RadioGroupItem value="evening" />
+                        </FormControl>
+                        <FormLabel className="font-normal text-sm">Evening</FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-1 space-y-0">
+                        <FormControl>
+                          <RadioGroupItem value="anytime" />
+                        </FormControl>
+                        <FormLabel className="font-normal text-sm">Anytime</FormLabel>
+                      </FormItem>
+                    </RadioGroup>
                     <FormMessage />
                   </FormItem>
                 )}
               />
               
-              <DialogFooter className="mt-6 gap-2">
-                <Button type="button" variant="outline" size="sm" className="h-9" onClick={() => setIsNewRequestOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit" size="sm" className="h-9 px-5" disabled={createRequestMutation.isPending}>
-                  {createRequestMutation.isPending ? (
-                    <>
-                      <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-                      Submitting...
-                    </>
-                  ) : (
-                    <>Submit</>
+              {/* Hidden property_id field */}
+              <input 
+                type="hidden" 
+                {...form.register("property_id", { 
+                  value: property?.id || 0
+                })}
+              />
+              
+              <DialogFooter>
+                <Button 
+                  type="submit" 
+                  disabled={createRequestMutation.isPending}
+                >
+                  {createRequestMutation.isPending && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   )}
+                  Post Job
                 </Button>
               </DialogFooter>
             </form>
@@ -932,114 +858,117 @@ export default function MaintenancePortal() {
         </DialogContent>
       </Dialog>
       
-      {/* Request Details Dialog - Airbnb style */}
-      {selectedRequest && (
-        <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-          <DialogContent className="sm:max-w-[500px] rounded-xl p-6">
-            <DialogHeader className="space-y-1 mb-4">
-              <DialogTitle className="text-xl font-semibold">
-                {selectedRequest.title}
-              </DialogTitle>
-              <div className="flex items-center flex-wrap gap-2">
-                <Badge variant="outline" className={
-                  selectedRequest.status === "pending" ? "bg-amber-50 text-amber-600 border-amber-200" :
-                  selectedRequest.status === "in progress" ? "bg-blue-50 text-blue-600 border-blue-200" :
-                  selectedRequest.status === "completed" ? "bg-green-50 text-green-600 border-green-200" :
-                  "bg-gray-50 text-gray-600 border-gray-200"
-                }>
-                  {selectedRequest.status.charAt(0).toUpperCase() + selectedRequest.status.slice(1)}
-                </Badge>
-                <Badge variant="outline" className={
-                  selectedRequest.priority === "low" ? "bg-blue-50 text-blue-600 border-blue-200" :
-                  selectedRequest.priority === "medium" ? "bg-yellow-50 text-yellow-600 border-yellow-200" :
-                  selectedRequest.priority === "high" ? "bg-orange-50 text-orange-600 border-orange-200" :
-                  selectedRequest.priority === "urgent" ? "bg-red-50 text-red-600 border-red-200" :
-                  "bg-gray-50 text-gray-600 border-gray-200"
-                }>
-                  {selectedRequest.priority.charAt(0).toUpperCase() + selectedRequest.priority.slice(1)} Priority
-                </Badge>
-                <span className="text-xs text-muted-foreground">
-                  Submitted {formatDateTime(selectedRequest.createdAt)}
-                </span>
-              </div>
-            </DialogHeader>
-            
-            <div className="space-y-5 text-sm">
-              {/* Category with icon */}
-              <div className="flex items-center gap-1.5">
-                <div className="p-1.5 bg-gray-50 rounded-full">
-                  <Tool className="h-3.5 w-3.5 text-gray-500" />
+      {/* Dialog for maintenance request details */}
+      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          {selectedRequest && (
+            <>
+              <DialogHeader>
+                <div className="flex items-center justify-between">
+                  <DialogTitle>{selectedRequest.title}</DialogTitle>
+                  <span className={`px-2 py-1 rounded text-xs ${
+                    selectedRequest.priority === "urgent" ? "bg-red-100 text-red-800" :
+                    selectedRequest.priority === "high" ? "bg-orange-100 text-orange-800" :
+                    selectedRequest.priority === "medium" ? "bg-yellow-100 text-yellow-800" :
+                    "bg-blue-100 text-blue-800"
+                  }`}>
+                    {selectedRequest.priority} priority
+                  </span>
                 </div>
-                <span className="text-muted-foreground">
-                  <span className="capitalize">{selectedRequest.category || 'Other'}</span> issue
-                </span>
-              </div>
+                <DialogDescription>
+                  Posted on {formatDateTime(new Date(selectedRequest.createdAt))}
+                </DialogDescription>
+              </DialogHeader>
               
-              {/* Description */}
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="font-medium mb-1">Description</p>
-                <p className="text-muted-foreground whitespace-pre-line">
-                  {selectedRequest.description}
-                </p>
-              </div>
-              
-              {/* Progress indicator for in-progress requests */}
-              {selectedRequest.status === "in progress" && (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs text-muted-foreground">Work in progress</p>
-                    <p className="text-xs font-medium">50%</p>
+              <div className="space-y-4">
+                <div>
+                  <h4 className="text-sm font-medium mb-1">Job Description</h4>
+                  <p className="text-sm text-gray-600">{selectedRequest.description}</p>
+                </div>
+                
+                <div className="bg-gray-50 p-4 rounded-md">
+                  <h4 className="text-sm font-medium mb-2">Job Details</h4>
+                  <div className="grid grid-cols-2 gap-y-2 text-sm">
+                    <div className="text-gray-500">Status:</div>
+                    <div>
+                      <span className={`px-2 py-1 rounded text-xs ${
+                        selectedRequest.status === "pending" ? "bg-amber-100 text-amber-800" :
+                        selectedRequest.status === "in progress" ? "bg-blue-100 text-blue-800" :
+                        selectedRequest.status === "completed" ? "bg-green-100 text-green-800" :
+                        "bg-gray-100 text-gray-800"
+                      }`}>
+                        {selectedRequest.status}
+                      </span>
+                    </div>
+                    
+                    <div className="text-gray-500">Category:</div>
+                    <div className="capitalize">{selectedRequest.category || "Not specified"}</div>
+                    
+                    <div className="text-gray-500">Priority:</div>
+                    <div className="capitalize">{selectedRequest.priority}</div>
+                    
+                    <div className="text-gray-500">Location:</div>
+                    <div>{property?.address || "Unknown"}</div>
+                    
+                    {selectedRequest.allowEntry !== undefined && (
+                      <>
+                        <div className="text-gray-500">Allow entry when absent:</div>
+                        <div>{selectedRequest.allowEntry ? "Yes" : "No"}</div>
+                      </>
+                    )}
+                    
+                    {selectedRequest.preferredTime && (
+                      <>
+                        <div className="text-gray-500">Preferred time:</div>
+                        <div className="capitalize">{selectedRequest.preferredTime}</div>
+                      </>
+                    )}
                   </div>
-                  <Progress value={50} className="h-1.5" />
                 </div>
-              )}
+                
+                {selectedRequest.status === "pending" && (
+                  <div className="bg-blue-50 p-4 rounded-md">
+                    <h4 className="text-sm font-medium text-blue-800 mb-2">Job Status</h4>
+                    <p className="text-sm text-blue-600">
+                      This job is open and waiting for maintenance providers to submit quotes.
+                    </p>
+                  </div>
+                )}
+                
+                {selectedRequest.status === "in progress" && (
+                  <div className="bg-blue-50 p-4 rounded-md">
+                    <h4 className="text-sm font-medium text-blue-800 mb-2">Job Status</h4>
+                    <p className="text-sm text-blue-600">
+                      A maintenance provider has been assigned and is currently working on this job.
+                    </p>
+                  </div>
+                )}
+              </div>
               
-              {/* Preferences */}
-              {(selectedRequest.allowEntry !== undefined || selectedRequest.preferredTime) && (
-                <div className="border rounded-lg p-4 space-y-3">
-                  <p className="font-medium">Your preferences</p>
-                  
-                  {selectedRequest.allowEntry !== undefined && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Allow entry when absent</span>
-                      <span>{selectedRequest.allowEntry ? "Yes" : "No"}</span>
-                    </div>
-                  )}
-                  
-                  {selectedRequest.preferredTime && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Preferred time</span>
-                      <span className="capitalize">{selectedRequest.preferredTime}</span>
-                    </div>
-                  )}
-                </div>
-              )}
-              
-              {/* Cancel button for pending requests */}
-              {selectedRequest.status === "pending" && (
-                <div className="pt-2">
-                  <Button 
+              <DialogFooter className="gap-2">
+                {selectedRequest.status === "pending" && (
+                  <Button
                     variant="outline"
-                    size="sm"
-                    className="w-full h-9 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
                     onClick={handleCancelRequest}
+                    className="text-red-500"
                     disabled={cancelRequestMutation.isPending}
                   >
-                    {cancelRequestMutation.isPending ? (
-                      <>
-                        <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-                        Cancelling...
-                      </>
-                    ) : (
-                      <>Cancel this request</>
+                    {cancelRequestMutation.isPending && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     )}
+                    Cancel Job
                   </Button>
-                </div>
-              )}
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
+                )}
+                <Button
+                  onClick={() => setIsDetailsOpen(false)}
+                >
+                  Close
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </DashLayout>
   );
 }
