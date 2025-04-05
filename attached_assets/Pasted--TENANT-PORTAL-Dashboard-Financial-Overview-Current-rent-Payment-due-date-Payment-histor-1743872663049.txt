@@ -1,0 +1,208 @@
+. TENANT PORTAL
+ Dashboard
+ Financial Overview:
+ Current rent
+ Payment due date
+ Payment history
+ Rewards status
+ Security deposit status
+Utility payment tracking
+ Property Information:
+ Current lease details
+ Property features/amenities
+ Building/complex rules
+ Local amenities map
+ Quick Actions:
+ Make payment
+ Submit maintenance request
+ Message landlord/agent
+ Access documents
+ Submit lease termination notice
+ Request lease renewal
+ Rent Management
+ Multiple payment methods (M-Zaka, Orange Money, Visa/Mastercard, bank transfer, Mobile Money)
+ Automatic payment setup
+ Payment reminders
+ Receipt generation
+ Rent history visualization
+ Split payment options for roommates
+ Partial payment options (with landlord approval)
+ Late payment fee calculator
+ Lease Management
+ Lease Termination Process:
+ Digital notice submission with legally required notice period calculator
+ Move-out checklist
+ Security deposit return tracking
+ Final inspection scheduling
+ Reference request system
+ Lease Renewal:
+Renewal request form
+ Negotiation interface
+ Digital signing
+ Rent increase visibility
+ Lease Compliance:
+ Rules and regulations reference
+ Violation reporting (for other tenants)
+ Appeal process for complaints
+ Maintenance Requests
+ Submit new requests with:
+ Issue categorization
+ Description
+ Photo/video upload
+ Priority selection
+ Preferred access times
+ Track request status
+ Rate and review completed work
+ Maintenance history log
+ Emergency maintenance hotline
+ Self-help guides for minor issues
+ Community Features
+ Neighborhood information
+ Building/complex announcements
+ Community events
+ Neighbor connection (opt-in)
+ Local service recommendations
+ Marketplace for tenant-to-tenant sales/exchanges
+ Carpooling coordination
+ Community discussion boards
+Rewards Program
+ Points for on-time payments
+ Referral bonuses
+ Loyalty incentives
+ Redemption options
+ Achievement badges
+ Leaderboards (optional, privacy-protected)
+ Local merchant partnerships for discounts
+ Utility Management
+ Utility connection/disconnection guides
+ Usage tracking
+ Bill splitting tools for shared accommodations
+ Conservation tips
+ Service provider contact information
+ 3. MAINTENANCE PROFESSIONAL PORTAL
+ Dashboard
+ Business Overview:
+ Monthly income
+ Job completion rate
+ Average rating
+ Active jobs
+ Upcoming appointments
+ Performance trends
+ Job Queue:
+ New opportunities
+ Scheduled jobs
+ In-progress work
+ Recently completed
+ Follow-up required
+Marketplace
+ Browse available jobs:
+ Property location
+ Job type
+ Estimated scope
+ Timeline
+ Property access instructions
+ Bidding system:
+ Quote submission
+ Timeframe proposal
+ Material requirements
+ Competing bids indicator
+ Previous job history at location
+ Specialization Categories:
+ Plumbing
+ Electrical
+ Carpentry
+ HVAC
+ General maintenance
+ Landscaping
+ Security systems
+ Cleaning services
+ Job Management
+ Scheduling calendar
+ Material tracking
+ Time logging
+ Progress updates
+ Completion documentation
+ Invoice generation
+ Warranty tracking
+Follow-up scheduling
+ Recurring maintenance contracts
+ Profile Management
+ Skills and certifications
+ Portfolio of completed work
+ Pricing structure
+ Availability settings
+ Ratings and reviews
+ License/insurance verification
+ Service area mapping
+ Team member management
+ Equipment inventory
+ Communication
+ In-app messaging with clients
+ Notification preferences
+ Automated updates
+ Photo/video sharing
+ Voice calling option
+ Translation services
+ Business Tools
+ Expense tracking
+ Material cost calculator
+ Quote generator
+ Invoice templates
+ Tax preparation tools
+ Marketing materials
+ Business growth analytics
+ 4. AGENT PORTAL
+ Dashboard
+Performance Metrics:
+ Properties rented/sold
+ Commission earned
+ Client satisfaction rate
+ Active listings
+ Lead conversion rate
+ Average days to rent/sell
+ Client Management:
+ Active clients
+ Prospect pipeline
+ Viewing schedule
+ Follow-up reminders
+ Client preferences tracking
+ Property Listings
+ Add new listings with:
+ Comprehensive property details
+ Professional photo management
+ Virtual tour integration
+ Pricing recommendation tool
+ Comparable property analysis
+ SEO optimization
+ Manage existing listings:
+ Update availability
+ Adjust pricing
+ Track viewing statistics
+ Manage open house events
+ Generate QR codes for physical marketing
+ Marketing Tools
+ Automated social media posting
+ Email campaign templates
+Digital brochure generator
+ Lead capture forms
+ Performance analytics
+ SMS marketing integration
+ WhatsApp Business integration
+ Local advertising platform connections
+ Print material templates
+ Client Management
+ Landlord relationship tracking
+ Tenant applicant database
+ Matching algorithm for tenant-property fitting
+ Viewing appointment scheduler
+ Feedback collection system
+ Contract negotiation tools
+ Referral tracking
+ Commission Management
+ Automated calculations
+ Payment tracking
+ Commission history
+ Forecast projections
+ Split commission handling
+ Integration with M-Zaka, Orange Money, and bank accounts for payouts
+ Tax documentation

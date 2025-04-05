@@ -913,6 +913,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Get properties for the current tenant (active leases)
+  app.get("/api/properties/tenant", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    
+    if (req.user.role !== 'tenant') {
+      return res.status(403).json({ message: "Access denied" });
+    }
+    
+    try {
+      // Find active leases for this tenant
+      const leases = await storage.getLeasesByTenant(req.user.id);
+      const activeLeases = leases.filter(lease => lease.active);
+      
+      if (activeLeases.length === 0) {
+        return res.json([]);
+      }
+      
+      // Get properties for these leases
+      const properties = [];
+      for (const lease of activeLeases) {
+        const property = await storage.getProperty(lease.propertyId);
+        if (property) {
+          properties.push({
+            ...property,
+            lease: lease,
+          });
+        }
+      }
+      
+      res.json(properties);
+    } catch (error) {
+      console.error("Error fetching tenant properties:", error);
+      res.status(500).json({ message: "Error fetching property" });
+    }
+  });
+  
   // Get tenant lease history (both active and inactive leases)
   app.get("/api/leases/history", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
