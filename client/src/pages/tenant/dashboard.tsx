@@ -29,9 +29,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   AreaChart,
@@ -176,7 +176,87 @@ export default function TenantDashboard() {
     isLoading: documentsLoading,
     error: documentsError
   } = useQuery<Document[]>({
-    queryKey: ["/api/documents/user"],
+    queryKey: ["/api/documents/user-static"],
+    retry: 1,
+    staleTime: 30000,
+  });
+  
+  // Fetch utility bills (mock data for now)
+  const {
+    data: utilities = [],
+    isLoading: utilitiesLoading,
+    error: utilitiesError
+  } = useQuery({
+    queryKey: ["/api/utilities/tenant"],
+    // Static data since endpoint may not exist yet
+    queryFn: async () => {
+      return [
+        {
+          id: 1,
+          name: "Electricity",
+          provider: "Botswana Power Corporation",
+          amount: 750,
+          dueDate: new Date(today.getFullYear(), today.getMonth(), 15).toISOString(),
+          status: "unpaid"
+        },
+        {
+          id: 2,
+          name: "Water",
+          provider: "Water Utilities Corporation",
+          amount: 350,
+          dueDate: new Date(today.getFullYear(), today.getMonth(), 20).toISOString(),
+          status: "unpaid"
+        },
+        {
+          id: 3,
+          name: "Internet",
+          provider: "Orange Botswana",
+          amount: 599,
+          dueDate: new Date(today.getFullYear(), today.getMonth(), 10).toISOString(),
+          status: "paid"
+        }
+      ];
+    },
+    retry: 1,
+    staleTime: 30000,
+  });
+  
+  // Fetch rewards (mock data for now)
+  const {
+    data: rewards = { 
+      points: 750, 
+      level: "Silver", 
+      nextLevel: "Gold", 
+      progress: 75,
+      availableRewards: [
+        { id: 1, name: "50 BWP Rent Discount", pointCost: 1000 },
+        { id: 2, name: "Free Property Inspection", pointCost: 500 },
+        { id: 3, name: "Priority Maintenance Request", pointCost: 300 }
+      ]
+    },
+    isLoading: rewardsLoading,
+    error: rewardsError
+  } = useQuery({
+    queryKey: ["/api/rewards/tenant"],
+    // Static data since endpoint may not exist yet
+    queryFn: async () => {
+      return {
+        points: 750,
+        level: "Silver",
+        nextLevel: "Gold",
+        progress: 75,
+        recentAchievements: [
+          { id: 1, name: "6 Months Perfect Payments", date: new Date(today.getFullYear(), today.getMonth() - 1, 15).toISOString(), points: 250 },
+          { id: 2, name: "Property Care Champion", date: new Date(today.getFullYear(), today.getMonth() - 2, 10).toISOString(), points: 150 },
+          { id: 3, name: "Community Contributor", date: new Date(today.getFullYear(), today.getMonth() - 3, 5).toISOString(), points: 100 }
+        ],
+        availableRewards: [
+          { id: 1, name: "50 BWP Rent Discount", pointCost: 1000 },
+          { id: 2, name: "Free Property Inspection", pointCost: 500 },
+          { id: 3, name: "Priority Maintenance Request", pointCost: 300 }
+        ]
+      };
+    },
     retry: 1,
     staleTime: 30000,
   });
@@ -649,6 +729,99 @@ export default function TenantDashboard() {
       </CardContent>
     </Card>
   );
+  
+  // Rewards summary component
+  const RewardsSummary = () => (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg">Rewards Program</CardTitle>
+        <CardDescription>Current status and available rewards</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex gap-2 items-center">
+              <div className="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center">
+                <Star className="h-4 w-4 text-yellow-600" />
+              </div>
+              <span className="font-medium">{rewards.level} Member</span>
+            </div>
+            <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200">{rewards.points} Points</Badge>
+          </div>
+          
+          <div className="space-y-1">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Progress to {rewards.nextLevel}</span>
+              <span className="font-medium">{rewards.progress}%</span>
+            </div>
+            <Progress value={rewards.progress} className="h-2" />
+          </div>
+        </div>
+        
+        <div className="space-y-3">
+          <h4 className="text-sm font-medium">Available Rewards</h4>
+          {rewards.availableRewards?.map((reward: { id: number; name: string; pointCost: number }) => (
+            <div key={reward.id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+              <span>{reward.name}</span>
+              <Button size="sm" variant="outline" className="text-xs">
+                Redeem ({reward.pointCost} pts)
+              </Button>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+      <CardFooter className="border-t pt-4">
+        <Button variant="outline" className="w-full">View All Rewards</Button>
+      </CardFooter>
+    </Card>
+  );
+  
+  // Utility tracking component
+  const UtilityTracking = () => (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg">Utility Tracking</CardTitle>
+        <CardDescription>Monitor your utility bills and payments</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {utilities.map(utility => (
+            <div key={utility.id} className="flex items-center justify-between p-3 border rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                  utility.name === 'Electricity' ? 'bg-yellow-100 text-yellow-600' :
+                  utility.name === 'Water' ? 'bg-blue-100 text-blue-600' :
+                  'bg-purple-100 text-purple-600'
+                }`}>
+                  {utility.name === 'Electricity' ? 
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 16.8a7.21 7.21 0 0 1-4 1.2 7 7 0 0 1-7-7 5 5 0 0 1 1-3" /><path d="m13 9 2 2 6-6" /><path d="m5 19 7-7" /><path d="M16 3h5v5" /></svg> :
+                  utility.name === 'Water' ?
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" /></svg> :
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1" /><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" /><line x1="6" y1="1" x2="6" y2="4" /><line x1="10" y1="1" x2="10" y2="4" /><line x1="14" y1="1" x2="14" y2="4" /></svg>
+                  }
+                </div>
+                <div>
+                  <p className="font-medium">{utility.name}</p>
+                  <p className="text-xs text-muted-foreground">{utility.provider}</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="font-medium">{formatCurrency(utility.amount)}</p>
+                <div className="flex items-center gap-1 text-xs">
+                  <Badge className={utility.status === 'paid' ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-orange-100 text-orange-800 hover:bg-orange-200'}>
+                    {utility.status === 'paid' ? 'Paid' : `Due ${formatDate(utility.dueDate)}`}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+      <CardFooter className="border-t pt-4">
+        <Button variant="outline" className="w-full">Manage Utilities</Button>
+      </CardFooter>
+    </Card>
+  );
 
   // Recent maintenance requests component
   const RecentMaintenance = () => (
@@ -845,7 +1018,13 @@ export default function TenantDashboard() {
                 
                 {/* Finances Tab */}
                 <TabsContent value="finances" className="pt-6 space-y-6">
-                  <PaymentHistoryChart />
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="lg:col-span-2">
+                      <PaymentHistoryChart />
+                    </div>
+                    <UtilityTracking />
+                  </div>
+                  <RewardsSummary />
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <Card className="lg:col-span-2">
                       <CardHeader>

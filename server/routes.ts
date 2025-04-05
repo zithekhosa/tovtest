@@ -140,6 +140,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Error serving document" });
     }
   });
+  
+  // Serve property inspection report
+  app.get("/api/documents/inspection-report", (req, res) => {
+    // Since we don't have an actual PDF, let's create a simple text-based inspection report
+    const inspectionReport = `# Property Inspection Report
+    
+## Property Details
+- **Address**: Plot 1234, Block 10, Gaborone, Botswana
+- **Inspection Date**: July 2, 2022
+- **Inspector**: Property Management Team
+
+## Exterior Inspection
+- Roof: Good condition, no visible damage
+- Exterior walls: Well maintained, paint in good condition
+- Windows: All intact, properly sealed
+- Doors: Front and back doors functioning properly
+- Garden: Well-maintained, irrigation system operational
+
+## Interior Inspection
+- Living Room: Excellent condition, no damages
+- Kitchen: All appliances functioning, countertops in good condition
+- Bedrooms: Clean, no wall damages
+- Bathrooms: Plumbing works properly, no leaks detected
+- Electrical: All outlets and switches functioning
+
+## Recommendations
+- Regular maintenance of the air conditioning system recommended
+- Consider repainting the guest bedroom in the next 12 months
+- Garden irrigation system should be checked quarterly
+
+## Conclusion
+The property is in excellent condition and meets all the required standards for occupancy. No major issues were identified during this inspection.
+
+Signed: _______________________
+Date: July 2, 2022`;
+
+    res.setHeader('Content-Type', 'text/plain');
+    res.send(inspectionReport);
+  });
 
   // API routes
   // =====================
