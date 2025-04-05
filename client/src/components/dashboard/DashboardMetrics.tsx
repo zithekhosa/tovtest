@@ -37,38 +37,44 @@ export function MetricsCard({ title, value, description, icon, trend, progress, 
   }
 
   return (
-    <div className={`tov-metrics-card bg-white border p-4 shadow-sm hover:shadow-md transition-all aspect-square flex flex-col items-center justify-center text-center ${className || ''}`}>
-      <div className={`h-8 w-8 ${bgColorClass} flex items-center justify-center shrink-0 mb-2`}>
+    <div className={`tov-metrics-card bg-white border p-3 hover:bg-gray-50 transition-colors flex items-center ${className || ''}`}>
+      <div className={`h-8 w-8 ${bgColorClass} flex items-center justify-center shrink-0 mr-3`}>
         {icon}
       </div>
-      <h3 className="text-xs font-medium mb-1 tov-truncate-text">{title}</h3>
-      <div className="text-xl font-bold mt-0.5 mb-0.5">{value}</div>
-      
-      {description && (
-        <p className="text-xs text-muted-foreground tov-text-ellipsis">{description}</p>
-      )}
-      
-      {trend && (
-        <div className="flex items-center text-xs mt-2 justify-center">
-          {trend.isPositive ? (
-            <TrendingUp className="mr-1 h-3 w-3 text-green-500 shrink-0" />
-          ) : (
-            <TrendingDown className="mr-1 h-3 w-3 text-red-500 shrink-0" />
+      <div className="flex-1 text-left min-w-0">
+        <h3 className="text-xs font-medium tov-truncate-text">{title}</h3>
+        <div className="flex items-baseline gap-2">
+          <div className="text-base font-bold">{value}</div>
+          
+          {trend && (
+            <div className="flex items-center text-xs">
+              {trend.isPositive ? (
+                <TrendingUp className="mr-0.5 h-3 w-3 text-green-500 shrink-0" />
+              ) : (
+                <TrendingDown className="mr-0.5 h-3 w-3 text-red-500 shrink-0" />
+              )}
+              <span className={`${trend.isPositive ? "text-green-500" : "text-red-500"} tov-text-ellipsis`}>
+                {trend.value}%
+              </span>
+            </div>
           )}
-          <span className={`${trend.isPositive ? "text-green-500" : "text-red-500"} tov-text-ellipsis`}>
-            {trend.value}% {trend.text || ""}
-          </span>
         </div>
-      )}
-      
-      {progress && (
-        <div className="mt-2 w-full max-w-[120px]">
-          <Progress value={(progress.value / progress.max) * 100} className="h-1.5" />
-          <p className="text-xs text-muted-foreground mt-1 tov-text-ellipsis">
-            {progress.value} of {progress.max}
+        
+        {description && (
+          <p className="text-xs text-muted-foreground truncate">
+            {description}
           </p>
-        </div>
-      )}
+        )}
+        
+        {progress && (
+          <div className="mt-1 w-full">
+            <Progress value={(progress.value / progress.max) * 100} className="h-1" />
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {progress.value} of {progress.max}
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
