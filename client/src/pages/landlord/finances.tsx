@@ -1,196 +1,187 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "wouter";
 import { StandardLayout } from "@/components/layout/StandardLayout";
 import { 
-  DollarSign, 
-  Plus,
+  DollarSign,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  Loader2 
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Property, Lease, Payment } from "@shared/schema";
-import { format } from "date-fns";
 
-// Helper for formatting currency values
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat("en-BW", {
-    style: "currency",
-    currency: "BWP",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(value);
+// Simple formatter with fallback
+const formatCurrency = (value: number = 0) => {
+  try {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 0,
+    }).format(value);
+  } catch (e) {
+    return "$" + value;
+  }
+};
+
+// Simplified date formatter with error handling
+const formatDate = (dateString: string) => {
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString();
+  } catch (e) {
+    return dateString;
+  }
 };
 
 export default function Finances() {
+  // Use a simple in-memory state for filter to avoid extra renders
   const [activeFilter, setActiveFilter] = useState("all");
   
-  // Get properties data
-  const { data: properties = [] } = useQuery<Property[]>({
+  // Get properties with error handling
+  const { 
+    data: properties = [], 
+    isLoading: propertiesLoading,
+    isError: propertiesError
+  } = useQuery({
     queryKey: ["/api/properties/landlord"],
+    retry: 1, // Reduce retries to prevent hanging
+    staleTime: 60000, // Cache data for 1 minute
   });
   
-  // Get leases data
-  const { data: leases = [] } = useQuery<Lease[]>({
-    queryKey: ["/api/leases/landlord"],
-  });
-  
-  // Get payments data
-  const { data: payments = [] } = useQuery<Payment[]>({
+  // Get payments with error handling
+  const { 
+    data: payments = [], 
+    isLoading: paymentsLoading,
+    isError: paymentsError
+  } = useQuery({
     queryKey: ["/api/payments/landlord"],
+    retry: 1,
+    staleTime: 60000,
   });
 
-  // Financial metrics  
-  const monthlyRentalIncome = properties.reduce((sum, property) => 
-    sum + property.rentAmount, 0);
-  
-  const expenses = monthlyRentalIncome * 0.3; // 30% of income for expenses
-  const netIncome = monthlyRentalIncome - expenses;
-  
-  // Filter transactions based on type
-  const filteredTransactions = payments.filter(payment => {
-    if (activeFilter === "all") return true;
-    if (activeFilter === "income") return payment.paymentType === "rent";
-    if (activeFilter === "expenses") return payment.paymentType !== "rent";
-    return true;
-  });
+  // Calculate simple metrics with safe defaults
+  const income = properties.reduce((sum, p) => sum + (p?.rentAmount || 0), 0);
+  const expenses = income * 0.3; // Simplified expense calculation
+  const netIncome = income - expenses;
+
+  // Filter payments - keep simple
+  const filteredPayments = activeFilter === "all" 
+    ? payments.slice(0, 3) 
+    : payments
+        .filter(p => activeFilter === "income" ? p.paymentType === "rent" : p.paymentType !== "rent")
+        .slice(0, 3);
+
+  // Loading state components - keep super light
+  if (propertiesLoading || paymentsLoading) {
+    return (
+      <StandardLayout title="Finances">
+        <div className="flex justify-center items-center h-40">
+          <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+        </div>
+      </StandardLayout>
+    );
+  }
+
+  // Error state - very simple
+  if (propertiesError || paymentsError) {
+    return (
+      <StandardLayout title="Finances">
+        <div className="text-center py-8">
+          <p>Could not load financial data. Please try again later.</p>
+        </div>
+      </StandardLayout>
+    );
+  }
 
   return (
     <StandardLayout title="Finances">
-      {/* Simple Financial Summary - 3 Cards */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-5">
-        <div className="flex-1 bg-white dark:bg-gray-900 p-4 rounded-lg border">
+      {/* Ultra simple financial cards */}
+      <div className="grid grid-cols-3 gap-2 mb-4">
+        <div className="bg-white p-3 rounded border">
           <div className="text-sm text-gray-500">Income</div>
-          <div className="text-xl font-semibold mt-1">{formatCurrency(monthlyRentalIncome)}</div>
-          <div className="text-xs text-emerald-600 mt-1">+4.2% from last month</div>
+          <div className="text-lg font-medium">{formatCurrency(income)}</div>
         </div>
         
-        <div className="flex-1 bg-white dark:bg-gray-900 p-4 rounded-lg border">
+        <div className="bg-white p-3 rounded border">
           <div className="text-sm text-gray-500">Expenses</div>
-          <div className="text-xl font-semibold mt-1">{formatCurrency(expenses)}</div>
-          <div className="text-xs text-red-600 mt-1">-2.1% from last month</div>
+          <div className="text-lg font-medium">{formatCurrency(expenses)}</div>
         </div>
         
-        <div className="flex-1 bg-white dark:bg-gray-900 p-4 rounded-lg border">
-          <div className="text-sm text-gray-500">Net Income</div>
-          <div className="text-xl font-semibold mt-1">{formatCurrency(netIncome)}</div>
-          <div className="text-xs text-emerald-600 mt-1">+5.3% from last month</div>
+        <div className="bg-white p-3 rounded border">
+          <div className="text-sm text-gray-500">Net</div>
+          <div className="text-lg font-medium">{formatCurrency(netIncome)}</div>
         </div>
       </div>
 
-      {/* Simple Filter and Add Button */}
-      <div className="flex justify-between items-center mb-4">
-        <div className="flex border rounded-md overflow-hidden">
-          <button 
-            className={`px-3 py-1 text-sm ${activeFilter === 'all' 
-              ? 'bg-primary text-white' 
-              : 'bg-white dark:bg-gray-900'}`}
-            onClick={() => setActiveFilter('all')}
-          >
-            All
-          </button>
-          <button 
-            className={`px-3 py-1 text-sm ${activeFilter === 'income' 
-              ? 'bg-primary text-white' 
-              : 'bg-white dark:bg-gray-900'}`}
-            onClick={() => setActiveFilter('income')}
-          >
-            Income
-          </button>
-          <button 
-            className={`px-3 py-1 text-sm ${activeFilter === 'expenses' 
-              ? 'bg-primary text-white' 
-              : 'bg-white dark:bg-gray-900'}`}
-            onClick={() => setActiveFilter('expenses')}
-          >
-            Expenses
-          </button>
-        </div>
-        
-        <Button size="sm">
-          <Plus className="h-4 w-4 mr-1" />
-          Add
-        </Button>
+      {/* Simple filter buttons */}
+      <div className="flex mb-3 border rounded-md overflow-hidden inline-flex">
+        <button 
+          className={`px-2 py-1 text-xs ${activeFilter === 'all' ? 'bg-primary text-white' : 'bg-white'}`}
+          onClick={() => setActiveFilter('all')}
+        >
+          All
+        </button>
+        <button 
+          className={`px-2 py-1 text-xs ${activeFilter === 'income' ? 'bg-primary text-white' : 'bg-white'}`}
+          onClick={() => setActiveFilter('income')}
+        >
+          Income
+        </button>
+        <button 
+          className={`px-2 py-1 text-xs ${activeFilter === 'expenses' ? 'bg-primary text-white' : 'bg-white'}`}
+          onClick={() => setActiveFilter('expenses')}
+        >
+          Expenses
+        </button>
       </div>
 
-      {/* Transaction List */}
-      {filteredTransactions.length > 0 ? (
-        <div className="space-y-2">
-          {filteredTransactions.slice(0, 5).map((transaction) => {
-            const lease = leases.find(l => l.id === transaction.leaseId);
-            const property = lease ? properties.find(p => p.id === lease.propertyId) : null;
-            const isIncome = transaction.paymentType === "rent";
+      {/* Ultra minimal transaction list */}
+      {filteredPayments.length > 0 ? (
+        <div className="space-y-2 mb-4">
+          {filteredPayments.map((payment) => {
+            const isIncome = payment.paymentType === "rent";
             
             return (
               <div 
-                key={transaction.id}
-                className="flex items-center justify-between bg-white dark:bg-gray-900 p-3 rounded-md border"
+                key={payment.id}
+                className="flex justify-between p-2 bg-white rounded border"
               >
                 <div className="flex items-center">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${
-                    isIncome ? "bg-emerald-100" : "bg-red-100"}`}>
-                    {isIncome ? <ArrowUp className="h-4 w-4 text-emerald-600" /> : <ArrowDown className="h-4 w-4 text-red-600" />}
-                  </div>
-                  
-                  <div>
-                    <div className="font-medium text-sm">
-                      {isIncome ? "Rent Payment" : "Expense"}
-                    </div>
-                    <div className="text-xs text-gray-500 mt-0.5">
-                      {format(new Date(transaction.paymentDate), "MMM d, yyyy")}
-                      {property && ` • ${property.title}`}
-                    </div>
-                  </div>
+                  {isIncome ? 
+                    <ArrowUp className="h-3 w-3 text-green-500 mr-2" /> : 
+                    <ArrowDown className="h-3 w-3 text-red-500 mr-2" />
+                  }
+                  <span className="text-sm">{formatDate(payment.paymentDate)}</span>
                 </div>
-                
-                <div className={`font-medium ${isIncome ? "text-emerald-600" : "text-red-600"}`}>
-                  {isIncome ? "+" : "-"}{formatCurrency(transaction.amount)}
-                </div>
+                <span className={`text-sm ${isIncome ? "text-green-500" : "text-red-500"}`}>
+                  {isIncome ? "+" : "-"}{formatCurrency(payment.amount)}
+                </span>
               </div>
             );
           })}
-
-          {/* View All Link */}
-          <div className="text-center mt-3">
-            <Link href="/landlord/finances/transactions" className="text-sm text-primary">
-              View all transactions
-            </Link>
-          </div>
         </div>
       ) : (
-        <div className="text-center py-8 bg-white dark:bg-gray-900 rounded-md border">
-          <DollarSign className="h-10 w-10 mx-auto text-gray-300 mb-2" />
-          <p className="text-gray-500 mb-4">No transactions found</p>
-          <Button size="sm" onClick={() => setActiveFilter("all")}>
-            <Plus className="h-4 w-4 mr-1" />
-            Add Transaction
-          </Button>
+        <div className="text-center p-4 bg-white rounded border">
+          <DollarSign className="h-6 w-6 mx-auto text-gray-300" />
+          <p className="text-sm text-gray-500">No transactions</p>
         </div>
       )}
 
-      {/* Property Summary Section - Simple List */}
-      <div className="mt-6 pt-5 border-t">
-        <h3 className="font-medium mb-3">Properties</h3>
-        
-        <div className="space-y-2">
-          {properties.slice(0, 3).map(property => (
-            <div 
-              key={property.id}
-              className="flex items-center justify-between bg-white dark:bg-gray-900 p-3 rounded-md border"
-            >
-              <div>
-                <div className="font-medium text-sm">{property.title}</div>
-                <div className="text-xs text-gray-500 mt-0.5">{property.address}</div>
+      {/* Ultra minimal property list */}
+      {properties.length > 0 && (
+        <div className="mt-4">
+          <h3 className="text-sm font-medium mb-2">Properties</h3>
+          <div className="space-y-2">
+            {properties.slice(0, 3).map(property => (
+              <div 
+                key={property.id}
+                className="flex justify-between p-2 bg-white rounded border"
+              >
+                <span className="text-sm">{property.title}</span>
+                <span className="text-sm">{formatCurrency(property.rentAmount)}/mo</span>
               </div>
-              
-              <div>
-                <Badge className="whitespace-nowrap">{formatCurrency(property.rentAmount)}/mo</Badge>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </StandardLayout>
   );
 }
