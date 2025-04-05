@@ -38,20 +38,25 @@ export default function Documents() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
 
-  // Fetch documents
+  // Fetch documents from our static endpoint for tenant or regular endpoint for other roles
   const { data: documents = [], isLoading } = useQuery<Document[]>({
-    queryKey: ["/api/documents"],
+    queryKey: [user?.role === 'tenant' ? "/api/documents/user-static" : "/api/documents/user"],
     enabled: !!user,
   });
 
   // Filter documents based on search term and active tab
   const filteredDocuments = documents.filter(doc => {
-    const searchMatch = doc.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                       (doc.description && doc.description.toLowerCase().includes(searchTerm.toLowerCase()));
+    // Handle different document structures (static API vs database API)
+    const docName = doc.name || doc.title || '';
+    const docDescription = doc.description || '';
+    
+    const searchMatch = docName.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                       docDescription.toLowerCase().includes(searchTerm.toLowerCase());
     
     if (activeTab === "all") return searchMatch;
-    if (activeTab === "shared") return searchMatch && doc.isPublic;
-    if (activeTab === "private") return searchMatch && !doc.isPublic;
+    // For static data, treat all documents as shared
+    if (activeTab === "shared") return searchMatch && (doc.isPublic !== undefined ? doc.isPublic : true);
+    if (activeTab === "private") return searchMatch && doc.isPublic === false;
     
     return searchMatch;
   });
@@ -154,25 +159,49 @@ export default function Documents() {
                     <TableCell className="font-medium">
                       <div className="flex items-center">
                         {getFileIcon(doc.fileType)}
-                        <span className="ml-2">{doc.name}</span>
+                        <span className="ml-2">{doc.name || doc.title || doc.fileName || 'Untitled Document'}</span>
                       </div>
                     </TableCell>
                     <TableCell className="uppercase">{doc.fileType}</TableCell>
-                    <TableCell>--</TableCell>
-                    <TableCell>{formatDate(doc.createdAt.toString())}</TableCell>
+                    <TableCell>{doc.fileSize || '--'}</TableCell>
+                    <TableCell>{formatDate((doc.createdAt || doc.uploadedAt).toString())}</TableCell>
                     <TableCell>
                       <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                         doc.isPublic ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
                       }`}>
-                        {doc.isPublic ? 'Shared' : 'Private'}
+                        {doc.isPublic !== undefined ? (doc.isPublic ? 'Shared' : 'Private') : 'Shared'}
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end space-x-1">
-                        <Button variant="ghost" size="icon" title="View Document">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          title="View Document"
+                          onClick={() => {
+                            // Open document in new tab if it has a path
+                            if (doc.path) {
+                              window.open(doc.path, '_blank');
+                            } else if (doc.fileUrl) {
+                              window.open(doc.fileUrl, '_blank');
+                            }
+                          }}
+                        >
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" title="Download">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          title="Download"
+                          onClick={() => {
+                            // Handle download based on available fields
+                            if (doc.path) {
+                              window.open(doc.path, '_blank');
+                            } else if (doc.fileUrl) {
+                              window.open(doc.fileUrl, '_blank');
+                            }
+                          }}
+                        >
                           <Download className="h-4 w-4" />
                         </Button>
                         <Button variant="ghost" size="icon" title="Share">

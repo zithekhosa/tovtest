@@ -57,19 +57,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const oneYearLater = new Date(today);
     oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
     
+    // Lease start date based on the document's date
+    const leaseStartDate = new Date(2022, 6, 1); // July 1, 2022
+    const leaseEndDate = new Date(2026, 5, 30); // June 30, 2026
+    
     const demoLeases = [
       { 
         id: 1, 
         propertyId: 42,
-        startDate: today.toISOString(),
-        endDate: oneYearLater.toISOString(),
+        startDate: leaseStartDate.toISOString(),
+        endDate: leaseEndDate.toISOString(),
         rentAmount: 6000,
         securityDeposit: 12000,
         active: true,
         property: {
           id: 42,
-          title: "Test Property",
-          address: "Plot 12345, Block 10",
+          title: "Block 10 Residence",
+          address: "Plot 1234, Block 10",
           city: "Gaborone"
         }
       },
@@ -90,6 +94,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     ];
     res.json(demoLeases);
+  });
+  
+  // Static endpoint for tenant documents
+  app.get("/api/documents/user-static", (req, res) => {
+    const documentList = [
+      {
+        id: 1,
+        title: "Residential Lease Agreement",
+        fileType: "markdown",
+        fileSize: "8.5 KB",
+        createdAt: new Date(2022, 3, 5).toISOString(), // April 5, 2022
+        path: "/api/documents/lease-agreement",
+        description: "Lease agreement for Block 10 Residence",
+        propertyId: 42
+      },
+      {
+        id: 2,
+        title: "Property Inspection Report",
+        fileType: "pdf",
+        fileSize: "2.3 MB",
+        createdAt: new Date(2022, 6, 2).toISOString(), // July 2, 2022
+        path: "/api/documents/inspection-report",
+        description: "Initial inspection report for Block 10 Residence",
+        propertyId: 42
+      }
+    ];
+    
+    res.json(documentList);
+  });
+  
+  // Serve the lease agreement document
+  app.get("/api/documents/lease-agreement", (req, res) => {
+    // Path is relative to the server execution context
+    const filePath = './client/src/assets/residential-lease-agreement.md';
+    
+    try {
+      const fs = require('fs');
+      const leaseDocument = fs.readFileSync(filePath, 'utf8');
+      
+      res.setHeader('Content-Type', 'text/markdown');
+      res.send(leaseDocument);
+    } catch (error) {
+      console.error("Error serving lease document:", error);
+      res.status(500).json({ message: "Error serving document" });
+    }
   });
 
   // API routes
