@@ -115,30 +115,61 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Header */}
-      <header className="border-b border-gray-200 dark:border-gray-800 py-4 sticky top-0 bg-white dark:bg-gray-900 z-10">
+      {/* Airbnb-style Header */}
+      <header className="border-b border-gray-200 dark:border-gray-800 py-5 sticky top-0 bg-white dark:bg-gray-900 z-10">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center">
               <img src={tovLogo} alt="TOV Logo" className="h-10 w-auto" />
             </div>
+            
+            {/* Centered Search Bar for Desktop - Airbnb Style */}
+            <div className="hidden lg:flex items-center shadow-sm border border-gray-200 dark:border-gray-700 rounded-full h-12 pl-6 pr-2">
+              <div className="flex items-center divide-x divide-gray-200 dark:divide-gray-700">
+                <div className="pr-4">
+                  <span className="text-sm font-medium">Location</span>
+                </div>
+                <div className="px-4">
+                  <span className="text-sm font-medium">Property Type</span>
+                </div>
+                <div className="pl-4 pr-2">
+                  <span className="text-sm font-medium">Price Range</span>
+                </div>
+              </div>
+              <Button size="sm" className="rounded-full ml-2 p-2 h-8 w-8">
+                <Search className="h-4 w-4" />
+              </Button>
+            </div>
+            
             <nav className="hidden md:flex items-center space-x-6">
-              <a href="#properties" className="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary">Properties</a>
-              <a href="#services" className="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary">Services</a>
-              <a href="#about" className="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary">About</a>
-              <a href="#contact" className="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary">Contact</a>
+              <a href="#properties" className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary">Properties</a>
+              <a href="#services" className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary">Services</a>
               <ThemeSwitcher />
-              <Button variant="outline" onClick={() => navigate("/providers-signup")}>
-                Join as Provider
-              </Button>
-              <Button onClick={() => navigate("/auth")}>
-                Sign In / Register
-              </Button>
+              <div className="relative group">
+                <Button variant="outline" className="flex items-center gap-2 rounded-full h-10">
+                  <Menu className="h-4 w-4" />
+                  <span className="sr-only md:not-sr-only">Menu</span>
+                </Button>
+                <div className="absolute right-0 top-12 w-64 bg-white dark:bg-gray-800 shadow-lg rounded-xl p-4 hidden group-hover:block border border-gray-100 dark:border-gray-700">
+                  <div className="flex flex-col space-y-2">
+                    <Button variant="ghost" onClick={() => navigate("/auth")} className="justify-start">
+                      Sign In / Register
+                    </Button>
+                    <Button variant="ghost" onClick={() => navigate("/providers-signup")} className="justify-start">
+                      Join as Provider
+                    </Button>
+                    <hr className="my-1 border-gray-100 dark:border-gray-700" />
+                    <a href="#about" className="text-sm px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md">About TOV</a>
+                    <a href="#contact" className="text-sm px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md">Contact Us</a>
+                  </div>
+                </div>
+              </div>
             </nav>
+            
             <div className="flex items-center space-x-2 md:hidden">
               <ThemeSwitcher />
-              <Button variant="ghost" size="icon">
-                <Menu className="h-6 w-6" />
+              <Button variant="ghost" size="icon" className="rounded-full">
+                <Menu className="h-5 w-5" />
               </Button>
             </div>
           </div>
@@ -146,152 +177,172 @@ export default function LandingPage() {
       </header>
 
       <main className="flex-1">
-        {/* Hero Section */}
-        <section className="relative bg-gray-50 dark:bg-gray-900 py-20 overflow-hidden">
-          <div className="absolute inset-0 z-0 opacity-10">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary to-primary-foreground"></div>
+        {/* Airbnb-style Hero Section with large background image */}
+        <section className="relative bg-white dark:bg-gray-900 overflow-hidden">
+          <div className="relative h-[80vh] max-h-[600px] overflow-hidden">
             <img 
               src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=1473&auto=format&fit=crop" 
-              alt="Background" 
+              alt="Beautiful property in Botswana" 
               className="w-full h-full object-cover"
             />
+            <div className="absolute inset-0 bg-black opacity-30"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="max-w-4xl mx-auto text-center px-4">
+                <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 drop-shadow-lg">
+                  Find Your Perfect Place in Botswana
+                </h1>
+                <p className="text-xl text-white mb-8 drop-shadow-md max-w-2xl mx-auto">
+                  TOV connects tenants, landlords, agencies, and service providers in one seamless platform
+                </p>
+              </div>
+            </div>
           </div>
-          <div className="container mx-auto px-4 relative z-10">
-            <div className="max-w-3xl mx-auto text-center mb-12">
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
-                Find Your Perfect Place with TOV
-              </h1>
-              <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
-                Your complete property operating system - connecting tenants, landlords, 
-                agencies, and service providers in one platform.
-              </p>
-              
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 max-w-2xl mx-auto">
-                <Tabs defaultValue="rent" className="mb-4">
-                  <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="rent">Rent</TabsTrigger>
-                    <TabsTrigger value="buy">Buy</TabsTrigger>
-                    <TabsTrigger value="services">Services</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="rent" className="mt-4">
-                    <div className="flex flex-col md:flex-row gap-3">
-                      <div className="relative flex-1">
-                        <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                        <Input 
-                          placeholder="Search by location or property name..."
-                          className="pl-10"
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                      </div>
-                      <Select 
-                        value={propertyType}
-                        onValueChange={setPropertyType}
-                      >
-                        <SelectTrigger className="w-full md:w-40">
-                          <SelectValue placeholder="Property Type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Types</SelectItem>
-                          <SelectItem value="apartment">Apartment</SelectItem>
-                          <SelectItem value="house">House</SelectItem>
-                          <SelectItem value="commercial">Commercial</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Button className="min-w-[120px]">
-                        Search
-                      </Button>
+          
+          {/* Airbnb-style Search Box - Floating above image at bottom */}
+          <div className="container mx-auto px-4 relative -mt-24">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 max-w-3xl mx-auto">
+              <Tabs defaultValue="rent" className="mb-4">
+                <TabsList className="grid w-full grid-cols-3 p-1 mb-4">
+                  <TabsTrigger value="rent" className="rounded-full text-sm">Rent</TabsTrigger>
+                  <TabsTrigger value="buy" className="rounded-full text-sm">Buy</TabsTrigger>
+                  <TabsTrigger value="services" className="rounded-full text-sm">Services</TabsTrigger>
+                </TabsList>
+                <TabsContent value="rent" className="mt-4">
+                  <div className="flex flex-col md:flex-row gap-3">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Input 
+                        placeholder="Search by location or property name..."
+                        className="pl-10 rounded-full border-gray-300 h-12"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                      />
                     </div>
-                  </TabsContent>
-                  <TabsContent value="buy" className="mt-4">
-                    <div className="flex flex-col md:flex-row gap-3">
-                      <div className="relative flex-1">
-                        <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                        <Input 
-                          placeholder="Search properties for sale..."
-                          className="pl-10"
-                        />
-                      </div>
-                      <Select defaultValue="all">
-                        <SelectTrigger className="w-full md:w-40">
-                          <SelectValue placeholder="Property Type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Types</SelectItem>
-                          <SelectItem value="apartment">Apartment</SelectItem>
-                          <SelectItem value="house">House</SelectItem>
-                          <SelectItem value="commercial">Commercial</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Button className="min-w-[120px]">
-                        Search
-                      </Button>
+                    <Select 
+                      value={propertyType}
+                      onValueChange={setPropertyType}
+                    >
+                      <SelectTrigger className="w-full md:w-40 rounded-full h-12">
+                        <SelectValue placeholder="Property Type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Types</SelectItem>
+                        <SelectItem value="apartment">Apartment</SelectItem>
+                        <SelectItem value="house">House</SelectItem>
+                        <SelectItem value="commercial">Commercial</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button className="rounded-full h-12 px-6">
+                      Search
+                    </Button>
+                  </div>
+                </TabsContent>
+                <TabsContent value="buy" className="mt-4">
+                  <div className="flex flex-col md:flex-row gap-3">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Input 
+                        placeholder="Search properties for sale..."
+                        className="pl-10 rounded-full border-gray-300 h-12"
+                      />
                     </div>
-                  </TabsContent>
-                  <TabsContent value="services" className="mt-4">
-                    <div className="flex flex-col md:flex-row gap-3">
-                      <div className="relative flex-1">
-                        <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                        <Input 
-                          placeholder="Search for maintenance services..."
-                          className="pl-10"
-                        />
-                      </div>
-                      <Select defaultValue="all">
-                        <SelectTrigger className="w-full md:w-40">
-                          <SelectValue placeholder="Service Type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Services</SelectItem>
-                          <SelectItem value="plumbing">Plumbing</SelectItem>
-                          <SelectItem value="electrical">Electrical</SelectItem>
-                          <SelectItem value="hvac">HVAC</SelectItem>
-                          <SelectItem value="cleaning">Cleaning</SelectItem>
-                          <SelectItem value="general">General</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Button className="min-w-[120px]">
-                        Find
-                      </Button>
+                    <Select defaultValue="all">
+                      <SelectTrigger className="w-full md:w-40 rounded-full h-12">
+                        <SelectValue placeholder="Property Type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Types</SelectItem>
+                        <SelectItem value="apartment">Apartment</SelectItem>
+                        <SelectItem value="house">House</SelectItem>
+                        <SelectItem value="commercial">Commercial</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button className="rounded-full h-12 px-6">
+                      Search
+                    </Button>
+                  </div>
+                </TabsContent>
+                <TabsContent value="services" className="mt-4">
+                  <div className="flex flex-col md:flex-row gap-3">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Input 
+                        placeholder="Search for maintenance services..."
+                        className="pl-10 rounded-full border-gray-300 h-12"
+                      />
                     </div>
-                  </TabsContent>
-                </Tabs>
-              </div>
-              
-              <div className="flex flex-wrap justify-center gap-3 mt-6">
-                <Badge variant="outline" className="text-sm py-1 px-3 rounded-full">
-                  200+ Properties
-                </Badge>
-                <Badge variant="outline" className="text-sm py-1 px-3 rounded-full">
-                  50+ Service Providers
-                </Badge>
-                <Badge variant="outline" className="text-sm py-1 px-3 rounded-full">
-                  Botswana Focused
-                </Badge>
-              </div>
-              
-              {/* Quick Login Options */}
-              <div className="mt-8 flex flex-col items-center">
-                <h3 className="text-lg font-medium mb-4">Quick Sign In Options</h3>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-lg">
-                  <Button variant="outline" onClick={() => navigate("/auth")} className="px-2 py-6 h-auto flex flex-col items-center gap-2">
+                    <Select defaultValue="all">
+                      <SelectTrigger className="w-full md:w-40 rounded-full h-12">
+                        <SelectValue placeholder="Service Type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Services</SelectItem>
+                        <SelectItem value="plumbing">Plumbing</SelectItem>
+                        <SelectItem value="electrical">Electrical</SelectItem>
+                        <SelectItem value="hvac">HVAC</SelectItem>
+                        <SelectItem value="cleaning">Cleaning</SelectItem>
+                        <SelectItem value="general">General</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button className="rounded-full h-12 px-6">
+                      Find
+                    </Button>
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </div>
+            
+            {/* Platform Stats */}
+            <div className="flex flex-wrap justify-center gap-4 mt-8">
+              <Badge variant="outline" className="text-sm py-1.5 px-4 rounded-full bg-white dark:bg-gray-800">
+                <Star className="h-3.5 w-3.5 mr-1 text-yellow-500" />
+                200+ Properties
+              </Badge>
+              <Badge variant="outline" className="text-sm py-1.5 px-4 rounded-full bg-white dark:bg-gray-800">
+                <Users className="h-3.5 w-3.5 mr-1 text-blue-500" />
+                50+ Service Providers
+              </Badge>
+              <Badge variant="outline" className="text-sm py-1.5 px-4 rounded-full bg-white dark:bg-gray-800">
+                <MapPin className="h-3.5 w-3.5 mr-1 text-green-500" />
+                Botswana Focused
+              </Badge>
+            </div>
+            
+            {/* Quick Login Options - Cleaner Design */}
+            <div className="mt-12 mb-16">
+              <h3 className="text-lg font-medium mb-4 text-center">Quick Sign In Options</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-lg mx-auto">
+                <Button variant="outline" onClick={() => navigate("/auth")} 
+                  className="p-4 h-auto rounded-xl flex flex-col items-center gap-2 border-gray-200 dark:border-gray-700 hover:border-primary hover:shadow-md transition-all">
+                  <div className="p-3 rounded-full bg-primary/10 text-primary">
                     <Home className="h-5 w-5" />
-                    <span>Tenant</span>
-                  </Button>
-                  <Button variant="outline" onClick={() => navigate("/auth")} className="px-2 py-6 h-auto flex flex-col items-center gap-2">
+                  </div>
+                  <span className="text-sm font-medium">Tenant</span>
+                </Button>
+                <Button variant="outline" onClick={() => navigate("/auth")} 
+                  className="p-4 h-auto rounded-xl flex flex-col items-center gap-2 border-gray-200 dark:border-gray-700 hover:border-primary hover:shadow-md transition-all">
+                  <div className="p-3 rounded-full bg-primary/10 text-primary">
                     <Building className="h-5 w-5" />
-                    <span>Landlord</span>
-                  </Button>
-                  <Button variant="outline" onClick={() => navigate("/auth")} className="px-2 py-6 h-auto flex flex-col items-center gap-2">
+                  </div>
+                  <span className="text-sm font-medium">Landlord</span>
+                </Button>
+                <Button variant="outline" onClick={() => navigate("/auth")} 
+                  className="p-4 h-auto rounded-xl flex flex-col items-center gap-2 border-gray-200 dark:border-gray-700 hover:border-primary hover:shadow-md transition-all">
+                  <div className="p-3 rounded-full bg-primary/10 text-primary">
                     <Users className="h-5 w-5" />
-                    <span>Agency</span>
-                  </Button>
-                  <Button variant="outline" onClick={() => navigate("/auth")} className="px-2 py-6 h-auto flex flex-col items-center gap-2">
+                  </div>
+                  <span className="text-sm font-medium">Agency</span>
+                </Button>
+                <Button variant="outline" onClick={() => navigate("/auth")} 
+                  className="p-4 h-auto rounded-xl flex flex-col items-center gap-2 border-gray-200 dark:border-gray-700 hover:border-primary hover:shadow-md transition-all">
+                  <div className="p-3 rounded-full bg-primary/10 text-primary">
                     <Wrench className="h-5 w-5" />
-                    <span>Maintenance</span>
-                  </Button>
-                </div>
-                <Button variant="link" onClick={() => navigate("/providers-signup")} className="mt-2">
+                  </div>
+                  <span className="text-sm font-medium">Maintenance</span>
+                </Button>
+              </div>
+              <div className="text-center mt-4">
+                <Button variant="link" onClick={() => navigate("/providers-signup")} className="text-sm">
                   New provider? Sign up here
                 </Button>
               </div>
@@ -301,122 +352,184 @@ export default function LandingPage() {
 
         {/* User Paths Section */}
 
-        {/* Featured Properties Section */}
-        <section id="properties" className="py-16 bg-gray-50 dark:bg-gray-900">
+        {/* Featured Properties Section - Airbnb-Style */}
+        <section id="properties" className="py-20 bg-white dark:bg-gray-900">
           <div className="container mx-auto px-4">
-            <div className="flex justify-between items-center mb-10">
-              <h2 className="text-3xl font-bold">Featured Properties</h2>
-              <Button variant="ghost" className="flex items-center gap-2">
-                View All Properties <ArrowRight className="h-4 w-4" />
+            <div className="flex justify-between items-center mb-8">
+              <div>
+                <h2 className="text-2xl md:text-3xl font-bold">Featured Properties in Botswana</h2>
+                <p className="text-gray-500 dark:text-gray-400 mt-1">Discover handpicked properties available for rent</p>
+              </div>
+              <Button variant="outline" className="flex items-center gap-2 rounded-full px-5">
+                View All <ArrowRight className="h-4 w-4" />
               </Button>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Airbnb-style property cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
               {featuredProperties.map((property) => (
-                <Card key={property.id} className="overflow-hidden group hover:shadow-md transition-all">
-                  <div className="relative h-52 overflow-hidden">
+                <div key={property.id} className="group cursor-pointer">
+                  {/* Image container with larger aspect ratio and rounded corners */}
+                  <div className="relative aspect-[4/3] rounded-xl overflow-hidden mb-3">
                     <img 
                       src={property.image} 
                       alt={property.title} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
-                    <div className="absolute top-3 left-3">
-                      <Badge className="bg-primary text-white">
-                        {property.type === 'apartment' ? 'Apartment' : 
-                         property.type === 'house' ? 'House' : 'Commercial'}
-                      </Badge>
-                    </div>
-                    <div className="absolute top-3 right-3">
-                      <Badge className="bg-white text-primary">
-                        {property.price.toLocaleString()} BWP/mo
-                      </Badge>
-                    </div>
+                    
+                    {/* Favorite button */}
+                    <button className="absolute top-3 right-3 h-8 w-8 rounded-full bg-white dark:bg-gray-800 shadow-md flex items-center justify-center text-gray-500 hover:text-red-500 transition-colors">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-5 h-5">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" 
+                          stroke="currentColor" strokeWidth="2" fill="none" />
+                      </svg>
+                    </button>
                   </div>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-xl">{property.title}</CardTitle>
-                    <div className="flex items-center text-gray-500 text-sm">
-                      <MapPin className="h-4 w-4 mr-1" />
-                      {property.location}
+                  
+                  {/* Property information with clean typography */}
+                  <div className="space-y-1">
+                    <div className="flex justify-between">
+                      <h3 className="font-medium">{property.title}</h3>
+                      <div className="flex items-center">
+                        <Star className="h-4 w-4 text-yellow-500 mr-1 fill-current" />
+                        <span className="text-sm font-medium">4.9</span>
+                      </div>
                     </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="flex justify-between items-center">
+                    
+                    <div className="flex items-center text-gray-500 dark:text-gray-400 text-sm">
+                      <MapPin className="h-3.5 w-3.5 mr-1 flex-shrink-0" />
+                      <span className="truncate">{property.location}</span>
+                    </div>
+                    
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {property.type === 'apartment' ? 'Apartment' : 
+                       property.type === 'house' ? 'House' : 'Commercial Space'}
+                    </p>
+                    
+                    <div className="flex items-center text-sm gap-x-4 pt-1">
                       {property.bedrooms !== null && (
-                        <div className="flex items-center text-gray-600">
-                          <BedDouble className="h-4 w-4 mr-1" />
-                          <span>{property.bedrooms} {property.bedrooms === 1 ? 'Bed' : 'Beds'}</span>
+                        <div className="flex items-center text-gray-700 dark:text-gray-300">
+                          <BedDouble className="h-4 w-4 mr-1.5" />
+                          <span>{property.bedrooms}</span>
                         </div>
                       )}
+                      
                       {property.bathrooms !== null && (
-                        <div className="flex items-center text-gray-600">
-                          <Bath className="h-4 w-4 mr-1" />
-                          <span>{property.bathrooms} {property.bathrooms === 1 ? 'Bath' : 'Baths'}</span>
+                        <div className="flex items-center text-gray-700 dark:text-gray-300">
+                          <Bath className="h-4 w-4 mr-1.5" />
+                          <span>{property.bathrooms}</span>
                         </div>
                       )}
-                      <div className="flex items-center text-gray-600">
-                        <Square className="h-4 w-4 mr-1" />
+                      
+                      <div className="flex items-center text-gray-700 dark:text-gray-300">
+                        <Square className="h-4 w-4 mr-1.5" />
                         <span>{property.area} m²</span>
                       </div>
                     </div>
-                  </CardContent>
-                  <CardFooter className="pt-0 flex justify-between">
-                    <Button variant="ghost" className="text-primary px-0">
-                      View Details
-                    </Button>
-                    <Button size="sm">
-                      {property.type === 'commercial' ? 'Inquire' : 'Apply Now'}
-                    </Button>
-                  </CardFooter>
-                </Card>
+                    
+                    <div className="pt-2 flex justify-between items-center">
+                      <p className="font-semibold">{property.price.toLocaleString()} <span className="text-gray-500 font-normal">BWP/month</span></p>
+                      <Button variant="outline" size="sm" className="text-xs rounded-full h-8 px-3">
+                        {property.type === 'commercial' ? 'Inquire' : 'Apply Now'}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               ))}
+            </div>
+            
+            {/* View more button for mobile */}
+            <div className="mt-10 text-center md:hidden">
+              <Button className="rounded-full px-8">View More Properties</Button>
             </div>
           </div>
         </section>
 
-        {/* Maintenance Services Section */}
-        <section id="services" className="py-16 bg-white dark:bg-gray-800">
+        {/* Maintenance Services Section - Airbnb Style */}
+        <section id="services" className="py-20 bg-gray-50 dark:bg-gray-800">
           <div className="container mx-auto px-4">
-            <div className="flex justify-between items-center mb-10">
-              <h2 className="text-3xl font-bold">Maintenance Services</h2>
+            <div className="flex justify-between items-center mb-8">
+              <div>
+                <h2 className="text-2xl md:text-3xl font-bold">Top-rated Service Providers</h2>
+                <p className="text-gray-500 dark:text-gray-400 mt-1">Verified maintenance professionals for your property needs</p>
+              </div>
               <Button 
-                variant="ghost" 
-                className="flex items-center gap-2"
+                variant="outline" 
+                className="flex items-center gap-2 rounded-full px-5"
                 onClick={() => navigate("/maintenance/marketplace")}
               >
-                View All Services <ArrowRight className="h-4 w-4" />
+                View All <ArrowRight className="h-4 w-4" />
               </Button>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Airbnb-style service provider cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
               {featuredProviders.map((provider) => (
-                <Card key={provider.id} className="overflow-hidden group hover:shadow-md transition-all">
-                  <div className="relative h-44 overflow-hidden">
+                <div key={provider.id} className="group cursor-pointer">
+                  {/* Image container with rounded corners */}
+                  <div className="relative aspect-[5/3] rounded-xl overflow-hidden mb-3">
                     <img 
                       src={provider.image} 
                       alt={provider.name} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
-                    <div className="absolute top-3 left-3">
-                      <Badge>{provider.specialty}</Badge>
+                    
+                    {/* Specialty badge */}
+                    <div className="absolute bottom-3 left-3">
+                      <Badge className="bg-white dark:bg-gray-800 text-primary font-medium px-3 py-1">
+                        {provider.specialty}
+                      </Badge>
                     </div>
                   </div>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-xl">{provider.name}</CardTitle>
-                    <div className="flex items-center text-amber-500">
-                      <Star className="h-4 w-4 fill-current" />
-                      <Star className="h-4 w-4 fill-current" />
-                      <Star className="h-4 w-4 fill-current" />
-                      <Star className="h-4 w-4 fill-current" />
-                      <Star className="h-4 w-4 fill-current opacity-40" />
-                      <span className="ml-2 text-gray-600">{provider.rating} ({provider.reviewCount} reviews)</span>
+                  
+                  {/* Provider information with clean typography */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-start">
+                      <h3 className="font-medium text-lg">{provider.name}</h3>
+                      <div className="flex items-center bg-black/5 dark:bg-white/10 px-2 py-0.5 rounded-md">
+                        <Star className="h-3.5 w-3.5 text-yellow-500 fill-current mr-1" />
+                        <span className="text-sm font-medium">{provider.rating}</span>
+                      </div>
                     </div>
-                  </CardHeader>
-                  <CardFooter className="pt-0 flex justify-between">
-                    <Button variant="outline">View Profile</Button>
-                    <Button>Request Service</Button>
-                  </CardFooter>
-                </Card>
+                    
+                    <div className="text-gray-500 dark:text-gray-400 text-sm flex items-center">
+                      <span>{provider.reviewCount} verified reviews</span>
+                      <span className="mx-2">•</span>
+                      <span>Available now</span>
+                    </div>
+                    
+                    <div className="flex items-center pt-1 space-x-2">
+                      <span className="inline-flex items-center text-xs px-2 py-1 rounded-full bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" strokeWidth="2" fill="none" className="mr-1">
+                          <path d="M20 6L9 17l-5-5"></path>
+                        </svg>
+                        Verified
+                      </span>
+                      <span className="inline-flex items-center text-xs px-2 py-1 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" strokeWidth="2" fill="none" className="mr-1">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <path d="M12 8v4l3 3"></path>
+                        </svg>
+                        Fast response
+                      </span>
+                    </div>
+                    
+                    <div className="pt-2 flex justify-between items-center">
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Starting from <span className="font-semibold text-gray-900 dark:text-white">P350/hour</span>
+                      </p>
+                      <Button size="sm" className="rounded-full px-4">
+                        Book Now
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               ))}
+            </div>
+            
+            {/* View more button for mobile */}
+            <div className="mt-10 text-center md:hidden">
+              <Button className="rounded-full px-8">View More Providers</Button>
             </div>
           </div>
         </section>
