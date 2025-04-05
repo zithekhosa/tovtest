@@ -36,7 +36,7 @@ import FacebookLandlordDashboard from "@/pages/landlord/facebook-dashboard";
 import LandlordProperties from "@/pages/landlord/properties";
 import LandlordTenants from "@/pages/landlord/tenants";
 import Finances from "@/pages/landlord/finances";
-import FinancialManagement from "@/pages/landlord/financial-management";
+
 import DocumentManagement from "@/pages/landlord/document-management";
 import MarketIntelligence from "@/pages/landlord/market-intelligence";
 
@@ -99,7 +99,7 @@ function Router() {
       <ProtectedRoute path="/landlord/messages" component={Messages} role="landlord" />
       <ProtectedRoute path="/landlord/documents" component={Documents} role="landlord" />
       <ProtectedRoute path="/landlord/document-management" component={DocumentManagement} role="landlord" />
-      <ProtectedRoute path="/landlord/financial-management" component={FinancialManagement} role="landlord" />
+
       <ProtectedRoute path="/landlord/market-intelligence" component={MarketIntelligence} role="landlord" />
       
       {/* Add routes for payments and other potential subpages */}
