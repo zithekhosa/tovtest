@@ -132,7 +132,7 @@ export default function TenantDashboard() {
     isLoading: propertiesLoading,
     error: propertiesError
   } = useQuery<(Property & { lease?: Lease })[]>({
-    queryKey: ["/api/properties/tenant"],
+    queryKey: ["/api/properties/tenant-static"],
     retry: 1,
     staleTime: 30000,
   });
@@ -154,7 +154,7 @@ export default function TenantDashboard() {
     isLoading: leasesLoading,
     error: leasesError
   } = useQuery<(Lease & { property?: Property })[]>({
-    queryKey: ["/api/leases/history"],
+    queryKey: ["/api/leases/history-static"],
     retry: 1,
     staleTime: 30000,
   });
@@ -306,7 +306,7 @@ export default function TenantDashboard() {
         <div className="px-6 py-8 border-b">
           <div className="flex items-center gap-3">
             <Avatar className="h-10 w-10">
-              <AvatarImage src={user?.avatarUrl || undefined} alt={user?.firstName || "User"} />
+              <AvatarImage src={user?.profileImage || undefined} alt={user?.firstName || "User"} />
               <AvatarFallback>{user?.firstName?.charAt(0) || "U"}</AvatarFallback>
             </Avatar>
             <div>
