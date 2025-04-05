@@ -37,12 +37,12 @@ export function MetricsCard({ title, value, description, icon, trend, progress, 
   }
 
   return (
-    <div className={`tov-metrics-card bg-white rounded-full p-6 shadow-sm hover:shadow-md transition-all aspect-square flex flex-col items-center justify-center text-center ${className || ''}`}>
-      <div className={`h-12 w-12 rounded-full ${bgColorClass} flex items-center justify-center shrink-0 mb-3`}>
+    <div className={`tov-metrics-card bg-white border p-4 shadow-sm hover:shadow-md transition-all aspect-square flex flex-col items-center justify-center text-center ${className || ''}`}>
+      <div className={`h-8 w-8 ${bgColorClass} flex items-center justify-center shrink-0 mb-2`}>
         {icon}
       </div>
-      <h3 className="text-sm font-medium mb-1 tov-truncate-text">{title}</h3>
-      <div className="text-2xl font-bold mt-1 mb-1">{value}</div>
+      <h3 className="text-xs font-medium mb-1 tov-truncate-text">{title}</h3>
+      <div className="text-xl font-bold mt-0.5 mb-0.5">{value}</div>
       
       {description && (
         <p className="text-xs text-muted-foreground tov-text-ellipsis">{description}</p>
