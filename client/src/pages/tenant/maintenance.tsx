@@ -30,6 +30,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogClose,
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -102,6 +103,11 @@ import {
   Eye,
   HelpCircle,
   Phone,
+  CalendarDays,
+  Activity,
+  Settings,
+  ArrowUpRight,
+  MoreHorizontal,
 } from "lucide-react";
 
 // Form schema for maintenance requests
@@ -133,13 +139,13 @@ type MaintenanceFormValues = z.infer<typeof maintenanceFormSchema>;
 
 // Available maintenance categories with icons
 const categories = [
-  { id: "plumbing", label: "Plumbing", icon: <Droplets className="h-4 w-4" /> },
-  { id: "electrical", label: "Electrical", icon: <Zap className="h-4 w-4" /> },
-  { id: "hvac", label: "HVAC", icon: <Zap className="h-4 w-4" /> },
-  { id: "appliance", label: "Appliance", icon: <Home className="h-4 w-4" /> },
-  { id: "structural", label: "Structural", icon: <Hammer className="h-4 w-4" /> },
-  { id: "pest", label: "Pest Control", icon: <Trash2 className="h-4 w-4" /> },
-  { id: "other", label: "Other", icon: <Wrench className="h-4 w-4" /> },
+  { id: "plumbing", label: "Plumbing", icon: <Droplets className="h-5 w-5" />, color: "bg-blue-500" },
+  { id: "electrical", label: "Electrical", icon: <Zap className="h-5 w-5" />, color: "bg-yellow-500" },
+  { id: "hvac", label: "HVAC", icon: <Activity className="h-5 w-5" />, color: "bg-green-500" },
+  { id: "appliance", label: "Appliance", icon: <Home className="h-5 w-5" />, color: "bg-purple-500" },
+  { id: "structural", label: "Structural", icon: <Hammer className="h-5 w-5" />, color: "bg-orange-500" },
+  { id: "pest", label: "Pest Control", icon: <Trash2 className="h-5 w-5" />, color: "bg-red-500" },
+  { id: "other", label: "Other", icon: <Wrench className="h-5 w-5" />, color: "bg-gray-500" },
 ];
 
 // Status and priority styling helpers
@@ -158,10 +164,181 @@ const getPriorityColor = (priority: string) => {
   }
 };
 
-const getCategoryIcon = (category: string) => {
+const getCategoryIcon = (category: string | null) => {
+  if (!category) return <Wrench className="h-5 w-5" />;
   const found = categories.find((c) => c.id === category);
-  return found ? found.icon : <Wrench className="h-4 w-4" />;
+  return found ? found.icon : <Wrench className="h-5 w-5" />;
 };
+
+const getCategoryColor = (category: string | null) => {
+  if (!category) return "bg-gray-500";
+  const found = categories.find((c) => c.id === category);
+  return found ? found.color : "bg-gray-500";
+};
+
+// Reusable components
+type EmptyStateProps = {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  action?: React.ReactNode;
+};
+
+function EmptyState({ icon, title, description, action }: EmptyStateProps) {
+  return (
+    <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+      <div className="bg-muted/30 p-6 rounded-full mb-4">
+        {icon}
+      </div>
+      <h3 className="text-lg font-semibold mb-2">{title}</h3>
+      <p className="text-muted-foreground max-w-md mb-6">{description}</p>
+      {action}
+    </div>
+  );
+}
+
+type HelpGuideItemProps = {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+};
+
+function HelpGuideItem({ icon, title, description }: HelpGuideItemProps) {
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center gap-2">
+        <div className="p-1.5 rounded-md bg-muted">
+          {icon}
+        </div>
+        <h4 className="text-sm font-medium">{title}</h4>
+      </div>
+      <p className="text-xs text-muted-foreground pl-8">{description}</p>
+    </div>
+  );
+}
+
+function RequestCard({ request, onClick }: { request: MaintenanceRequest, onClick: () => void }) {
+  const isPending = request.status === "pending";
+  const isInProgress = request.status === "in progress";
+  const isCompleted = request.status === "completed";
+  const isCancelled = request.status === "cancelled";
+  
+  const statusColor = (() => {
+    switch (request.status) {
+      case "pending": return "bg-amber-500";
+      case "in progress": return "bg-blue-500";
+      case "completed": return "bg-green-500";
+      case "cancelled": return "bg-gray-500";
+      default: return "bg-gray-500";
+    }
+  })();
+  
+  const statusIcon = (() => {
+    switch (request.status) {
+      case "pending": return <Clock className="h-4 w-4" />;
+      case "in progress": return <Activity className="h-4 w-4" />;
+      case "completed": return <CheckCircle className="h-4 w-4" />;
+      case "cancelled": return <X className="h-4 w-4" />;
+      default: return <Info className="h-4 w-4" />;
+    }
+  })();
+  
+  const timeSince = (() => {
+    const createDate = new Date(request.createdAt);
+    const updateDate = request.updatedAt ? new Date(request.updatedAt) : null;
+    
+    const now = new Date();
+    const date = isCompleted || isCancelled ? updateDate || createDate : createDate;
+    
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays > 30) {
+      const diffMonths = Math.floor(diffDays / 30);
+      return `${diffMonths} month${diffMonths !== 1 ? 's' : ''} ago`;
+    } else if (diffDays > 0) {
+      return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+    } else {
+      const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+      if (diffHours > 0) {
+        return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+      } else {
+        const diffMinutes = Math.floor(diffTime / (1000 * 60));
+        return `${diffMinutes} minute${diffMinutes !== 1 ? 's' : ''} ago`;
+      }
+    }
+  })();
+  
+  return (
+    <Card 
+      className="group cursor-pointer hover:shadow-md transition-shadow duration-200 border-0 shadow overflow-hidden"
+      onClick={onClick}
+    >
+      <div className={`h-1 w-full ${getCategoryColor(request.category)}`} />
+      <CardContent className="p-5">
+        <div className="flex justify-between items-start">
+          <div className="flex items-start gap-3">
+            <div className={`p-2 rounded-lg ${statusColor} text-white`}>
+              {statusIcon}
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="font-medium">{request.title}</h3>
+                <Badge variant="outline" className="text-xs font-normal">
+                  {request.priority}
+                </Badge>
+              </div>
+              <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                {request.description}
+              </p>
+              <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <Calendar className="h-3 w-3" />
+                  {timeSince}
+                </span>
+                <span className="flex items-center gap-1">
+                  <div className="h-3 w-3">
+                    {getCategoryIcon(request.category)}
+                  </div>
+                  {categories.find(c => c.id === request.category)?.label || 'Other'}
+                </span>
+                {(isInProgress || isCompleted) && request.assignedToId && (
+                  <span className="flex items-center gap-1">
+                    <Avatar className="h-3 w-3">
+                      <AvatarFallback className="text-[8px]">P</AvatarFallback>
+                    </Avatar>
+                    Provider
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+          >
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+        </div>
+        
+        {(isInProgress || isPending) && (
+          <div className="mt-3 pt-3 border-t">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">
+                {isInProgress ? 'Work in progress' : 'Awaiting assignment'}
+              </span>
+              <span className="font-medium">
+                {isInProgress ? '50%' : '0%'}
+              </span>
+            </div>
+            <Progress value={isInProgress ? 50 : 0} className="h-1.5 mt-1.5" />
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function MaintenancePortal() {
   const { user } = useAuth();
@@ -413,92 +590,176 @@ export default function MaintenancePortal() {
   return (
     <DashLayout>
       <div className="container py-6 max-w-7xl">
-        {/* Header section */}
-        <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-8 rounded-2xl mb-8">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Maintenance Hub</h1>
-              <p className="text-muted-foreground mt-2">Request and track repairs for your property</p>
+        {/* Hero section */}
+        <div className="relative bg-gradient-to-r from-primary/20 via-primary/15 to-transparent rounded-3xl overflow-hidden mb-8">
+          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1581578731548-c64695cc6952?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')] bg-cover opacity-10"></div>
+          <div className="relative p-8 md:p-10">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="bg-primary/20 p-1.5 rounded-md">
+                    <Wrench className="h-5 w-5 text-primary" />
+                  </div>
+                  <span className="text-sm font-medium text-primary/80">Tenant Portal</span>
+                </div>
+                <h1 className="text-3xl font-bold tracking-tight">Maintenance Hub</h1>
+                <p className="text-muted-foreground mt-2 max-w-md">Easily request and track repairs for your home with our simplified maintenance portal</p>
+              </div>
+              <Button 
+                size="lg" 
+                onClick={() => setIsNewRequestOpen(true)} 
+                className="gap-2 rounded-xl shadow-md hover:shadow-lg transition-all"
+              >
+                <Plus className="h-5 w-5" />
+                <span>New Request</span>
+              </Button>
             </div>
-            <Button size="lg" onClick={() => setIsNewRequestOpen(true)} className="gap-2">
-              <Plus className="h-5 w-5" />
-              <span>New Request</span>
-            </Button>
-          </div>
-          
-          {/* Stats overview */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
-            <Card className="bg-white/60 backdrop-blur-sm">
-              <CardContent className="p-4 flex items-center gap-4">
-                <div className="bg-primary/10 p-3 rounded-full">
-                  <Clock className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Active</p>
-                  <p className="text-2xl font-bold">{activeRequests.length}</p>
-                </div>
-              </CardContent>
-            </Card>
             
-            <Card className="bg-white/60 backdrop-blur-sm">
-              <CardContent className="p-4 flex items-center gap-4">
-                <div className="bg-green-100 p-3 rounded-full">
-                  <CheckCircle className="h-6 w-6 text-green-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Completed</p>
-                  <p className="text-2xl font-bold">{completedRequests.length}</p>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Stats overview */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-sm overflow-hidden">
+                <div className="absolute h-full w-1 left-0 top-0 bg-primary/40"></div>
+                <CardContent className="p-4 flex items-center gap-4">
+                  <div className="bg-white p-3 rounded-xl shadow-sm">
+                    <Clock className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Active</p>
+                    <p className="text-2xl font-bold">{activeRequests.length}</p>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-sm overflow-hidden">
+                <div className="absolute h-full w-1 left-0 top-0 bg-green-400"></div>
+                <CardContent className="p-4 flex items-center gap-4">
+                  <div className="bg-white p-3 rounded-xl shadow-sm">
+                    <CheckCircle className="h-5 w-5 text-green-500" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Completed</p>
+                    <p className="text-2xl font-bold">{completedRequests.length}</p>
+                  </div>
+                </CardContent>
+              </Card>
 
-            <Card className="bg-white/60 backdrop-blur-sm">
-              <CardContent className="p-4 flex items-center gap-4">
-                <div className="bg-gray-100 p-3 rounded-full">
-                  <X className="h-6 w-6 text-gray-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Cancelled</p>
-                  <p className="text-2xl font-bold">{cancelledRequests.length}</p>
-                </div>
-              </CardContent>
-            </Card>
+              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-sm overflow-hidden">
+                <div className="absolute h-full w-1 left-0 top-0 bg-gray-400"></div>
+                <CardContent className="p-4 flex items-center gap-4">
+                  <div className="bg-white p-3 rounded-xl shadow-sm">
+                    <X className="h-5 w-5 text-gray-500" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Cancelled</p>
+                    <p className="text-2xl font-bold">{cancelledRequests.length}</p>
+                  </div>
+                </CardContent>
+              </Card>
 
-            <Card className="bg-white/60 backdrop-blur-sm">
-              <CardContent className="p-4 flex items-center gap-4">
-                <div className="bg-blue-100 p-3 rounded-full">
-                  <FileText className="h-6 w-6 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Total</p>
-                  <p className="text-2xl font-bold">{maintenanceRequests.length}</p>
-                </div>
-              </CardContent>
-            </Card>
+              <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-sm overflow-hidden">
+                <div className="absolute h-full w-1 left-0 top-0 bg-blue-400"></div>
+                <CardContent className="p-4 flex items-center gap-4">
+                  <div className="bg-white p-3 rounded-xl shadow-sm">
+                    <FileText className="h-5 w-5 text-blue-500" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total</p>
+                    <p className="text-2xl font-bold">{maintenanceRequests.length}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
 
         {/* Main content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-6">
-            {/* Requests list section */}
-            <Card>
-              <CardHeader className="pb-2">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Left sidebar - property info */}
+          <div className="lg:col-span-3 space-y-6 order-last lg:order-first">
+            <Card className="overflow-hidden border-0 shadow-md">
+              <div className="h-32 w-full relative">
+                <img
+                  src={`https://source.unsplash.com/random/800x600?property&sig=${property.id}`}
+                  alt={property.title || "Property"}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                <div className="absolute bottom-3 left-4 text-white">
+                  <p className="text-sm font-medium">{property.propertyType} Property</p>
+                  <h3 className="text-lg font-bold">{property.title || `${property.address}`}</h3>
+                </div>
+              </div>
+              <CardContent className="p-5">
+                <div className="flex items-start gap-3 mb-4">
+                  <MapPin className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm leading-tight">{property.address}</p>
+                    <p className="text-sm text-muted-foreground">{property.city}, {property.state}</p>
+                  </div>
+                </div>
+                
+                <Separator className="my-4" />
+                
+                <div className="space-y-3">
+                  <h4 className="text-sm font-medium">Property Manager</h4>
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-9 w-9">
+                      <AvatarImage src={`https://ui-avatars.com/api/?name=Property Manager&background=random`} />
+                      <AvatarFallback>PM</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="text-sm font-medium">Property Manager</p>
+                      <p className="text-xs text-muted-foreground">Contact via system</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <Separator className="my-4" />
+                
+                <p className="text-sm font-medium mb-3">Quick Access</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button variant="outline" size="sm" className="h-auto py-2 justify-start">
+                    <Phone className="h-4 w-4 mr-2" />
+                    <span className="text-xs">Emergency</span>
+                  </Button>
+                  <Button variant="outline" size="sm" className="h-auto py-2 justify-start">
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    <span className="text-xs">Message</span>
+                  </Button>
+                  <Button variant="outline" size="sm" className="h-auto py-2 justify-start">
+                    <FileText className="h-4 w-4 mr-2" />
+                    <span className="text-xs">Lease</span>
+                  </Button>
+                  <Button variant="outline" size="sm" className="h-auto py-2 justify-start">
+                    <HelpCircle className="h-4 w-4 mr-2" />
+                    <span className="text-xs">Help</span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          
+          {/* Main content - maintenance requests */}
+          <div className="lg:col-span-9 space-y-6">
+            <Card className="border-0 shadow-md overflow-hidden">
+              <CardHeader className="border-b bg-muted/30 pb-3">
                 <div className="flex justify-between items-center">
                   <div>
-                    <CardTitle>Maintenance Requests</CardTitle>
-                    <CardDescription>View and manage your property maintenance requests</CardDescription>
+                    <CardTitle className="text-xl">Maintenance Requests</CardTitle>
+                    <CardDescription>All your property maintenance tickets in one place</CardDescription>
                   </div>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button variant="ghost" size="icon" onClick={() => refetchRequests()}>
-                          <RotateCcw className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Refresh requests</TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                  <div className="flex items-center gap-2">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="ghost" size="icon" onClick={() => refetchRequests()}>
+                            <RotateCcw className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Refresh requests</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
                 </div>
               </CardHeader>
               
@@ -1128,98 +1389,9 @@ export default function MaintenancePortal() {
   );
 }
 
-// Component for request cards
-function RequestCard({ request, onClick }: { request: MaintenanceRequest; onClick: () => void }) {
-  const statusMap = {
-    pending: { label: "Pending", color: "text-yellow-600 bg-yellow-50 border-yellow-200" },
-    "in progress": { label: "In Progress", color: "text-blue-600 bg-blue-50 border-blue-200" },
-    completed: { label: "Completed", color: "text-green-600 bg-green-50 border-green-200" },
-    cancelled: { label: "Cancelled", color: "text-gray-600 bg-gray-50 border-gray-200" },
-  };
-  
-  const status = statusMap[request.status as keyof typeof statusMap] || statusMap.pending;
-  
-  return (
-    <Card className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer" onClick={onClick}>
-      <div className="flex">
-        <div className={cn("w-2.5", request.status === "pending" ? "bg-yellow-400" : request.status === "in progress" ? "bg-blue-400" : request.status === "completed" ? "bg-green-400" : "bg-gray-400")} />
-        <div className="flex-1 p-4">
-          <div className="flex justify-between items-start">
-            <div>
-              <h3 className="font-medium mb-1">{request.title}</h3>
-              <div className="flex items-center gap-2 mb-3">
-                <Badge className={cn("px-2 py-0.5", getPriorityColor(request.priority))}>
-                  {request.priority.charAt(0).toUpperCase() + request.priority.slice(1)}
-                </Badge>
-                
-                <span className="text-xs text-muted-foreground">
-                  #{request.id} • {formatDateTime(request.createdAt)}
-                </span>
-              </div>
-              
-              <p className="text-sm text-gray-600 line-clamp-2">{request.description}</p>
-            </div>
-            
-            <div className="flex flex-col items-end">
-              <Badge variant="outline" className={cn(status.color, "whitespace-nowrap")}>
-                {status.label}
-              </Badge>
-              
-              {request.category && (
-                <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
-                  {getCategoryIcon(request.category)}
-                  <span className="capitalize">{request.category}</span>
-                </div>
-              )}
-            </div>
-          </div>
-          
-          {(request.status === "in progress" || request.status === "completed") && (
-            <div className="mt-3 pt-3 border-t">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                {request.status === "in progress" ? (
-                  <>
-                    <Clock className="h-3.5 w-3.5 text-blue-500" />
-                    <span>Work in progress</span>
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle className="h-3.5 w-3.5 text-green-500" />
-                    <span>Completed on {request.updatedAt ? formatDateTime(request.updatedAt) : "N/A"}</span>
-                  </>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </Card>
-  );
-}
+// Second implementation removed to prevent duplication (RequestCard)
 
-// Component for empty states
-function EmptyState({ 
-  icon, 
-  title, 
-  description, 
-  action 
-}: { 
-  icon: React.ReactNode; 
-  title: string; 
-  description: string; 
-  action?: React.ReactNode;
-}) {
-  return (
-    <div className="flex flex-col items-center justify-center py-12 text-center">
-      <div className="p-3 rounded-full bg-muted mb-4">
-        {icon}
-      </div>
-      <h3 className="text-lg font-medium mb-1">{title}</h3>
-      <p className="text-muted-foreground mb-6 max-w-sm">{description}</p>
-      {action}
-    </div>
-  );
-}
+// Second implementation removed to prevent duplication
 
 // Component for timeline items
 function TimelineItem({ 
@@ -1257,23 +1429,4 @@ function TimelineItem({
   );
 }
 
-// Component for help guide items
-function HelpGuideItem({ 
-  icon, 
-  title, 
-  description 
-}: { 
-  icon: React.ReactNode; 
-  title: string; 
-  description: string;
-}) {
-  return (
-    <div className="flex gap-2">
-      <div className="mt-0.5">{icon}</div>
-      <div>
-        <h4 className="text-sm font-medium">{title}</h4>
-        <p className="text-xs text-muted-foreground">{description}</p>
-      </div>
-    </div>
-  );
-}
+// Second implementation removed to prevent duplication
