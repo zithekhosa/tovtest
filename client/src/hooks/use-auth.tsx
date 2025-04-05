@@ -9,6 +9,7 @@ import { getQueryFn, apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useLocation } from "wouter";
 
 // Extended schemas for frontend validation
 export const loginSchema = z.object({
@@ -38,6 +39,7 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
+  const [_, navigate] = useLocation();
   const {
     data: user,
     error,
@@ -100,6 +102,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       toast({
         title: "Logged out successfully",
       });
+      // Redirect to landing page after logout
+      navigate('/');
     },
     onError: (error: Error) => {
       toast({

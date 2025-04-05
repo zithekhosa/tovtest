@@ -204,7 +204,7 @@ export default function Sidebar({ role }: SidebarProps) {
 
   const handleLogout = async () => {
     await logoutMutation.mutateAsync();
-    navigate('/'); // Redirect to the landing page after logout
+    // Remove navigation as it's now handled in the auth hook
   };
 
   return (
