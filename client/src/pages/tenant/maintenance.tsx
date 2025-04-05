@@ -138,42 +138,42 @@ function JobCard({
   // Function to get icon for category
   const getCategoryIcon = (categoryId: string) => {
     const category = categories.find(c => c.id === categoryId);
-    return category ? category.icon : <Tool className="h-5 w-5 text-gray-500" />;
+    return category ? category.icon : <Tool className="h-4 w-4 text-gray-500" />;
   };
 
   return (
     <div 
       onClick={onClick}
-      className="bg-white rounded-lg border overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+      className="bg-white border cursor-pointer hover:shadow-md transition-shadow"
     >
-      <div className="p-5">
+      <div className="p-3">
         {/* Provider/Property info */}
-        <div className="flex items-center mb-4">
-          <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center mr-3">
+        <div className="flex items-center mb-3">
+          <div className="h-8 w-8 bg-gray-200 flex items-center justify-center mr-2">
             {request.category && getCategoryIcon(request.category)}
           </div>
           <div>
-            <h3 className="font-medium">{request.title}</h3>
-            <div className="flex items-center text-sm text-gray-500">
-              <Clock className="h-3.5 w-3.5 mr-1" />
+            <h3 className="font-medium text-sm">{request.title}</h3>
+            <div className="flex items-center text-xs text-gray-500">
+              <Clock className="h-3 w-3 mr-1" />
               {getRelativeTime(new Date(request.createdAt))}
             </div>
           </div>
         </div>
         
         {/* Job description */}
-        <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+        <p className="text-xs text-gray-600 mb-3 line-clamp-2">
           {request.description}
         </p>
         
         {/* Tags row */}
-        <div className="flex flex-wrap gap-2 mb-4">
+        <div className="flex flex-wrap gap-1.5 mb-2">
           {request.category && (
-            <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded text-xs">
+            <span className="px-1.5 py-0.5 bg-gray-100 text-gray-800 text-xs">
               {request.category}
             </span>
           )}
-          <span className={`px-2 py-1 rounded text-xs ${
+          <span className={`px-1.5 py-0.5 text-xs ${
             request.priority === "urgent" ? "bg-red-100 text-red-800" :
             request.priority === "high" ? "bg-orange-100 text-orange-800" :
             request.priority === "medium" ? "bg-yellow-100 text-yellow-800" :
@@ -181,7 +181,7 @@ function JobCard({
           }`}>
             {request.priority} priority
           </span>
-          <span className={`px-2 py-1 rounded text-xs ${
+          <span className={`px-1.5 py-0.5 text-xs ${
             request.status === "pending" ? "bg-amber-100 text-amber-800" :
             request.status === "in progress" ? "bg-blue-100 text-blue-800" :
             request.status === "completed" ? "bg-green-100 text-green-800" :
@@ -558,108 +558,142 @@ export default function MaintenancePortal() {
 
           {/* Featured Providers Section */}
           {activeTab === "active" && (
-            <div className="mt-12">
-              <h2 className="text-xl font-semibold mb-6">Top Maintenance Providers</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white rounded-lg border overflow-hidden">
-                  <div className="p-5">
-                    <div className="flex items-center mb-4">
-                      <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center mr-3">
-                        <Droplets className="h-6 w-6 text-blue-500" />
+            <div className="mt-10">
+              <h2 className="text-xl font-semibold mb-5">Top Maintenance Providers</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-white border">
+                  <div className="p-3">
+                    <div className="flex items-center mb-3">
+                      <div className="h-8 w-8 bg-blue-100 flex items-center justify-center mr-2">
+                        <Droplets className="h-4 w-4 text-blue-500" />
                       </div>
                       <div>
-                        <h3 className="font-medium">Mpho Khumalo</h3>
-                        <div className="flex items-center text-sm text-gray-500">
-                          Plumbing Specialist
+                        <h3 className="font-medium text-sm">Mpho Khumalo</h3>
+                        <div className="text-xs text-gray-500">
+                          Plumbing
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center mb-3">
+                    <div className="flex items-center mb-2">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <svg 
                           key={star} 
                           xmlns="http://www.w3.org/2000/svg" 
                           viewBox="0 0 24 24"
                           fill="currentColor"
-                          className={`h-4 w-4 ${star <= 5 ? "text-yellow-400" : "text-gray-300"}`}
+                          className={`h-3 w-3 ${star <= 5 ? "text-yellow-400" : "text-gray-300"}`}
                         >
                           <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
                         </svg>
                       ))}
-                      <span className="ml-2 text-sm text-gray-600">4.9/5</span>
+                      <span className="ml-1 text-xs text-gray-600">4.9</span>
                     </div>
-                    <p className="text-sm text-gray-600 mb-4">
-                      Specializing in all types of plumbing repairs and installations with 8+ years of experience.
+                    <p className="text-xs text-gray-600 mb-3 line-clamp-2">
+                      Plumbing repairs and installations. 8+ years experience.
                     </p>
-                    <Button variant="outline" className="w-full">View Profile</Button>
+                    <Button variant="outline" size="sm" className="w-full text-xs">View Profile</Button>
                   </div>
                 </div>
                 
-                <div className="bg-white rounded-lg border overflow-hidden">
-                  <div className="p-5">
-                    <div className="flex items-center mb-4">
-                      <div className="h-12 w-12 rounded-full bg-yellow-100 flex items-center justify-center mr-3">
-                        <Zap className="h-6 w-6 text-yellow-500" />
+                <div className="bg-white border">
+                  <div className="p-3">
+                    <div className="flex items-center mb-3">
+                      <div className="h-8 w-8 bg-yellow-100 flex items-center justify-center mr-2">
+                        <Zap className="h-4 w-4 text-yellow-500" />
                       </div>
                       <div>
-                        <h3 className="font-medium">Tebogo Moitwa</h3>
-                        <div className="flex items-center text-sm text-gray-500">
-                          Electrical Contractor
+                        <h3 className="font-medium text-sm">Tebogo Moitwa</h3>
+                        <div className="text-xs text-gray-500">
+                          Electrical
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center mb-3">
+                    <div className="flex items-center mb-2">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <svg 
                           key={star} 
                           xmlns="http://www.w3.org/2000/svg" 
                           viewBox="0 0 24 24"
                           fill="currentColor"
-                          className={`h-4 w-4 ${star <= 4 ? "text-yellow-400" : "text-gray-300"}`}
+                          className={`h-3 w-3 ${star <= 4 ? "text-yellow-400" : "text-gray-300"}`}
                         >
                           <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
                         </svg>
                       ))}
-                      <span className="ml-2 text-sm text-gray-600">4.1/5</span>
+                      <span className="ml-1 text-xs text-gray-600">4.1</span>
                     </div>
-                    <p className="text-sm text-gray-600 mb-4">
-                      Licensed electrician with expertise in residential and commercial electrical systems.
+                    <p className="text-xs text-gray-600 mb-3 line-clamp-2">
+                      Licensed electrician for residential & commercial systems.
                     </p>
-                    <Button variant="outline" className="w-full">View Profile</Button>
+                    <Button variant="outline" size="sm" className="w-full text-xs">View Profile</Button>
                   </div>
                 </div>
                 
-                <div className="bg-white rounded-lg border overflow-hidden">
-                  <div className="p-5">
-                    <div className="flex items-center mb-4">
-                      <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center mr-3">
-                        <Building className="h-6 w-6 text-green-500" />
+                <div className="bg-white border">
+                  <div className="p-3">
+                    <div className="flex items-center mb-3">
+                      <div className="h-8 w-8 bg-green-100 flex items-center justify-center mr-2">
+                        <Building className="h-4 w-4 text-green-500" />
                       </div>
                       <div>
-                        <h3 className="font-medium">Lesego Selina</h3>
-                        <div className="flex items-center text-sm text-gray-500">
-                          General Contractor
+                        <h3 className="font-medium text-sm">Lesego Selina</h3>
+                        <div className="text-xs text-gray-500">
+                          General
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center mb-3">
+                    <div className="flex items-center mb-2">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <svg 
                           key={star} 
                           xmlns="http://www.w3.org/2000/svg" 
                           viewBox="0 0 24 24"
                           fill="currentColor"
-                          className={`h-4 w-4 ${star <= 5 ? "text-yellow-400" : "text-gray-300"}`}
+                          className={`h-3 w-3 ${star <= 5 ? "text-yellow-400" : "text-gray-300"}`}
                         >
                           <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
                         </svg>
                       ))}
-                      <span className="ml-2 text-sm text-gray-600">4.8/5</span>
+                      <span className="ml-1 text-xs text-gray-600">4.8</span>
                     </div>
-                    <p className="text-sm text-gray-600 mb-4">
-                      Full-service contractor specializing in structural repairs, renovations and installations.
+                    <p className="text-xs text-gray-600 mb-3 line-clamp-2">
+                      Contractor for structural repairs and renovations.
                     </p>
-                    <Button variant="outline" className="w-full">View Profile</Button>
+                    <Button variant="outline" size="sm" className="w-full text-xs">View Profile</Button>
+                  </div>
+                </div>
+                
+                <div className="bg-white border">
+                  <div className="p-3">
+                    <div className="flex items-center mb-3">
+                      <div className="h-8 w-8 bg-orange-100 flex items-center justify-center mr-2">
+                        <Tool className="h-4 w-4 text-orange-500" />
+                      </div>
+                      <div>
+                        <h3 className="font-medium text-sm">Thato Mabe</h3>
+                        <div className="text-xs text-gray-500">
+                          Appliance
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center mb-2">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <svg 
+                          key={star} 
+                          xmlns="http://www.w3.org/2000/svg" 
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          className={`h-3 w-3 ${star <= 4 ? "text-yellow-400" : "text-gray-300"}`}
+                        >
+                          <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
+                        </svg>
+                      ))}
+                      <span className="ml-1 text-xs text-gray-600">4.2</span>
+                    </div>
+                    <p className="text-xs text-gray-600 mb-3 line-clamp-2">
+                      Specializes in kitchen and household appliance repair.
+                    </p>
+                    <Button variant="outline" size="sm" className="w-full text-xs">View Profile</Button>
                   </div>
                 </div>
               </div>
