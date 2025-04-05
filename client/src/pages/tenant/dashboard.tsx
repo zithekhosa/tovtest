@@ -1,52 +1,51 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { StandardLayout } from "@/components/layout/StandardLayout";
-import { 
+import { useAuth } from "@/hooks/use-auth";
+import {
   Home,
   DollarSign,
   FileText,
   Wrench,
-  ArrowUp,
-  ArrowDown,
-  Loader2, 
-  Building,
   Calendar,
   CreditCard,
   Download,
   Clock,
   CheckCircle,
-  ShieldAlert,
-  Shield,
+  Bell,
+  HelpCircle,
+  Settings,
+  Menu,
+  X,
+  Search,
+  ChevronDown,
+  User,
   MapPin,
   Star,
-  Wifi as WifiIcon,
-  Trash2
+  Plus
 } from "lucide-react";
 import { Property, Payment, Lease, Document } from "@shared/schema";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Progress } from "@/components/ui/progress";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  LineChart,
-  Line,
   AreaChart,
   Area,
   BarChart,
   Bar,
-  PieChart,
-  Pie,
-  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer
 } from "recharts";
 
-// Currency formatter
+// Currency formatter for Botswana Pula
 const formatCurrency = (value: number = 0): string => {
   try {
     return new Intl.NumberFormat("en-BW", {
@@ -63,7 +62,11 @@ const formatCurrency = (value: number = 0): string => {
 const formatDate = (dateString: string | Date): string => {
   try {
     const date = new Date(dateString);
-    return date.toLocaleDateString();
+    return date.toLocaleDateString("en-BW", {
+      year: "numeric",
+      month: "short",
+      day: "numeric"
+    });
   } catch (e) {
     return String(dateString);
   }
@@ -77,26 +80,51 @@ const daysUntil = (dateString: string | Date): number => {
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 };
 
-// Payment method icon mapper
-const PaymentMethodIcon = ({ method }: { method: string }) => {
+// Payment method badge component
+const PaymentMethodBadge = ({ method }: { method: string }) => {
   switch(method.toLowerCase()) {
     case 'm-zaka':
-      return <Badge className="bg-blue-100 text-blue-800 border-blue-300">M-Zaka</Badge>;
+      return <Badge className="bg-blue-100 text-blue-800 border-0">M-Zaka</Badge>;
     case 'orange money':
-      return <Badge className="bg-orange-100 text-orange-800 border-orange-300">Orange Money</Badge>;
+      return <Badge className="bg-orange-100 text-orange-800 border-0">Orange Money</Badge>;
     case 'credit card':
-      return <Badge className="bg-purple-100 text-purple-800 border-purple-300">Credit Card</Badge>;
+      return <Badge className="bg-purple-100 text-purple-800 border-0">Credit Card</Badge>;
     case 'bank transfer':
-      return <Badge className="bg-green-100 text-green-800 border-green-300">Bank Transfer</Badge>;
+      return <Badge className="bg-green-100 text-green-800 border-0">Bank Transfer</Badge>;
     default:
-      return <Badge className="bg-gray-100 text-gray-800 border-gray-300">{method}</Badge>;
+      return <Badge className="bg-gray-100 text-gray-800 border-0">{method}</Badge>;
   }
 };
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
+// Status badge component
+const StatusBadge = ({ status }: { status: string }) => {
+  switch(status.toLowerCase()) {
+    case 'paid':
+    case 'completed':
+    case 'active':
+      return <Badge className="bg-green-100 text-green-800 border-0">{status}</Badge>;
+    case 'pending':
+    case 'in progress':
+      return <Badge className="bg-blue-100 text-blue-800 border-0">{status}</Badge>;
+    case 'overdue':
+    case 'late':
+      return <Badge className="bg-red-100 text-red-800 border-0">{status}</Badge>;
+    default:
+      return <Badge className="bg-gray-100 text-gray-800 border-0">{status}</Badge>;
+  }
+};
 
 export default function TenantDashboard() {
-  const [activeTab, setActiveTab] = useState<string>("overview");
+  const { user } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Get current date for displaying
+  const today = new Date();
+  const formattedDate = today.toLocaleDateString('en-BW', { 
+    weekday: 'long', 
+    month: 'long', 
+    day: 'numeric' 
+  });
   
   // Fetch tenant's property data
   const {
@@ -166,13 +194,13 @@ export default function TenantDashboard() {
   const daysUntilPayment = daysUntil(nextPaymentDate);
   
   // Monthly payment amount
-  const monthlyRent = currentProperty?.rentAmount || 0;
+  const monthlyRent = currentProperty?.rentAmount || 6000;
   
   // Total paid to date (all payments)
   const totalPaid = payments.reduce((sum, payment) => sum + payment.amount, 0);
   
   // Security deposit
-  const securityDeposit = currentLease?.securityDeposit || 0;
+  const securityDeposit = currentLease?.securityDeposit || 12000;
   
   // Calculate lease end date and days remaining
   const leaseEndDate = currentLease ? new Date(currentLease.endDate) : new Date();
@@ -199,951 +227,830 @@ export default function TenantDashboard() {
     };
   });
   
-  // Documents by type
-  const documentTypes = documents.reduce((acc: Record<string, number>, doc) => {
-    acc[doc.documentType] = (acc[doc.documentType] || 0) + 1;
-    return acc;
-  }, {});
+  // Mock data for upcoming events
+  const upcomingEvents = [
+    { 
+      id: 1, 
+      title: 'Rent Due', 
+      date: nextPaymentDate, 
+      type: 'payment' 
+    },
+    { 
+      id: 2, 
+      title: 'Annual Property Inspection', 
+      date: new Date(today.getFullYear(), today.getMonth() + 1, 15), 
+      type: 'inspection' 
+    },
+    { 
+      id: 3, 
+      title: 'HVAC Maintenance', 
+      date: new Date(today.getFullYear(), today.getMonth() + 2, 8), 
+      type: 'maintenance' 
+    }
+  ];
   
-  const documentTypeData = Object.entries(documentTypes).map(([name, value]) => ({
-    name,
-    value
-  }));
+  // Recent transactions - use 3 most recent payments
+  const recentTransactions = payments
+    .slice()
+    .sort((a, b) => new Date(b.paymentDate).getTime() - new Date(a.paymentDate).getTime())
+    .slice(0, 3);
   
-  // Previous properties data
-  const previousLeases = leases.filter(lease => !lease.active).sort((a, b) => {
-    return new Date(b.endDate).getTime() - new Date(a.endDate).getTime();
-  });
+  // Recent maintenance requests - use 3 most recent
+  const recentMaintenanceRequests = maintenanceRequests
+    .slice()
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 3);
   
-  // Loading state
-  if (propertiesLoading || paymentsLoading || leasesLoading || maintenanceLoading || documentsLoading) {
-    return (
-      <StandardLayout title="Tenant Dashboard">
-        <div className="flex justify-center items-center h-64">
-          <div className="flex flex-col items-center">
-            <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
-            <p>Loading your dashboard...</p>
+  // Check if all data is loading
+  const isLoading = propertiesLoading || paymentsLoading || leasesLoading || maintenanceLoading || documentsLoading;
+  
+  // Check if there are any errors
+  const hasError = !!(propertiesError || paymentsError || leasesError || maintenanceError || documentsError);
+
+  // Component for displaying a skeleton loader during data fetch
+  const DashboardSkeleton = () => (
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row gap-6">
+        <Skeleton className="h-[200px] w-full md:w-2/3 rounded-xl" />
+        <Skeleton className="h-[200px] w-full md:w-1/3 rounded-xl" />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Skeleton className="h-[120px] rounded-xl" />
+        <Skeleton className="h-[120px] rounded-xl" />
+        <Skeleton className="h-[120px] rounded-xl" />
+      </div>
+      <Skeleton className="h-[300px] rounded-xl" />
+    </div>
+  );
+
+  // Component for displaying the error state
+  const ErrorState = () => (
+    <div className="flex flex-col items-center justify-center h-[400px] text-center">
+      <div className="bg-red-50 p-4 rounded-full mb-4">
+        <X className="h-8 w-8 text-red-500" />
+      </div>
+      <h3 className="text-xl font-semibold mb-2">Unable to Load Dashboard</h3>
+      <p className="text-muted-foreground mb-6 max-w-md">
+        We encountered an error while loading your dashboard data. Please try again later or contact support if the problem persists.
+      </p>
+      <Button variant="outline" onClick={() => window.location.reload()}>
+        Retry
+      </Button>
+    </div>
+  );
+
+  // Sidebar component
+  const Sidebar = ({ mobile = false }: { mobile?: boolean }) => (
+    <div className={`${mobile ? "block lg:hidden" : "hidden lg:block"} h-full`}>
+      <div className="flex flex-col h-full">
+        <div className="px-6 py-8 border-b">
+          <div className="flex items-center gap-3">
+            <Avatar className="h-10 w-10">
+              <AvatarImage src={user?.avatarUrl || undefined} alt={user?.firstName || "User"} />
+              <AvatarFallback>{user?.firstName?.charAt(0) || "U"}</AvatarFallback>
+            </Avatar>
+            <div>
+              <p className="font-medium">{user?.firstName} {user?.lastName}</p>
+              <p className="text-xs text-muted-foreground">{user?.email}</p>
+            </div>
           </div>
         </div>
-      </StandardLayout>
-    );
-  }
-  
-  // Error state
-  if (propertiesError || paymentsError || leasesError || maintenanceError || documentsError) {
-    return (
-      <StandardLayout title="Tenant Dashboard">
-        <div className="text-center py-8">
-          <p className="text-lg font-medium text-red-500 mb-2">Unable to load dashboard data</p>
-          <p className="text-gray-500">Please try again later or contact support if the problem persists.</p>
+        
+        <ScrollArea className="flex-1 px-4 py-6">
+          <div className="flex flex-col gap-1">
+            <Button variant="ghost" className="justify-start gap-3" asChild>
+              <Link href="/tenant/dashboard">
+                <Home className="h-4 w-4" />
+                <span>Dashboard</span>
+              </Link>
+            </Button>
+            <Button variant="ghost" className="justify-start gap-3" asChild>
+              <Link href="/tenant/payments">
+                <DollarSign className="h-4 w-4" />
+                <span>Payments</span>
+              </Link>
+            </Button>
+            <Button variant="ghost" className="justify-start gap-3" asChild>
+              <Link href="/tenant/documents">
+                <FileText className="h-4 w-4" />
+                <span>Documents</span>
+              </Link>
+            </Button>
+            <Button variant="ghost" className="justify-start gap-3" asChild>
+              <Link href="/tenant/maintenance">
+                <Wrench className="h-4 w-4" />
+                <span>Maintenance</span>
+              </Link>
+            </Button>
+            <Button variant="ghost" className="justify-start gap-3" asChild>
+              <Link href="/tenant/marketplace">
+                <Search className="h-4 w-4" />
+                <span>Marketplace</span>
+              </Link>
+            </Button>
+            <Button variant="ghost" className="justify-start gap-3" asChild>
+              <Link href="/tenant/lease-history">
+                <FileText className="h-4 w-4" />
+                <span>Lease History</span>
+              </Link>
+            </Button>
+          </div>
+        </ScrollArea>
+        
+        <div className="mt-auto p-6 border-t">
+          <Button variant="ghost" className="justify-start gap-3 w-full" asChild>
+            <Link href="/auth">
+              <Settings className="h-4 w-4" />
+              <span>Settings</span>
+            </Link>
+          </Button>
+          <Button variant="ghost" className="justify-start gap-3 w-full" asChild>
+            <Link href="/tenant/support">
+              <HelpCircle className="h-4 w-4" />
+              <span>Help & Support</span>
+            </Link>
+          </Button>
         </div>
-      </StandardLayout>
+      </div>
+    </div>
+  );
+
+  // Header component
+  const Header = () => (
+    <header className="py-4 px-6 border-b bg-white flex items-center justify-between sticky top-0 z-10">
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setMobileMenuOpen(true)}>
+          <Menu className="h-5 w-5" />
+        </Button>
+        <h1 className="text-xl font-semibold">My Home</h1>
+      </div>
+      
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" size="icon">
+          <Bell className="h-5 w-5" />
+        </Button>
+        <Button variant="ghost" size="icon" className="lg:hidden">
+          <User className="h-5 w-5" />
+        </Button>
+      </div>
+    </header>
+  );
+
+  // Mobile menu
+  const MobileMenu = () => (
+    <div className={`fixed inset-0 z-50 ${mobileMenuOpen ? 'block' : 'hidden'}`}>
+      <div className="absolute inset-0 bg-black/50" onClick={() => setMobileMenuOpen(false)} />
+      <div className="absolute inset-y-0 left-0 w-3/4 max-w-sm bg-white">
+        <div className="flex h-full flex-col overflow-y-auto">
+          <div className="flex justify-between items-center p-4 border-b">
+            <h2 className="font-semibold">Menu</h2>
+            <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(false)}>
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
+          
+          <Sidebar mobile />
+        </div>
+      </div>
+    </div>
+  );
+
+  // Hero section with property info
+  const PropertyHero = () => {
+    if (!currentProperty) return null;
+    
+    return (
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-indigo-500 to-blue-600 text-white">
+        <div className="absolute inset-0 bg-black/20" />
+        <div className="relative p-8">
+          <div className="space-y-4">
+            <Badge className="bg-white/20 text-white border-0 backdrop-blur-sm">Current Residence</Badge>
+            <h2 className="text-3xl font-bold">{currentProperty.title || 'Block 10 Residence'}</h2>
+            <p className="flex items-center text-white/90">
+              <MapPin className="h-4 w-4 mr-1" /> 
+              {currentProperty.address || 'Plot 12345, Block 10'}, {currentProperty.city || 'Gaborone'}
+            </p>
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+              <div className="bg-white/10 backdrop-blur-sm p-4 rounded-lg">
+                <p className="text-sm text-white/70">Monthly Rent</p>
+                <p className="text-lg font-semibold">{formatCurrency(monthlyRent)}</p>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm p-4 rounded-lg">
+                <p className="text-sm text-white/70">Next Payment</p>
+                <p className="text-lg font-semibold">{formatDate(nextPaymentDate)}</p>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm p-4 rounded-lg">
+                <p className="text-sm text-white/70">Days Remaining</p>
+                <p className="text-lg font-semibold">{daysUntilPayment} days</p>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm p-4 rounded-lg">
+                <p className="text-sm text-white/70">Lease Expires</p>
+                <p className="text-lg font-semibold">{currentLease ? formatDate(currentLease.endDate) : 'N/A'}</p>
+              </div>
+            </div>
+            
+            <div className="flex gap-3 mt-6">
+              <Button className="bg-white text-blue-600 hover:bg-white/90">
+                <DollarSign className="h-4 w-4 mr-1" />
+                Make Payment
+              </Button>
+              <Button variant="outline" className="bg-transparent border-white text-white hover:bg-white/20">
+                <Wrench className="h-4 w-4 mr-1" />
+                Request Repair
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
     );
-  }
-  
-  return (
-    <StandardLayout title="My Rental Dashboard" subtitle="Manage your rental information and payments">
-      <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-4 mb-6">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="payments">Payments</TabsTrigger>
-          <TabsTrigger value="documents">Documents</TabsTrigger>
-          <TabsTrigger value="maintenance">Maintenance</TabsTrigger>
-        </TabsList>
-        
-        {/* OVERVIEW TAB */}
-        <TabsContent value="overview" className="space-y-4">
-          {currentProperty ? (
-            <>
-              {/* Property and Rent Summary */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-md flex items-center">
-                      <Building className="h-4 w-4 mr-1 text-primary" />
-                      Current Residence
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-lg font-bold">{currentProperty.title}</div>
-                    <p className="text-sm text-muted-foreground">{currentProperty.address}</p>
-                    <div className="mt-2 flex items-center text-sm text-muted-foreground">
-                      <MapPin className="h-3 w-3 mr-1" />
-                      <span>{currentProperty.location}, {currentProperty.city}</span>
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-md flex items-center">
-                      <DollarSign className="h-4 w-4 mr-1 text-primary" />
-                      Monthly Rent
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{formatCurrency(monthlyRent)}</div>
-                    <div className="flex items-center mt-1 text-sm">
-                      <CreditCard className="h-3 w-3 mr-1 text-muted-foreground" />
-                      <span className="text-muted-foreground">Next payment: </span>
-                      <span className="ml-1 font-medium">{formatDate(nextPaymentDate)}</span>
-                    </div>
-                    <div className="text-xs text-amber-500 mt-2 flex items-center">
-                      <Clock className="h-3 w-3 mr-1" />
-                      <span>{daysUntilPayment} days until next payment</span>
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-md flex items-center">
-                      <Shield className="h-4 w-4 mr-1 text-primary" />
-                      Security Deposit
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{formatCurrency(securityDeposit)}</div>
-                    <p className="text-xs text-muted-foreground mt-1">Refundable at end of lease</p>
-                    <div className="text-xs text-emerald-500 mt-2 flex items-center">
-                      <CheckCircle className="h-3 w-3 mr-1" />
-                      <span>Deposit in good standing</span>
-                    </div>
-                  </CardContent>
-                </Card>
+  };
+
+  // Upcoming events component
+  const UpcomingEvents = () => (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg">Upcoming Events</CardTitle>
+        <CardDescription>Important dates and upcoming activities</CardDescription>
+      </CardHeader>
+      <CardContent className="px-0">
+        <div className="space-y-1">
+          {upcomingEvents.map(event => (
+            <div key={event.id} className="px-6 py-3 hover:bg-muted/50 transition-colors flex items-center gap-4">
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                event.type === 'payment' ? 'bg-blue-100 text-blue-600' : 
+                event.type === 'inspection' ? 'bg-amber-100 text-amber-600' : 
+                'bg-green-100 text-green-600'
+              }`}>
+                {event.type === 'payment' ? <DollarSign className="h-5 w-5" /> :
+                 event.type === 'inspection' ? <Search className="h-5 w-5" /> :
+                 <Wrench className="h-5 w-5" />}
               </div>
-              
-              {/* Lease Summary */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Lease Information</CardTitle>
-                  <CardDescription>Current lease details and important dates</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <h4 className="text-sm font-medium">Lease Period</h4>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Start Date:</span>
-                        <span>{currentLease && formatDate(currentLease.startDate)}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">End Date:</span>
-                        <span>{currentLease && formatDate(currentLease.endDate)}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Status:</span>
-                        <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
-                          Active
-                        </Badge>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <h4 className="text-sm font-medium">Property Details</h4>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Property Type:</span>
-                        <span>{currentProperty.propertyType}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Bedrooms:</span>
-                        <span>{currentProperty.bedrooms}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Bathrooms:</span>
-                        <span>{currentProperty.bathrooms}</span>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <h4 className="text-sm font-medium">Lease Terms</h4>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Duration:</span>
-                        <span>{currentLease ? 
-                          `${Math.round((new Date(currentLease.endDate).getTime() - 
-                             new Date(currentLease.startDate).getTime()) / 
-                             (1000 * 60 * 60 * 24 * 30.4))} months` : '12 months'}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Time Remaining:</span>
-                        <span>{daysUntilLeaseEnd} days</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Security Deposit:</span>
-                        <span>{formatCurrency(securityDeposit)}</span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-                <CardFooter className="border-t pt-4 flex justify-between">
-                  <p className="text-sm text-muted-foreground">
-                    <ShieldAlert className="h-4 w-4 inline mr-1 text-amber-500" />
-                    Lease renewal will be available 60 days before expiration
-                  </p>
-                  <Button variant="outline" size="sm">
-                    <FileText className="h-4 w-4 mr-1" />
-                    View Lease Document
-                  </Button>
-                </CardFooter>
-              </Card>
-              
-              {/* Property Amenities */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Property Amenities</CardTitle>
-                  <CardDescription>Features and amenities included with your rental</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {currentProperty.amenities?.map((amenity, idx) => (
-                      <div key={idx} className="flex items-center p-2 border rounded-md">
-                        <CheckCircle className="h-4 w-4 mr-2 text-emerald-500" />
-                        <span className="text-sm">{amenity}</span>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-              
-              {/* Payment Overview */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Payment Overview</CardTitle>
-                  <CardDescription>Summary of your rental payments</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[250px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart
-                        data={paymentHistoryData}
-                        margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-                      >
-                        <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                        <XAxis dataKey="name" />
-                        <YAxis tickFormatter={(value) => `P${value/1000}k`} />
-                        <Tooltip formatter={(value) => [formatCurrency(value as number), "Amount"]} />
-                        <Bar 
-                          dataKey="amount" 
-                          fill="#8884d8" 
-                          name="Payment Amount"
-                          fillOpacity={0.8}
-                          barSize={20}
-                        />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-                    <div className="p-3 border rounded-md">
-                      <p className="text-sm text-muted-foreground">Total Paid</p>
-                      <p className="text-lg font-medium mt-1">{formatCurrency(totalPaid)}</p>
-                    </div>
-                    <div className="p-3 border rounded-md">
-                      <p className="text-sm text-muted-foreground">Monthly Payment</p>
-                      <p className="text-lg font-medium mt-1">{formatCurrency(monthlyRent)}</p>
-                    </div>
-                    <div className="p-3 border rounded-md">
-                      <p className="text-sm text-muted-foreground">Next Due Date</p>
-                      <p className="text-lg font-medium mt-1">{formatDate(nextPaymentDate)}</p>
-                    </div>
-                    <div className="p-3 border rounded-md">
-                      <p className="text-sm text-muted-foreground">Payment Status</p>
-                      <Badge variant="outline" className="mt-1 bg-emerald-50 text-emerald-700 border-emerald-200">
-                        Current
-                      </Badge>
-                    </div>
-                  </div>
-                </CardContent>
-                <CardFooter className="border-t pt-4">
-                  <Button className="w-full" variant="default">
-                    <DollarSign className="h-4 w-4 mr-1" />
-                    Make a Payment
-                  </Button>
-                </CardFooter>
-              </Card>
-              
-              {/* Quick Actions */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-md">Maintenance</CardTitle>
-                    <CardDescription>Request repairs or report issues</CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex justify-center">
-                    <Button variant="outline" className="w-full">
-                      <Wrench className="h-4 w-4 mr-1" />
-                      Submit Request
-                    </Button>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-md">Documents</CardTitle>
-                    <CardDescription>Access lease and other documents</CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex justify-center">
-                    <Button variant="outline" className="w-full">
-                      <FileText className="h-4 w-4 mr-1" />
-                      View Documents
-                    </Button>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-md">Contact Landlord</CardTitle>
-                    <CardDescription>Send a message to property owner</CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex justify-center">
-                    <Button variant="outline" className="w-full">
-                      <div className="flex items-center">
-                        Send Message
-                      </div>
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
-            </>
-          ) : (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-10">
-                <Home className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-medium mb-2">No Active Lease Found</h3>
-                <p className="text-muted-foreground mb-4 text-center max-w-md">
-                  You don't have any active leases at the moment. Browse available properties or contact support
-                  if you think this is an error.
+              <div className="flex-1">
+                <h4 className="font-medium">{event.title}</h4>
+                <p className="text-sm text-muted-foreground">
+                  {formatDate(event.date)} ({daysUntil(event.date)} days)
                 </p>
-                <Button>Browse Available Properties</Button>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-        
-        {/* PAYMENTS TAB */}
-        <TabsContent value="payments" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Payment History</CardTitle>
-              <CardDescription>Complete history of your rental payments</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {payments.length > 0 ? (
-                <div className="border rounded-md">
-                  <div className="grid grid-cols-6 gap-2 p-3 bg-muted font-medium text-sm">
-                    <div>Date</div>
-                    <div>Property</div>
-                    <div>Amount</div>
-                    <div>Method</div>
-                    <div>Status</div>
-                    <div>Receipt</div>
+              </div>
+              <Button variant="ghost" size="icon">
+                <Calendar className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+      <CardFooter className="border-t pt-4 flex justify-center">
+        <Button variant="outline" className="w-full">
+          <Plus className="h-4 w-4 mr-1" />
+          Add to Calendar
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+
+  // Payment summary component
+  const PaymentSummary = () => (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <Card className="bg-green-50 border-green-100">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center text-green-700">
+            <DollarSign className="h-4 w-4 mr-1 text-green-500" />
+            Payment Status
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold text-green-700">Current</div>
+          <p className="text-xs text-green-600 mt-1 flex items-center">
+            <CheckCircle className="h-3 w-3 mr-1" />
+            All payments up to date
+          </p>
+        </CardContent>
+      </Card>
+      
+      <Card className="bg-blue-50 border-blue-100">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center text-blue-700">
+            <Clock className="h-4 w-4 mr-1 text-blue-500" />
+            Next Payment
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold text-blue-700">{formatDate(nextPaymentDate)}</div>
+          <p className="text-xs text-blue-600 mt-1">{daysUntilPayment} days remaining</p>
+        </CardContent>
+      </Card>
+      
+      <Card className="bg-purple-50 border-purple-100">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center text-purple-700">
+            <CreditCard className="h-4 w-4 mr-1 text-purple-500" />
+            Security Deposit
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold text-purple-700">{formatCurrency(securityDeposit)}</div>
+          <p className="text-xs text-purple-600 mt-1">Fully refundable at end of lease</p>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
+  // Recent transactions component
+  const RecentTransactions = () => (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg">Recent Transactions</CardTitle>
+        <CardDescription>Your latest payment activity</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {recentTransactions.length > 0 ? (
+          <div className="space-y-4">
+            {recentTransactions.map(transaction => (
+              <div key={transaction.id} className="flex items-center gap-4 pb-4 border-b last:border-0 last:pb-0">
+                <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+                  <DollarSign className="h-5 w-5" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-medium">Monthly Rent - {formatDate(transaction.paymentDate)}</h4>
+                  <div className="flex items-center gap-2 mt-1">
+                    <PaymentMethodBadge method={transaction.paymentMethod || 'Bank Transfer'} />
+                    <span className="text-xs text-muted-foreground">
+                      • Ref: {transaction.id.toString().padStart(6, '0')}
+                    </span>
                   </div>
-                  {payments.slice()
-                    .sort((a, b) => new Date(b.paymentDate).getTime() - new Date(a.paymentDate).getTime())
-                    .map((payment, index) => {
-                      // Find lease and property for this payment
-                      const lease = leases.find(l => l.id === payment.leaseId);
-                      const property = lease?.property;
-                      
-                      return (
-                        <div 
-                          key={payment.id} 
-                          className={`grid grid-cols-6 gap-2 p-3 text-sm ${
-                            index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900'
-                          } border-t`}
-                        >
-                          <div>{formatDate(payment.paymentDate)}</div>
-                          <div>{property?.title || 'Unknown Property'}</div>
-                          <div className="font-medium">{formatCurrency(payment.amount)}</div>
-                          <div><PaymentMethodIcon method={payment.paymentMethod} /></div>
-                          <div>
-                            <Badge variant="outline" className={
-                              payment.status === 'paid' 
-                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
-                                : 'bg-amber-50 text-amber-700 border-amber-200'
-                            }>
-                              {payment.status}
-                            </Badge>
+                </div>
+                <div className="text-right">
+                  <p className="font-medium">{formatCurrency(transaction.amount)}</p>
+                  <StatusBadge status={transaction.status || 'paid'} />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <DollarSign className="h-10 w-10 mx-auto text-muted-foreground/50 mb-3" />
+            <p className="text-muted-foreground">No recent transactions found</p>
+          </div>
+        )}
+      </CardContent>
+      <CardFooter className="border-t pt-4">
+        <Button variant="outline" className="w-full" asChild>
+          <Link href="/tenant/payments">
+            View All Transactions
+          </Link>
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+
+  // Payment history chart component
+  const PaymentHistoryChart = () => (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg">Payment History</CardTitle>
+        <CardDescription>Your monthly payment activity this year</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="h-[300px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart
+              data={paymentHistoryData}
+              margin={{ top: 20, right: 20, left: 20, bottom: 20 }}
+            >
+              <defs>
+                <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.8} />
+                  <stop offset="95%" stopColor="#4f46e5" stopOpacity={0.1} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+              <XAxis 
+                dataKey="name" 
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis 
+                tickFormatter={(value) => `P${value/1000}k`}
+                axisLine={false}
+                tickLine={false}
+              />
+              <Tooltip formatter={(value) => formatCurrency(value as number)} />
+              <Area 
+                type="monotone" 
+                dataKey="amount" 
+                stroke="#4f46e5" 
+                strokeWidth={2}
+                fillOpacity={1}
+                fill="url(#colorAmount)" 
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  // Recent maintenance requests component
+  const RecentMaintenance = () => (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg">Maintenance Requests</CardTitle>
+        <CardDescription>Recent repair and maintenance activity</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {recentMaintenanceRequests.length > 0 ? (
+          <div className="space-y-4">
+            {recentMaintenanceRequests.map(request => (
+              <div key={request.id} className="flex items-center gap-4 pb-4 border-b last:border-0 last:pb-0">
+                <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center">
+                  <Wrench className="h-5 w-5" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-medium">{request.title || 'Maintenance Request'}</h4>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Submitted on {formatDate(request.createdAt || new Date())}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <StatusBadge status={request.status || 'pending'} />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <Wrench className="h-10 w-10 mx-auto text-muted-foreground/50 mb-3" />
+            <p className="text-muted-foreground">No maintenance requests found</p>
+          </div>
+        )}
+      </CardContent>
+      <CardFooter className="border-t pt-4">
+        <Button className="w-full" asChild>
+          <Link href="/tenant/maintenance">
+            <Wrench className="h-4 w-4 mr-1" />
+            New Maintenance Request
+          </Link>
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+
+  // Lease details component
+  const LeaseDetails = () => (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg">Lease Details</CardTitle>
+        <CardDescription>Your current lease information</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {currentLease ? (
+          <div>
+            <div className="mb-6">
+              <h4 className="text-sm font-medium mb-2">Lease Timeline</h4>
+              <div className="relative pt-1">
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <span className="text-xs font-semibold inline-block text-blue-600">
+                      {Math.min(Math.round((today.getTime() - new Date(currentLease.startDate).getTime()) / 
+                      (new Date(currentLease.endDate).getTime() - new Date(currentLease.startDate).getTime()) * 100), 100)}% Complete
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xs font-semibold inline-block text-blue-600">
+                      {daysUntilLeaseEnd > 0 ? `${daysUntilLeaseEnd} days remaining` : 'Expired'}
+                    </span>
+                  </div>
+                </div>
+                <Progress 
+                  value={Math.min(Math.round((today.getTime() - new Date(currentLease.startDate).getTime()) / 
+                  (new Date(currentLease.endDate).getTime() - new Date(currentLease.startDate).getTime()) * 100), 100)} 
+                  className="h-2" 
+                />
+                <div className="flex justify-between mt-1 text-xs text-muted-foreground">
+                  <span>{formatDate(currentLease.startDate)}</span>
+                  <span>{formatDate(currentLease.endDate)}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <h4 className="text-sm font-medium mb-2">Lease Terms</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">Monthly Rent</span>
+                    <span className="text-sm">{formatCurrency(monthlyRent)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">Security Deposit</span>
+                    <span className="text-sm">{formatCurrency(securityDeposit)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">Lease Status</span>
+                    <StatusBadge status="active" />
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="text-sm font-medium mb-2">Property Details</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">Property Type</span>
+                    <span className="text-sm">{currentProperty?.propertyType || 'Apartment'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">Bedrooms</span>
+                    <span className="text-sm">{currentProperty?.bedrooms || 2}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">Bathrooms</span>
+                    <span className="text-sm">{currentProperty?.bathrooms || 1}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-8">
+            <FileText className="h-10 w-10 mx-auto text-muted-foreground/50 mb-3" />
+            <p className="text-muted-foreground">No active lease found</p>
+          </div>
+        )}
+      </CardContent>
+      <CardFooter className="border-t pt-4">
+        <Button variant="outline" className="w-full" asChild>
+          <Link href="/tenant/documents">
+            <FileText className="h-4 w-4 mr-1" />
+            View Lease Documents
+          </Link>
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <MobileMenu />
+      <Header />
+      
+      <div className="flex-1 flex">
+        <div className="w-64 border-r bg-white hidden lg:block">
+          <Sidebar />
+        </div>
+        
+        <main className="flex-1 max-w-7xl mx-auto w-full px-4 py-6">
+          {isLoading ? (
+            <DashboardSkeleton />
+          ) : hasError ? (
+            <ErrorState />
+          ) : (
+            <div className="space-y-6">
+              <div>
+                <div className="mb-6">
+                  <h1 className="text-2xl font-bold mb-1">Welcome, {user?.firstName || 'Tenant'}!</h1>
+                  <p className="text-muted-foreground">{formattedDate}</p>
+                </div>
+                
+                {/* Top Section - Property Hero + Upcoming Events */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                  <div className="lg:col-span-2">
+                    <PropertyHero />
+                  </div>
+                  <div>
+                    <UpcomingEvents />
+                  </div>
+                </div>
+                
+                {/* Payment Summary Cards */}
+                <PaymentSummary />
+              </div>
+              
+              {/* Dashboard Tabs */}
+              <Tabs defaultValue="overview">
+                <TabsList className="grid grid-cols-3 w-full max-w-md">
+                  <TabsTrigger value="overview">Overview</TabsTrigger>
+                  <TabsTrigger value="finances">Finances</TabsTrigger>
+                  <TabsTrigger value="property">Property</TabsTrigger>
+                </TabsList>
+                
+                {/* Overview Tab */}
+                <TabsContent value="overview" className="pt-6 space-y-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <RecentTransactions />
+                    <RecentMaintenance />
+                  </div>
+                  <LeaseDetails />
+                </TabsContent>
+                
+                {/* Finances Tab */}
+                <TabsContent value="finances" className="pt-6 space-y-6">
+                  <PaymentHistoryChart />
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <Card className="lg:col-span-2">
+                      <CardHeader>
+                        <CardTitle className="text-lg">Payment Methods</CardTitle>
+                        <CardDescription>Your saved payment options</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div className="p-4 border rounded-lg flex items-center gap-4">
+                            <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                              <CreditCard className="h-5 w-5 text-blue-600" />
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-medium">M-Zaka Mobile Money</h3>
+                              <p className="text-sm text-muted-foreground">******5678</p>
+                            </div>
+                            <Badge>Default</Badge>
                           </div>
+                          
+                          <div className="p-4 border rounded-lg flex items-center gap-4">
+                            <div className="h-10 w-10 rounded-full bg-orange-100 flex items-center justify-center">
+                              <CreditCard className="h-5 w-5 text-orange-600" />
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="font-medium">Orange Money</h3>
+                              <p className="text-sm text-muted-foreground">******1234</p>
+                            </div>
+                          </div>
+                          
+                          <Button className="w-full" variant="outline">
+                            <Plus className="h-4 w-4 mr-1" />
+                            Add Payment Method
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-lg">Billing Summary</CardTitle>
+                        <CardDescription>Year to date statistics</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-muted-foreground">Total Paid (YTD)</span>
+                            <span className="font-medium">{formatCurrency(totalPaid)}</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-muted-foreground">Annual Rent</span>
+                            <span className="font-medium">{formatCurrency(monthlyRent * 12)}</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-muted-foreground">Monthly Average</span>
+                            <span className="font-medium">{formatCurrency(monthlyRent)}</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-muted-foreground">Security Deposit</span>
+                            <span className="font-medium">{formatCurrency(securityDeposit)}</span>
+                          </div>
+                          
+                          <Tabs defaultValue="automatic" className="w-full pt-4 border-t">
+                            <TabsList className="grid grid-cols-2 w-full">
+                              <TabsTrigger value="automatic">Auto Pay</TabsTrigger>
+                              <TabsTrigger value="reminders">Reminders</TabsTrigger>
+                            </TabsList>
+                            <TabsContent value="automatic" className="pt-4">
+                              <Button className="w-full" variant="outline">Enable Auto Pay</Button>
+                            </TabsContent>
+                            <TabsContent value="reminders" className="pt-4">
+                              <Button className="w-full" variant="outline">Set Up Reminders</Button>
+                            </TabsContent>
+                          </Tabs>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </TabsContent>
+                
+                {/* Property Tab */}
+                <TabsContent value="property" className="pt-6 space-y-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <Card className="lg:col-span-2">
+                      <CardHeader>
+                        <CardTitle className="text-lg">Property Details</CardTitle>
+                        <CardDescription>Information about your current residence</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-6">
                           <div>
-                            <Button variant="ghost" size="sm" className="h-6 px-2">
-                              <Download className="h-3 w-3" />
-                            </Button>
+                            <h3 className="text-sm font-medium mb-2">Location & Contact</h3>
+                            <div className="p-4 border rounded-lg">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                  <p className="text-sm text-muted-foreground">Address</p>
+                                  <p className="font-medium">
+                                    {currentProperty?.address || 'Plot 12345, Block 10'}<br />
+                                    {currentProperty?.city || 'Gaborone'}, Botswana
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-sm text-muted-foreground">Property Manager</p>
+                                  <p className="font-medium">Demo Landlord</p>
+                                  <p className="text-sm">landlord@example.com</p>
+                                  <p className="text-sm">+267 1234 5678</p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <h3 className="text-sm font-medium mb-2">Property Features</h3>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                              {(currentProperty?.amenities || ['Parking', 'Security', 'Water Supply', 'Electricity', 'WiFi', 'AC', 'Garden', 'Swimming Pool']).map((amenity, idx) => (
+                                <div key={idx} className="p-3 border rounded-lg flex items-center gap-2">
+                                  <CheckCircle className="h-4 w-4 text-green-500" />
+                                  <span className="text-sm">{amenity}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <h3 className="text-sm font-medium mb-2">Property Rules</h3>
+                            <div className="p-4 border rounded-lg space-y-2">
+                              <p className="text-sm">
+                                <span className="font-medium">Noise:</span> Quiet hours from
+                                10 pm to 6 am on weekdays and 11 pm to 7 am on weekends.
+                              </p>
+                              <p className="text-sm">
+                                <span className="font-medium">Guests:</span> Overnight guests allowed for up to 
+                                7 consecutive days with prior notice to property management.
+                              </p>
+                              <p className="text-sm">
+                                <span className="font-medium">Maintenance:</span> Report any maintenance issues 
+                                promptly through the tenant portal.
+                              </p>
+                            </div>
                           </div>
                         </div>
-                      );
-                    })
-                  }
-                </div>
-              ) : (
-                <div className="text-center py-8 border rounded-md">
-                  <DollarSign className="h-8 w-8 mx-auto text-gray-300 mb-2" />
-                  <p className="text-gray-500">No payment history found</p>
-                </div>
-              )}
-            </CardContent>
-            <CardFooter className="border-t pt-4 flex justify-between">
-              <Button variant="outline">
-                <Download className="h-4 w-4 mr-1" />
-                Export Payment History
-              </Button>
-              <Button>
-                <DollarSign className="h-4 w-4 mr-1" />
-                Make a Payment
-              </Button>
-            </CardFooter>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Payment Analytics</CardTitle>
-              <CardDescription>Visualize your payment patterns</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart
-                    data={paymentHistoryData}
-                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
-                    <XAxis dataKey="name" />
-                    <YAxis tickFormatter={(value) => `P${value/1000}k`} />
-                    <Tooltip formatter={(value) => formatCurrency(value as number)} />
-                    <Legend />
-                    <Line 
-                      type="monotone" 
-                      dataKey="amount" 
-                      stroke="#8884d8" 
-                      strokeWidth={2}
-                      name="Payment Amount" 
-                      dot={{ fill: '#8884d8', strokeWidth: 2, r: 5 }}
-                      activeDot={{ fill: '#8884d8', stroke: '#fff', strokeWidth: 2, r: 7 }} 
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-              
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-                <div className="p-3 border rounded-md">
-                  <p className="text-sm text-muted-foreground">Total Paid (YTD)</p>
-                  <p className="text-lg font-medium mt-1">{formatCurrency(totalPaid)}</p>
-                </div>
-                <div className="p-3 border rounded-md">
-                  <p className="text-sm text-muted-foreground">Annual Total</p>
-                  <p className="text-lg font-medium mt-1">{formatCurrency(monthlyRent * 12)}</p>
-                </div>
-                <div className="p-3 border rounded-md">
-                  <p className="text-sm text-muted-foreground">Security Deposit</p>
-                  <p className="text-lg font-medium mt-1">{formatCurrency(securityDeposit)}</p>
-                </div>
-                <div className="p-3 border rounded-md">
-                  <p className="text-sm text-muted-foreground">Payment Methods Used</p>
-                  <p className="text-lg font-medium mt-1">
-                    {new Set(payments.map(p => p.paymentMethod)).size}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Payment Setup</CardTitle>
-              <CardDescription>Configure your payment methods and preferences</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="border rounded-md p-4">
-                  <h4 className="font-medium mb-3">Payment Methods</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex items-center p-3 border rounded-md">
-                      <div className="mr-3">
-                        <Badge className="bg-blue-100 text-blue-800 border-blue-300">M-Zaka</Badge>
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">M-Zaka Mobile Money</p>
-                        <p className="text-xs text-muted-foreground">Connected</p>
-                      </div>
-                      <Button variant="ghost" size="sm">Edit</Button>
-                    </div>
+                      </CardContent>
+                    </Card>
                     
-                    <div className="flex items-center p-3 border rounded-md">
-                      <div className="mr-3">
-                        <Badge className="bg-green-100 text-green-800 border-green-300">Bank</Badge>
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">Bank Transfer</p>
-                        <p className="text-xs text-muted-foreground">Connected</p>
-                      </div>
-                      <Button variant="ghost" size="sm">Edit</Button>
-                    </div>
-                    
-                    <Button variant="outline" className="flex items-center justify-center">
-                      <div className="flex items-center">
-                        <span>Add Payment Method</span>
-                      </div>
-                    </Button>
-                  </div>
-                </div>
-                
-                <div className="border rounded-md p-4">
-                  <h4 className="font-medium mb-3">Automatic Payments</h4>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Set up automatic payments to never miss a rent payment.
-                  </p>
-                  <Button variant="outline">Enable Automatic Payments</Button>
-                </div>
-                
-                <div className="border rounded-md p-4">
-                  <h4 className="font-medium mb-3">Payment Reminders</h4>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Get notified before your rent is due.
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Email Reminders</span>
-                    <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
-                      Enabled
-                    </Badge>
-                  </div>
-                  <div className="flex items-center justify-between mt-2">
-                    <span className="text-sm">SMS Reminders</span>
-                    <Button variant="outline" size="sm">Enable</Button>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        {/* DOCUMENTS TAB */}
-        <TabsContent value="documents" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Document Library</CardTitle>
-              <CardDescription>Access all your rental-related documents</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[250px] mb-6">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={documentTypeData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
-                      {documentTypeData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-              
-              {documents.length > 0 ? (
-                <div className="border rounded-md">
-                  <div className="grid grid-cols-5 gap-2 p-3 bg-muted font-medium text-sm">
-                    <div>Document Name</div>
-                    <div>Type</div>
-                    <div>Upload Date</div>
-                    <div>Size</div>
-                    <div className="text-right">Actions</div>
-                  </div>
-                  {documents.map((document, index) => (
-                    <div 
-                      key={document.id} 
-                      className={`grid grid-cols-5 gap-2 p-3 text-sm ${
-                        index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900'
-                      } border-t`}
-                    >
-                      <div className="font-medium">{document.fileName}</div>
-                      <div>
-                        <Badge variant="outline">
-                          {document.documentType.charAt(0).toUpperCase() + document.documentType.slice(1)}
-                        </Badge>
-                      </div>
-                      <div>{formatDate(document.uploadedAt)}</div>
-                      <div>-</div>
-                      <div className="flex justify-end space-x-2">
-                        <Button variant="ghost" size="sm" className="h-8 px-2">
-                          <Download className="h-4 w-4" />
-                        </Button>
-                        <a href={document.fileUrl} target="_blank" rel="noopener noreferrer">
-                          <Button variant="ghost" size="sm" className="h-8 px-2">
-                            <FileText className="h-4 w-4" />
+                    <div className="space-y-6">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-lg">Quick Actions</CardTitle>
+                          <CardDescription>Property management tools</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          <Button className="w-full justify-start" variant="outline" asChild>
+                            <Link href="/tenant/maintenance">
+                              <Wrench className="h-4 w-4 mr-2" />
+                              Request Maintenance
+                            </Link>
                           </Button>
-                        </a>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 border rounded-md">
-                  <FileText className="h-8 w-8 mx-auto text-gray-300 mb-2" />
-                  <p className="text-gray-500">No documents found</p>
-                </div>
-              )}
-            </CardContent>
-            <CardFooter className="border-t pt-4">
-              <Button className="w-full">
-                <div className="flex items-center">
-                  Upload Document
-                </div>
-              </Button>
-            </CardFooter>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Important Documents</CardTitle>
-              <CardDescription>Key documents related to your current lease</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="border rounded-md p-4">
-                  <div className="flex items-center mb-3">
-                    <FileText className="h-5 w-5 mr-2 text-primary" />
-                    <h4 className="font-medium">Lease Agreement</h4>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Your current binding contract with the property owner.
-                  </p>
-                  <Button variant="outline" size="sm" className="w-full">View Document</Button>
-                </div>
-                
-                <div className="border rounded-md p-4">
-                  <div className="flex items-center mb-3">
-                    <FileText className="h-5 w-5 mr-2 text-primary" />
-                    <h4 className="font-medium">Property Rules</h4>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Guidelines and regulations for the property.
-                  </p>
-                  <Button variant="outline" size="sm" className="w-full">View Document</Button>
-                </div>
-                
-                <div className="border rounded-md p-4">
-                  <div className="flex items-center mb-3">
-                    <FileText className="h-5 w-5 mr-2 text-primary" />
-                    <h4 className="font-medium">Move-in Inspection</h4>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Condition report from when you moved in.
-                  </p>
-                  <Button variant="outline" size="sm" className="w-full">View Document</Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Rental History</CardTitle>
-              <CardDescription>Documents from your previous leases</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {previousLeases.length > 0 ? (
-                <div className="space-y-4">
-                  {previousLeases.map((lease) => (
-                    <div key={lease.id} className="border rounded-md p-4">
-                      <div className="flex justify-between items-center mb-3">
-                        <h4 className="font-medium">{lease.property?.title || 'Previous Property'}</h4>
-                        <Badge variant="outline">
-                          {formatDate(lease.startDate)} - {formatDate(lease.endDate)}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        {lease.property?.address || 'Address not available'}
-                      </p>
-                      <div className="flex space-x-2">
-                        <Button variant="outline" size="sm">View Lease</Button>
-                        <Button variant="outline" size="sm">Payment Records</Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 border rounded-md">
-                  <Building className="h-8 w-8 mx-auto text-gray-300 mb-2" />
-                  <p className="text-gray-500">No previous lease history found</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        {/* MAINTENANCE TAB */}
-        <TabsContent value="maintenance" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Maintenance Requests</CardTitle>
-              <CardDescription>Submit and track repair requests for your rental</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {maintenanceRequests.length > 0 ? (
-                <div className="border rounded-md">
-                  <div className="grid grid-cols-6 gap-2 p-3 bg-muted font-medium text-sm">
-                    <div>Date</div>
-                    <div>Issue</div>
-                    <div>Category</div>
-                    <div>Priority</div>
-                    <div>Status</div>
-                    <div className="text-right">Actions</div>
-                  </div>
-                  {maintenanceRequests.map((request, index) => (
-                    <div 
-                      key={request.id} 
-                      className={`grid grid-cols-6 gap-2 p-3 text-sm ${
-                        index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900'
-                      } border-t`}
-                    >
-                      <div>{formatDate(request.createdAt)}</div>
-                      <div className="font-medium">{request.title}</div>
-                      <div>{request.category}</div>
-                      <div>
-                        <Badge 
-                          variant="outline" 
-                          className={
-                            request.priority === 'high'
-                              ? 'bg-red-50 text-red-700 border-red-200'
-                              : request.priority === 'medium'
-                              ? 'bg-amber-50 text-amber-700 border-amber-200'
-                              : 'bg-blue-50 text-blue-700 border-blue-200'
-                          }
-                        >
-                          {request.priority}
-                        </Badge>
-                      </div>
-                      <div>
-                        <Badge 
-                          variant="outline"
-                          className={
-                            request.status === 'completed'
-                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                              : request.status === 'in_progress'
-                              ? 'bg-blue-50 text-blue-700 border-blue-200'
-                              : 'bg-amber-50 text-amber-700 border-amber-200'
-                          }
-                        >
-                          {request.status}
-                        </Badge>
-                      </div>
-                      <div className="flex justify-end space-x-2">
-                        <Button variant="ghost" size="sm" className="h-8 px-2">
-                          View
-                        </Button>
-                        {request.status === 'pending' && (
-                          <Button variant="ghost" size="sm" className="h-8 px-2 text-red-500">
-                            <Trash2 className="h-4 w-4" />
+                          <Button className="w-full justify-start" variant="outline" asChild>
+                            <Link href="/tenant/documents">
+                              <FileText className="h-4 w-4 mr-2" />
+                              View Documents
+                            </Link>
                           </Button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 border rounded-md">
-                  <Wrench className="h-8 w-8 mx-auto text-gray-300 mb-2" />
-                  <p className="text-gray-500">No maintenance requests found</p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Submit a request when you need repairs or have issues with your rental
-                  </p>
-                </div>
-              )}
-            </CardContent>
-            <CardFooter className="border-t pt-4">
-              <Button className="w-full">
-                <Wrench className="h-4 w-4 mr-1" />
-                Submit New Maintenance Request
-              </Button>
-            </CardFooter>
-          </Card>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Property Condition</CardTitle>
-                <CardDescription>Report and track issues with your rental</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="border rounded-md p-4">
-                    <h4 className="font-medium mb-3">Common Issues</h4>
-                    <div className="space-y-2">
-                      <div className="flex items-center">
-                        <WifiIcon className="h-4 w-4 mr-2 text-primary" />
-                        <span className="text-sm">Internet Connectivity</span>
-                      </div>
-                      <div className="flex items-center">
-                        <Wrench className="h-4 w-4 mr-2 text-primary" />
-                        <span className="text-sm">Plumbing Problems</span>
-                      </div>
-                      <div className="flex items-center">
-                        <Wrench className="h-4 w-4 mr-2 text-primary" />
-                        <span className="text-sm">Electrical Issues</span>
-                      </div>
-                      <div className="flex items-center">
-                        <Wrench className="h-4 w-4 mr-2 text-primary" />
-                        <span className="text-sm">HVAC Maintenance</span>
-                      </div>
+                          <Button className="w-full justify-start" variant="outline" asChild>
+                            <Link href="/tenant/messages">
+                              <div className="flex items-center">
+                                Contact Landlord
+                              </div>
+                            </Link>
+                          </Button>
+                        </CardContent>
+                      </Card>
+                      
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-lg">Property Rating</CardTitle>
+                          <CardDescription>Your experience rating</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="flex flex-col items-center justify-center py-4">
+                            <div className="flex items-center gap-1 mb-3">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <Star 
+                                  key={star} 
+                                  className={`h-8 w-8 ${star <= 4 ? 'text-amber-400 fill-amber-400' : 'text-gray-300'}`} 
+                                />
+                              ))}
+                            </div>
+                            <p className="text-center text-lg font-medium">4.0/5.0</p>
+                            <p className="text-center text-sm text-muted-foreground">
+                              Based on your ratings
+                            </p>
+                            <Button className="mt-4" variant="outline">
+                              Update Rating
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
                     </div>
                   </div>
-                  
-                  <div className="border rounded-md p-4">
-                    <h4 className="font-medium mb-3">Emergency Contacts</h4>
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-sm">Maintenance</span>
-                        <span className="text-sm font-medium">+267 1234 5678</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm">Property Manager</span>
-                        <span className="text-sm font-medium">+267 8765 4321</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm">Emergency Services</span>
-                        <span className="text-sm font-medium">999</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Maintenance Tips</CardTitle>
-                <CardDescription>Helpful guides to maintain your rental</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="border rounded-md p-4">
-                    <h4 className="font-medium mb-2">Tenant Responsibilities</h4>
-                    <ul className="text-sm space-y-1 list-disc pl-5">
-                      <li>Replace air filters every 3 months</li>
-                      <li>Clean appliances regularly</li>
-                      <li>Report water leaks immediately</li>
-                      <li>Keep drains clear and free of debris</li>
-                      <li>Test smoke detectors monthly</li>
-                    </ul>
-                  </div>
-                  
-                  <div className="border rounded-md p-4">
-                    <h4 className="font-medium mb-2">Common DIY Fixes</h4>
-                    <ul className="text-sm space-y-1 list-disc pl-5">
-                      <li>Unclogging drains with baking soda and vinegar</li>
-                      <li>Resetting circuit breakers during power issues</li>
-                      <li>Fixing running toilets by adjusting the float</li>
-                      <li>Cleaning air conditioner filters for better efficiency</li>
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Local Services</CardTitle>
-              <CardDescription>Find trusted service providers in your area</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="border rounded-md p-4">
-                  <h4 className="font-medium mb-2">Plumbers</h4>
-                  <div className="space-y-3">
-                    <div>
-                      <p className="text-sm font-medium">Gaborone Plumbing Services</p>
-                      <div className="flex items-center text-xs mt-1">
-                        <Star className="h-3 w-3 text-amber-500 mr-1" />
-                        <Star className="h-3 w-3 text-amber-500 mr-1" />
-                        <Star className="h-3 w-3 text-amber-500 mr-1" />
-                        <Star className="h-3 w-3 text-amber-500 mr-1" />
-                        <Star className="h-3 w-3 text-gray-300" />
-                        <span className="ml-1 text-muted-foreground">(4.2)</span>
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">Quick Fix Plumbing</p>
-                      <div className="flex items-center text-xs mt-1">
-                        <Star className="h-3 w-3 text-amber-500 mr-1" />
-                        <Star className="h-3 w-3 text-amber-500 mr-1" />
-                        <Star className="h-3 w-3 text-amber-500 mr-1" />
-                        <Star className="h-3 w-3 text-amber-500 mr-1" />
-                        <Star className="h-3 w-3 text-amber-500" />
-                        <span className="ml-1 text-muted-foreground">(4.9)</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="border rounded-md p-4">
-                  <h4 className="font-medium mb-2">Electricians</h4>
-                  <div className="space-y-3">
-                    <div>
-                      <p className="text-sm font-medium">Botswana Electric Solutions</p>
-                      <div className="flex items-center text-xs mt-1">
-                        <Star className="h-3 w-3 text-amber-500 mr-1" />
-                        <Star className="h-3 w-3 text-amber-500 mr-1" />
-                        <Star className="h-3 w-3 text-amber-500 mr-1" />
-                        <Star className="h-3 w-3 text-amber-500 mr-1" />
-                        <Star className="h-3 w-3 text-gray-300" />
-                        <span className="ml-1 text-muted-foreground">(4.3)</span>
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">Power Pro Electricians</p>
-                      <div className="flex items-center text-xs mt-1">
-                        <Star className="h-3 w-3 text-amber-500 mr-1" />
-                        <Star className="h-3 w-3 text-amber-500 mr-1" />
-                        <Star className="h-3 w-3 text-amber-500 mr-1" />
-                        <Star className="h-3 w-3 text-amber-500 mr-1" />
-                        <Star className="h-3 w-3 text-amber-500" />
-                        <span className="ml-1 text-muted-foreground">(4.7)</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="border rounded-md p-4">
-                  <h4 className="font-medium mb-2">Cleaning Services</h4>
-                  <div className="space-y-3">
-                    <div>
-                      <p className="text-sm font-medium">Pristine Cleaning</p>
-                      <div className="flex items-center text-xs mt-1">
-                        <Star className="h-3 w-3 text-amber-500 mr-1" />
-                        <Star className="h-3 w-3 text-amber-500 mr-1" />
-                        <Star className="h-3 w-3 text-amber-500 mr-1" />
-                        <Star className="h-3 w-3 text-amber-500 mr-1" />
-                        <Star className="h-3 w-3 text-gray-300" />
-                        <span className="ml-1 text-muted-foreground">(4.4)</span>
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">Gaborone Home Cleaners</p>
-                      <div className="flex items-center text-xs mt-1">
-                        <Star className="h-3 w-3 text-amber-500 mr-1" />
-                        <Star className="h-3 w-3 text-amber-500 mr-1" />
-                        <Star className="h-3 w-3 text-amber-500 mr-1" />
-                        <Star className="h-3 w-3 text-amber-500 mr-1" />
-                        <Star className="h-3 w-3 text-amber-500" />
-                        <span className="ml-1 text-muted-foreground">(4.8)</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </StandardLayout>
+                </TabsContent>
+              </Tabs>
+            </div>
+          )}
+        </main>
+      </div>
+    </div>
   );
 }
