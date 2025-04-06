@@ -31,9 +31,9 @@ export default function Properties() {
   
   // Filter properties based on search term
   const filteredProperties = properties.filter(property => 
-    property.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    property.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    property.city.toLowerCase().includes(searchTerm.toLowerCase())
+    (property.title ? property.title.toLowerCase().includes(searchTerm.toLowerCase()) : false) ||
+    (property.address ? property.address.toLowerCase().includes(searchTerm.toLowerCase()) : false) ||
+    (property.city ? property.city.toLowerCase().includes(searchTerm.toLowerCase()) : false)
   );
 
   if (isLoading || isLoadingTenantProperty) {
@@ -70,7 +70,7 @@ export default function Properties() {
         {tenantProperty ? (
           <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200">
             <div className="p-6">
-              <h2 className="text-xl font-semibold text-gray-900">{tenantProperty.name}</h2>
+              <h2 className="text-xl font-semibold text-gray-900">{tenantProperty.title}</h2>
               <p className="text-gray-600 mt-1">{tenantProperty.address}, {tenantProperty.city}, {tenantProperty.state} {tenantProperty.zipCode}</p>
               
               <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -140,13 +140,13 @@ export default function Properties() {
             <PropertyCard
               key={property.id}
               id={property.id}
-              name={property.name}
-              address={`${property.address}, ${property.city}`}
-              imageUrl=""
-              units={property.units}
+              name={property.title || ''}
+              address={`${property.address || ''}, ${property.city || ''}`}
+              imageUrl={(property.images && property.images.length > 0) ? property.images[0] : ""}
+              units={property.bedrooms || 0}
               tenants={0} // This would be calculated in a real implementation
-              income={`$${property.monthlyIncome || 0}/mo`}
-              status={property.units === 0 ? 'Vacant' : 'Partially Occupied'}
+              income={`${property.rentAmount || 0} BWP/mo`}
+              status={property.available ? 'Vacant' : 'Fully Occupied'}
               onClick={() => navigate(`/properties/${property.id}`)}
             />
           ))}
