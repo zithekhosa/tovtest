@@ -29,6 +29,7 @@ import TenantApplications from "@/pages/tenant/applications";
 import TenantPropertySearch from "@/pages/tenant/property-search";
 import TenantMarketplace from "@/pages/tenant/marketplace";
 import TenantLeaseHistory from "@/pages/tenant/lease-history";
+import TenantSettings from "@/pages/tenant/settings";
 
 // Landlord pages
 import LandlordDashboard from "@/pages/landlord/dashboard";
@@ -36,7 +37,7 @@ import FacebookLandlordDashboard from "@/pages/landlord/facebook-dashboard";
 import LandlordProperties from "@/pages/landlord/properties";
 import LandlordTenants from "@/pages/landlord/tenants";
 import Finances from "@/pages/landlord/finances";
-
+import LandlordSettings from "@/pages/landlord/settings";
 import DocumentManagement from "@/pages/landlord/document-management";
 import MarketIntelligence from "@/pages/landlord/market-intelligence";
 
@@ -46,10 +47,12 @@ import LeadsManagement from "@/pages/agency/leads-management";
 import CommissionTracker from "@/pages/agency/commission-tracker";
 import PropertyListings from "@/pages/agency/property-listings";
 import ExpiringLeases from "@/pages/agency/expiring-leases";
+import AgencySettings from "@/pages/agency/settings";
 
 // Maintenance pages
 import MaintenanceDashboard from "@/pages/maintenance/dashboard";
 import MaintenanceMarketplace from "@/pages/maintenance/marketplace";
+import MaintenanceSettings from "@/pages/maintenance/settings";
 
 function Router() {
   return (
@@ -88,6 +91,7 @@ function Router() {
       <ProtectedRoute path="/tenant/messages" component={Messages} role="tenant" />
       <ProtectedRoute path="/tenant/documents" component={Documents} role="tenant" />
       <ProtectedRoute path="/tenant/properties" component={Properties} role="tenant" />
+      <ProtectedRoute path="/tenant/settings" component={TenantSettings} role="tenant" />
       
       {/* Landlord routes */}
       <ProtectedRoute path="/landlord/dashboard" component={LandlordDashboard} role="landlord" />
@@ -108,6 +112,7 @@ function Router() {
       <ProtectedRoute path="/landlord/messages/tenant/:id" component={Messages} role="landlord" />
       <ProtectedRoute path="/landlord/documents/tenant/:id" component={Documents} role="landlord" />
       <ProtectedRoute path="/landlord/leases/:id" component={DocumentManagement} role="landlord" />
+      <ProtectedRoute path="/landlord/settings" component={LandlordSettings} role="landlord" />
       
       {/* Agency routes */}
       <ProtectedRoute path="/agency/dashboard" component={AgencyDashboard} role="agency" />
@@ -119,12 +124,14 @@ function Router() {
       <ProtectedRoute path="/agency/tenants" component={Tenants} role="agency" />
       <ProtectedRoute path="/agency/messages" component={Messages} role="agency" />
       <ProtectedRoute path="/agency/documents" component={Documents} role="agency" />
+      <ProtectedRoute path="/agency/settings" component={AgencySettings} role="agency" />
       
       {/* Maintenance routes */}
       <ProtectedRoute path="/maintenance/dashboard" component={MaintenanceDashboard} role="maintenance" />
       <ProtectedRoute path="/maintenance/jobs" component={Maintenance} role="maintenance" />
       <ProtectedRoute path="/maintenance/messages" component={Messages} role="maintenance" />
       <ProtectedRoute path="/maintenance/documents" component={Documents} role="maintenance" />
+      <ProtectedRoute path="/maintenance/settings" component={MaintenanceSettings} role="maintenance" />
       
       {/* Maintenance Marketplace - accessible by all users */}
       <ProtectedRoute path="/maintenance/marketplace" component={MaintenanceMarketplace} />
