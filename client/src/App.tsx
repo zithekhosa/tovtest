@@ -48,6 +48,8 @@ import CommissionTracker from "@/pages/agency/commission-tracker";
 import PropertyListings from "@/pages/agency/property-listings";
 import ExpiringLeases from "@/pages/agency/expiring-leases";
 import AgencySettings from "@/pages/agency/settings";
+import AgencyProperties from "@/pages/agency/properties";
+import AgencyPropertyDetail from "@/pages/agency/property-detail";
 
 // Maintenance pages
 import MaintenanceDashboard from "@/pages/maintenance/dashboard";
@@ -116,7 +118,8 @@ function Router() {
       
       {/* Agency routes */}
       <ProtectedRoute path="/agency/dashboard" component={AgencyDashboard} role="agency" />
-      <ProtectedRoute path="/agency/properties" component={Properties} role="agency" />
+      <ProtectedRoute path="/agency/properties" component={AgencyProperties} role="agency" />
+      <ProtectedRoute path="/agency/properties/:id" component={AgencyPropertyDetail} role="agency" />
       <ProtectedRoute path="/agency/property-listings" component={PropertyListings} role="agency" />
       <ProtectedRoute path="/agency/leads-management" component={LeadsManagement} role="agency" />
       <ProtectedRoute path="/agency/commission-tracker" component={CommissionTracker} role="agency" />

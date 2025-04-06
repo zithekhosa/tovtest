@@ -133,10 +133,28 @@ export function Sidebar() {
       // Agency items
       agency: [
         {
+          href: "/agency/dashboard",
+          icon: LayoutDashboard,
+          label: "Dashboard",
+          active: location === "/agency/dashboard" || location === "/dashboard",
+        },
+        {
           href: "/agency/properties",
           icon: Building,
-          label: "Properties",
+          label: "Property Marketing",
           active: location.includes("/agency/properties"),
+        },
+        {
+          href: "/agency/property-listings",
+          icon: PanelLeft,
+          label: "Listings",
+          active: location.includes("/agency/property-listings"),
+        },
+        {
+          href: "/agency/leads-management",
+          icon: Users,
+          label: "Leads",
+          active: location.includes("/agency/leads-management"),
         },
         {
           href: "/agency/landlords",
@@ -145,28 +163,22 @@ export function Sidebar() {
           active: location.includes("/agency/landlords"),
         },
         {
-          href: "/agency/tenants",
-          icon: Users,
-          label: "Tenants",
-          active: location.includes("/agency/tenants"),
+          href: "/agency/commission-tracker",
+          icon: DollarSign,
+          label: "Commissions",
+          active: location.includes("/agency/commission-tracker"),
+        },
+        {
+          href: "/agency/expiring-leases",
+          icon: Calendar,
+          label: "Expiring Leases",
+          active: location.includes("/agency/expiring-leases"),
         },
         {
           href: "/maintenance/marketplace",
-          icon: Calendar,
+          icon: Wrench,
           label: "Service Marketplace",
           active: location.includes("/marketplace"),
-        },
-        {
-          href: "/agency/commissions",
-          icon: DollarSign,
-          label: "Commissions",
-          active: location.includes("/agency/commissions"),
-        },
-        {
-          href: "/agency/analytics",
-          icon: BarChart,
-          label: "Analytics",
-          active: location.includes("/agency/analytics"),
         },
       ],
       
