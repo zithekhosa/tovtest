@@ -177,80 +177,10 @@ export function StandardLayout({
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
-      {/* Desktop Sidebar */}
-      <aside className="hidden md:flex md:w-64 lg:w-72 md:flex-col border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
-        <div className="flex flex-col flex-grow pt-5 overflow-y-auto">
-          {/* Logo */}
-          <div className="flex items-center px-4 mb-5">
-            <img src={tovLogo} alt="TOV Logo" className="h-10 w-auto mr-2" />
-            <span className="font-bold text-xl dark:text-white">Property OS</span>
-          </div>
-          
-          {/* User Profile */}
-          <div className="px-4 mb-6">
-            <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
-              <div className="flex items-center">
-                <ProfileAvatar userRole={role} size="md" className="border-2 border-primary" />
-                <div className="ml-3 flex-1 min-w-0">
-                  <p className="font-medium truncate">
-                    {user.firstName && user.lastName 
-                      ? `${user.firstName} ${user.lastName}` 
-                      : user.username}
-                  </p>
-                  <p className="text-sm text-muted-foreground truncate">{role}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          {/* Navigation */}
-          <div className="px-3 mt-2 flex-1">
-            <div className="space-y-1">
-              {navItems.map((item, index) => (
-                <Link 
-                  key={index} 
-                  href={item.href}
-                  className={cn(
-                    "flex items-center px-3 py-2.5 text-gray-700 dark:text-gray-300 rounded-lg group relative",
-                    item.active 
-                      ? "bg-primary/10 text-primary font-medium" 
-                      : "hover:bg-gray-100 dark:hover:bg-gray-800"
-                  )}
-                >
-                  <div className={cn(
-                    "w-6 h-6 flex items-center justify-center mr-3", 
-                    item.active ? "text-primary" : "text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300"
-                  )}>
-                    <item.icon className="h-5 w-5" />
-                  </div>
-                  <span className="truncate">{item.label}</span>
-                  {item.notification && (
-                    <span className="ml-auto bg-red-500 text-white text-xs font-medium min-w-[20px] h-5 flex items-center justify-center rounded-full px-1">
-                      {item.notification}
-                    </span>
-                  )}
-                </Link>
-              ))}
-            </div>
-          </div>
-          
-          {/* Logout */}
-          <div className="p-3 mt-auto border-t border-gray-200 dark:border-gray-800">
-            <Button
-              variant="outline"
-              className="w-full justify-start text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-              onClick={handleLogout}
-              disabled={logoutMutation.isPending}
-            >
-              <LogOut className="mr-3 h-4 w-4" />
-              {logoutMutation.isPending ? "Logging out..." : "Log out"}
-            </Button>
-          </div>
-        </div>
-      </aside>
+      {/* We removed the desktop sidebar since we're using the Sidebar component for desktop */}
 
       {/* Main Content */}
-      <div className="flex flex-col flex-1 h-screen overflow-hidden">
+      <div className="flex flex-col flex-1 h-screen overflow-hidden md:ml-64">
         {/* Desktop Header */}
         <header className="hidden md:flex h-16 items-center justify-between px-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
           <div>
