@@ -51,7 +51,8 @@ import {
   MoreHorizontal,
   Building,
   MapPin,
-  Phone
+  Phone,
+  User
 } from "lucide-react";
 import { Link } from "wouter";
 import {
@@ -323,8 +324,8 @@ export default function MaintenanceDashboard() {
           <TabsContent value="overview" className="space-y-4 mt-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Upcoming Jobs */}
-              <Card>
-                <CardHeader className="pb-2">
+              <Card className="bg-white border-none shadow-sm">
+                <CardHeader className="pb-2 px-3 sm:px-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <CardTitle className="text-md font-medium">Upcoming Jobs</CardTitle>
@@ -339,14 +340,14 @@ export default function MaintenanceDashboard() {
                   </div>
                 </CardHeader>
                 <CardContent className="p-0">
-                  <ScrollArea className="h-[300px] px-6">
-                    <div className="space-y-4 py-2">
+                  <ScrollArea className="h-[280px] px-3 sm:px-6">
+                    <div className="space-y-3 py-2">
                       {upcomingJobs.length > 0 ? (
                         upcomingJobs.map((job) => (
-                          <div key={job.id} className="p-3 border rounded-lg">
+                          <div key={job.id} className="p-3 border rounded-md hover:bg-gray-50 transition-colors">
                             <div className="flex justify-between items-start">
-                              <div>
-                                <h4 className="font-medium text-sm">{job.title}</h4>
+                              <div className="min-w-0">
+                                <h4 className="font-medium text-sm truncate">{job.title}</h4>
                                 <div className="flex items-center text-xs text-muted-foreground mt-1">
                                   <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
                                   <span className="truncate">{job.address}</span>
@@ -356,18 +357,18 @@ export default function MaintenanceDashboard() {
                                   <span>{formatCardDate(job.date)} • {formatTime(job.date)}</span>
                                 </div>
                               </div>
-                              <Badge className={
+                              <Badge className={`ml-2 flex-shrink-0 ${
                                 job.status === "confirmed" 
                                   ? "bg-green-50 text-green-700" 
                                   : "bg-amber-50 text-amber-700"
-                              }>
+                              }`}>
                                 {job.status === "confirmed" ? "Confirmed" : "Pending"}
                               </Badge>
                             </div>
                             <div className="flex justify-between items-center mt-3 pt-2 border-t">
-                              <div className="flex items-center">
-                                <span className="text-sm font-medium mr-1">{job.client}</span>
-                                <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full">
+                              <div className="flex items-center min-w-0">
+                                <span className="text-sm font-medium mr-1 truncate">{job.client}</span>
+                                <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full flex-shrink-0">
                                   <Phone className="h-3 w-3" />
                                 </Button>
                               </div>
@@ -395,8 +396,8 @@ export default function MaintenanceDashboard() {
               </Card>
 
               {/* Monthly Performance */}
-              <Card>
-                <CardHeader className="pb-2">
+              <Card className="bg-white border-none shadow-sm">
+                <CardHeader className="pb-2 px-3 sm:px-6">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-md font-medium">Monthly Performance</CardTitle>
                     <Button variant="ghost" size="sm" className="h-8 gap-1">
@@ -405,20 +406,20 @@ export default function MaintenanceDashboard() {
                     </Button>
                   </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="px-3 sm:px-6">
                   <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
+                    <div className="grid grid-cols-2 gap-2 sm:gap-4">
+                      <div className="space-y-1 sm:space-y-2">
                         <p className="text-sm text-muted-foreground">Completed Jobs</p>
-                        <div className="flex items-end gap-1">
-                          <p className="text-2xl font-bold">{completedJobsCount}</p>
+                        <div className="flex flex-wrap items-end gap-1">
+                          <p className="text-xl sm:text-2xl font-bold">{completedJobsCount}</p>
                           <p className="text-xs text-green-600 mb-1">+3 from last month</p>
                         </div>
                       </div>
-                      <div className="space-y-2">
+                      <div className="space-y-1 sm:space-y-2">
                         <p className="text-sm text-muted-foreground">Earnings</p>
-                        <div className="flex items-end gap-1">
-                          <p className="text-2xl font-bold">{formatCurrency(currentMonthEarnings)}</p>
+                        <div className="flex flex-wrap items-end gap-1">
+                          <p className="text-xl sm:text-2xl font-bold">{formatCurrency(currentMonthEarnings)}</p>
                           <p className="text-xs text-green-600 mb-1">+12%</p>
                         </div>
                       </div>
@@ -426,9 +427,9 @@ export default function MaintenanceDashboard() {
 
                     <Separator />
 
-                    <div className="space-y-3">
+                    <div className="space-y-2 sm:space-y-3">
                       <h3 className="text-sm font-medium">Rating Distribution</h3>
-                      <div className="space-y-2">
+                      <div className="space-y-1 sm:space-y-2">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center">
                             <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400 mr-1" />
@@ -438,7 +439,7 @@ export default function MaintenanceDashboard() {
                         </div>
                         <Progress value={85} className="h-1.5" />
                       </div>
-                      <div className="space-y-2">
+                      <div className="space-y-1 sm:space-y-2">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center">
                             <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400 mr-1" />
@@ -448,7 +449,7 @@ export default function MaintenanceDashboard() {
                         </div>
                         <Progress value={15} className="h-1.5" />
                       </div>
-                      <div className="space-y-2">
+                      <div className="space-y-1 sm:space-y-2">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center">
                             <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400 mr-1" />
@@ -460,11 +461,11 @@ export default function MaintenanceDashboard() {
                       </div>
                     </div>
 
-                    <div className="pt-2 space-y-2">
+                    <div className="pt-2 space-y-1 sm:space-y-2">
                       <h3 className="text-sm font-medium">Job Acceptance Rate</h3>
                       <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">This Month</span>
-                        <span className="font-medium">92%</span>
+                        <span className="text-muted-foreground text-xs sm:text-sm">This Month</span>
+                        <span className="font-medium text-xs sm:text-sm">92%</span>
                       </div>
                       <Progress value={92} className="h-2" />
                       <p className="text-xs text-muted-foreground">You're in the top 10% of providers.</p>
@@ -476,14 +477,14 @@ export default function MaintenanceDashboard() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Available Jobs */}
-              <Card className="md:col-span-2">
-                <CardHeader className="pb-2">
+              <Card className="md:col-span-2 bg-white border-none shadow-sm">
+                <CardHeader className="pb-2 px-3 sm:px-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <CardTitle className="text-md font-medium">Available Jobs</CardTitle>
                       <CardDescription>Maintenance requests matching your skills</CardDescription>
                     </div>
-                    <Button variant="outline" size="sm" asChild>
+                    <Button variant="outline" size="sm" className="text-xs px-2 sm:px-3" asChild>
                       <Link href="/maintenance/marketplace">
                         Browse All
                       </Link>
@@ -491,25 +492,27 @@ export default function MaintenanceDashboard() {
                   </div>
                 </CardHeader>
                 <CardContent className="p-0">
-                  <ScrollArea className="h-[220px] px-6">
-                    <div className="space-y-4 py-2">
+                  <ScrollArea className="h-[220px] px-3 sm:px-6">
+                    <div className="space-y-3 py-2">
                       {availableJobs.length > 0 ? (
                         availableJobs.slice(0, 3).map((job) => (
-                          <div key={job.id} className="p-3 border rounded-lg">
+                          <div key={job.id} className="p-3 border rounded-md hover:bg-gray-50 transition-colors">
                             <div className="flex justify-between items-start">
-                              <div>
-                                <h4 className="font-medium text-sm">{job.title}</h4>
-                                <div className="flex items-center text-xs text-muted-foreground mt-1">
-                                  <Badge variant="outline" className="mr-2 bg-slate-50">
+                              <div className="min-w-0 flex-1">
+                                <h4 className="font-medium text-sm truncate">{job.title}</h4>
+                                <div className="flex flex-wrap items-center text-xs text-muted-foreground mt-1 gap-1">
+                                  <Badge variant="outline" className="bg-slate-50">
                                     {job.category}
                                   </Badge>
-                                  <MapPin className="h-3 w-3 mr-1" />
-                                  <span>{job.location}</span>
-                                  <span className="mx-1">•</span>
-                                  <span>{job.distance}</span>
+                                  <div className="flex items-center">
+                                    <MapPin className="h-3 w-3 mx-1 flex-shrink-0" />
+                                    <span className="truncate">{job.location}</span>
+                                    <span className="mx-1">•</span>
+                                    <span>{job.distance}</span>
+                                  </div>
                                 </div>
                               </div>
-                              <div>
+                              <div className="ml-2 flex-shrink-0">
                                 <Badge className={
                                   job.priority === "high" 
                                     ? "bg-red-50 text-red-700" 
@@ -525,7 +528,7 @@ export default function MaintenanceDashboard() {
                               <div className="text-sm font-medium text-primary">
                                 {formatCurrency(job.budget)}
                               </div>
-                              <Button size="sm" asChild>
+                              <Button size="sm" className="h-8 text-xs px-3 sm:px-4" asChild>
                                 <Link href={`/maintenance/jobs/${job.id}`}>
                                   Apply
                                 </Link>
@@ -545,8 +548,8 @@ export default function MaintenanceDashboard() {
               </Card>
 
               {/* Your Services */}
-              <Card className="md:col-span-1">
-                <CardHeader className="pb-2">
+              <Card className="md:col-span-1 bg-white border-none shadow-sm">
+                <CardHeader className="pb-2 px-3 sm:px-6">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-md font-medium">Your Services</CardTitle>
                     <Button variant="ghost" size="sm" className="h-8 gap-1" asChild>
@@ -556,22 +559,22 @@ export default function MaintenanceDashboard() {
                     </Button>
                   </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="px-3 sm:px-6">
                   <ScrollArea className="h-[220px]">
                     <div className="space-y-3">
                       {serviceCategories.map((category) => (
-                        <div key={category.id} className="space-y-2">
+                        <div key={category.id} className="space-y-2 p-2 hover:bg-gray-50 rounded-md transition-colors">
                           <div className="flex items-center justify-between">
-                            <h3 className="text-sm font-medium">{category.name}</h3>
+                            <h3 className="text-sm font-medium truncate">{category.name}</h3>
                             {category.active ? (
-                              <Badge className="bg-green-50 text-green-700">Active</Badge>
+                              <Badge className="bg-green-50 text-green-700 ml-2 flex-shrink-0">Active</Badge>
                             ) : (
-                              <Badge variant="outline">Inactive</Badge>
+                              <Badge variant="outline" className="ml-2 flex-shrink-0">Inactive</Badge>
                             )}
                           </div>
                           <div className="flex flex-wrap gap-1">
                             {category.skills.map((skill, i) => (
-                              <Badge key={i} variant="outline" className="bg-slate-50">
+                              <Badge key={i} variant="outline" className="bg-slate-50 text-xs">
                                 {skill}
                               </Badge>
                             ))}
@@ -585,31 +588,31 @@ export default function MaintenanceDashboard() {
             </div>
 
             {/* Recent Client Feedback */}
-            <Card>
-              <CardHeader className="pb-2">
+            <Card className="bg-white border-none shadow-sm">
+              <CardHeader className="pb-2 px-3 sm:px-6">
                 <CardTitle className="text-md font-medium">Recent Client Feedback</CardTitle>
               </CardHeader>
               <CardContent className="p-0">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 px-6 py-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 px-3 sm:px-6 py-4">
                   {recentlyCompletedJobs.map((job) => (
-                    <div key={job.id} className="p-4 border rounded-lg">
+                    <div key={job.id} className="p-3 border rounded-md hover:bg-gray-50 transition-colors">
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center">
                           {[...Array(5)].map((_, i) => (
                             <Star 
                               key={i} 
-                              className={`h-4 w-4 ${i < job.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`} 
+                              className={`h-3 w-3 sm:h-4 sm:w-4 ${i < job.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`} 
                             />
                           ))}
                         </div>
-                        <span className="text-xs text-muted-foreground">
+                        <span className="text-xs text-muted-foreground ml-2">
                           {formatDate(job.completedDate)}
                         </span>
                       </div>
-                      <p className="text-sm italic mb-2">"{job.feedback}"</p>
+                      <p className="text-xs sm:text-sm italic mb-2 line-clamp-3">"{job.feedback}"</p>
                       <div className="flex justify-between items-center text-xs">
-                        <span className="font-medium">{job.client}</span>
-                        <span className="text-muted-foreground">{job.title}</span>
+                        <span className="font-medium truncate max-w-[50%]">{job.client}</span>
+                        <span className="text-muted-foreground truncate max-w-[45%]">{job.title}</span>
                       </div>
                     </div>
                   ))}
@@ -637,37 +640,37 @@ export default function MaintenanceDashboard() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card>
-                <CardHeader className="pb-2">
+              <Card className="bg-white border-none shadow-sm">
+                <CardHeader className="pb-2 px-3 sm:px-6">
                   <CardTitle className="text-md font-medium flex items-center">
                     <Calendar className="h-4 w-4 text-primary mr-2" />
                     Scheduled
                   </CardTitle>
                   <CardDescription>{upcomingJobsCount} jobs</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="px-3 sm:px-6">
                   {upcomingJobs.length > 0 ? (
-                    <ScrollArea className="h-[300px] pr-4">
-                      <div className="space-y-4">
+                    <ScrollArea className="h-[300px]">
+                      <div className="space-y-3">
                         {upcomingJobs.map((job) => (
-                          <div key={job.id} className="p-3 border rounded-lg">
+                          <div key={job.id} className="p-3 border rounded-md hover:bg-gray-50 transition-colors">
                             <div className="flex justify-between items-start">
-                              <div>
-                                <h4 className="font-medium text-sm">{job.title}</h4>
+                              <div className="min-w-0 flex-1">
+                                <h4 className="font-medium text-sm truncate">{job.title}</h4>
                                 <div className="flex items-center text-xs text-muted-foreground mt-1">
                                   <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
-                                  <span className="truncate w-32">{job.address}</span>
+                                  <span className="truncate">{job.address}</span>
                                 </div>
                                 <div className="flex items-center text-xs text-muted-foreground mt-1">
                                   <Calendar className="h-3 w-3 mr-1 flex-shrink-0" />
                                   <span>{formatCardDate(job.date)} • {formatTime(job.date)}</span>
                                 </div>
                               </div>
-                              <Badge className={
+                              <Badge className={`ml-2 flex-shrink-0 ${
                                 job.status === "confirmed" 
                                   ? "bg-green-50 text-green-700" 
                                   : "bg-amber-50 text-amber-700"
-                              }>
+                              }`}>
                                 {job.status === "confirmed" ? "Confirmed" : "Pending"}
                               </Badge>
                             </div>
@@ -675,7 +678,7 @@ export default function MaintenanceDashboard() {
                               <div className="text-sm font-medium text-primary">
                                 {formatCurrency(job.price)}
                               </div>
-                              <Button variant="outline" size="sm" asChild>
+                              <Button variant="outline" size="sm" className="h-8 text-xs" asChild>
                                 <Link href={`/maintenance/jobs/${job.id}`}>
                                   <Eye className="h-3.5 w-3.5 mr-1" />
                                   View
@@ -695,29 +698,29 @@ export default function MaintenanceDashboard() {
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader className="pb-2">
+              <Card className="bg-white border-none shadow-sm">
+                <CardHeader className="pb-2 px-3 sm:px-6">
                   <CardTitle className="text-md font-medium flex items-center">
                     <Clock className="h-4 w-4 text-blue-500 mr-2" />
                     In Progress
                   </CardTitle>
                   <CardDescription>{getInProgressRequests().length} jobs</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="px-3 sm:px-6">
                   {getInProgressRequests().length > 0 ? (
-                    <ScrollArea className="h-[300px] pr-4">
-                      <div className="space-y-4">
+                    <ScrollArea className="h-[300px]">
+                      <div className="space-y-3">
                         {getInProgressRequests().map((request) => (
-                          <div key={request.id} className="p-3 border rounded-lg">
-                            <div className="flex justify-between">
-                              <h4 className="font-medium text-sm">{request.title}</h4>
-                              <Badge className="bg-blue-50 text-blue-700">In Progress</Badge>
+                          <div key={request.id} className="p-3 border rounded-md hover:bg-gray-50 transition-colors">
+                            <div className="flex justify-between items-center">
+                              <h4 className="font-medium text-sm truncate max-w-[70%]">{request.title}</h4>
+                              <Badge className="bg-blue-50 text-blue-700 flex-shrink-0">In Progress</Badge>
                             </div>
                             <p className="text-xs text-muted-foreground mt-1">
                               Property #{request.propertyId} • Started {request.updatedAt ? formatDate(request.updatedAt) : formatDate(request.createdAt)}
                             </p>
-                            <p className="text-sm line-clamp-2 mt-2">{request.description}</p>
-                            <div className="flex justify-between mt-3 pt-2 border-t">
+                            <p className="text-xs sm:text-sm line-clamp-2 mt-2">{request.description}</p>
+                            <div className="flex justify-between items-center mt-3 pt-2 border-t">
                               <Badge variant="outline" className={
                                 request.priority === "urgent" 
                                   ? "bg-red-50 text-red-700" 
@@ -727,10 +730,10 @@ export default function MaintenanceDashboard() {
                               }>
                                 {request.priority.charAt(0).toUpperCase() + request.priority.slice(1)} Priority
                               </Badge>
-                              <Button variant="ghost" size="sm" className="h-7" asChild>
+                              <Button variant="ghost" size="sm" className="h-7 text-xs" asChild>
                                 <Link href={`/maintenance/jobs/${request.id}`}>
                                   <Eye className="h-3.5 w-3.5 mr-1" />
-                                  <span className="text-xs">View</span>
+                                  <span>View</span>
                                 </Link>
                               </Button>
                             </div>
@@ -747,23 +750,23 @@ export default function MaintenanceDashboard() {
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader className="pb-2">
+              <Card className="bg-white border-none shadow-sm">
+                <CardHeader className="pb-2 px-3 sm:px-6">
                   <CardTitle className="text-md font-medium flex items-center">
                     <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
                     Completed
                   </CardTitle>
                   <CardDescription>{completedRequests?.length || 0} jobs</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="px-3 sm:px-6">
                   {(completedRequests?.length || 0) > 0 ? (
-                    <ScrollArea className="h-[300px] pr-4">
-                      <div className="space-y-4">
+                    <ScrollArea className="h-[300px]">
+                      <div className="space-y-3">
                         {recentlyCompletedJobs.map((job) => (
-                          <div key={job.id} className="p-3 border rounded-lg">
-                            <div className="flex justify-between">
-                              <h4 className="font-medium text-sm">{job.title}</h4>
-                              <Badge className="bg-green-50 text-green-700">Completed</Badge>
+                          <div key={job.id} className="p-3 border rounded-md hover:bg-gray-50 transition-colors">
+                            <div className="flex justify-between items-center">
+                              <h4 className="font-medium text-sm truncate max-w-[70%]">{job.title}</h4>
+                              <Badge className="bg-green-50 text-green-700 flex-shrink-0">Completed</Badge>
                             </div>
                             <p className="text-xs text-muted-foreground mt-1">
                               {job.address} • Completed {formatDate(job.completedDate)}
@@ -773,7 +776,7 @@ export default function MaintenanceDashboard() {
                                 {[...Array(5)].map((_, i) => (
                                   <Star 
                                     key={i} 
-                                    className={`h-3.5 w-3.5 ${i < job.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`} 
+                                    className={`h-3 w-3 sm:h-3.5 sm:w-3.5 ${i < job.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`} 
                                   />
                                 ))}
                               </div>
