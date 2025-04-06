@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Map } from "lucide-react";
-import DashLayout from "../../components/layout/DashLayout";
+import { StandardLayout } from "@/components/layout/StandardLayout";
 import {
   Card,
   CardContent,
@@ -147,7 +147,7 @@ export default function MarketIntelligence() {
 
   // Enhanced UI with performance optimization techniques
   return (
-    <DashLayout>
+    <StandardLayout title="Market Intelligence" subtitle="Real-time insights for the Botswana property market">
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
@@ -578,6 +578,6 @@ export default function MarketIntelligence() {
           </TabsContent>
         </Tabs>
       </div>
-    </DashLayout>
+    </StandardLayout>
   );
 }

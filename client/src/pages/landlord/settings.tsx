@@ -1,10 +1,10 @@
 import { SettingsPage } from "@/components/settings/SettingsPage";
-import { DashLayout } from "@/layout/dash-layout";
+import { StandardLayout } from "@/components/layout/StandardLayout";
 
 export default function LandlordSettings() {
   return (
-    <DashLayout>
+    <StandardLayout title="Settings">
       <SettingsPage role="landlord" />
-    </DashLayout>
+    </StandardLayout>
   );
 }

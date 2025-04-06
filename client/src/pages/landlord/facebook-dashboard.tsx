@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { Property, Lease, MaintenanceRequest, Payment, User } from "@shared/schema";
-import { DashLayout } from "@/layout/dash-layout";
+import { StandardLayout } from "@/components/layout/StandardLayout";
 import { FeedContainer } from "@/components/layout/ContentContainer";
 import { SocialCard } from "@/components/ui/mobile-optimized-card";
 import { formatCurrency, formatDate, cn } from "@/lib/utils";
@@ -285,11 +285,11 @@ export default function FacebookLandlordDashboard() {
 
   if (isLoading) {
     return (
-      <DashLayout>
+      <StandardLayout title="Dashboard">
         <div className="flex justify-center items-center h-64">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-      </DashLayout>
+      </StandardLayout>
     );
   }
 
@@ -321,7 +321,7 @@ export default function FacebookLandlordDashboard() {
   ];
 
   return (
-    <DashLayout>
+    <StandardLayout title="Dashboard" subtitle="Welcome to your social feed">
       <div className="pb-16 md:pb-0">
         {/* Stories/Highlights Section */}
         <div className="bg-white dark:bg-gray-900 py-3 border-b border-gray-200 dark:border-gray-800 mb-3">
@@ -419,6 +419,6 @@ export default function FacebookLandlordDashboard() {
           ))}
         </SocialFeed>
       </div>
-    </DashLayout>
+    </StandardLayout>
   );
 }
