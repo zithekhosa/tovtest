@@ -204,7 +204,70 @@ export default function Sidebar({ role }: SidebarProps) {
     // Remove navigation as it's now handled in the auth hook
   };
 
-  // Return empty div when Standard Layout is used
-  // This prevents duplicate sidebars
-  return null;
+  return (
+    <aside className="hidden md:flex flex-col w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 h-screen fixed top-0 left-0 pt-5 z-30">
+      <div className="px-4 pb-4 mb-2 flex items-center border-b border-gray-200 dark:border-gray-800">
+        <img src={tovLogo} alt="TOV Logo" className="h-10 w-auto" />
+        <span className="font-medium text-gray-700 dark:text-gray-200 ml-2">Property OS</span>
+      </div>
+      <div className="flex-1 overflow-y-auto py-6 px-4">
+        <div className="pb-6 mb-6 border-b border-gray-200 dark:border-gray-800">
+          <div className="flex items-center space-x-3">
+            <ProfileAvatar userRole={role} size="md" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                {user.firstName && user.lastName 
+                  ? `${user.firstName} ${user.lastName}` 
+                  : user.username}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{role}</p>
+            </div>
+          </div>
+        </div>
+
+        <nav className="space-y-1">
+          {navItems.map((item) => (
+            <div key={item.href} className="w-full">
+              <Link href={item.href}>
+                <div
+                  className={cn(
+                    "flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer w-full",
+                    item.active
+                      ? "bg-primary/10 text-primary dark:bg-primary/20"
+                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+                  )}
+                >
+                  <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />
+                  <span className="truncate">{item.label}</span>
+                  {item.label === "Messages" && (
+                    <span className="ml-auto bg-primary text-primary-foreground text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0">
+                      2
+                    </span>
+                  )}
+                </div>
+              </Link>
+            </div>
+          ))}
+        </nav>
+      </div>
+      
+      <div className="p-4 border-t border-gray-200 dark:border-gray-800 space-y-2">
+        <Link href={`/${role}/settings`}>
+          <div className="flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer w-full text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white">
+            <Settings className="mr-3 h-5 w-5 flex-shrink-0" />
+            <span className="truncate">Settings</span>
+          </div>
+        </Link>
+        <Button
+          variant="ghost"
+          className="w-full justify-start text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+          onClick={handleLogout}
+          disabled={logoutMutation.isPending}
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          <span className="truncate">{logoutMutation.isPending ? "Logging out..." : "Log out"}</span>
+        </Button>
+      </div>
+    </aside>
+  );
 }
