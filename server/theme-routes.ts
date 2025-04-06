@@ -22,7 +22,7 @@ export function registerThemeRoutes(app: Express) {
       }
       
       // Write to theme.json file
-      const themePath = path.join(__dirname, '..', 'theme.json');
+      const themePath = path.resolve('theme.json');
       
       // Filter out region property before saving to theme.json
       const { region, ...themeWithoutRegion } = theme;
