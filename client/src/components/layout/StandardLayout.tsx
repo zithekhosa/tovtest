@@ -8,9 +8,11 @@ import {
   MessageSquare, Settings, LogOut, DollarSign, 
   Search, Bell, User as UserIcon, ChevronRight
 } from "lucide-react";
+import { ProfileAvatar } from "@/components/ui/profile-avatar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserRoleType } from "@shared/schema";
 import type { LucideIcon } from "lucide-react";
+import tovLogo from "@/assets/images/tov-logo.png";
 
 interface NavItem {
   href: string;
@@ -180,22 +182,15 @@ export function StandardLayout({
         <div className="flex flex-col flex-grow pt-5 overflow-y-auto">
           {/* Logo */}
           <div className="flex items-center px-4 mb-5">
-            <div className="w-10 h-10 bg-primary rounded-md flex items-center justify-center mr-2">
-              <span className="text-primary-foreground font-bold text-lg">T</span>
-            </div>
-            <span className="font-bold text-xl dark:text-white">TOV</span>
+            <img src={tovLogo} alt="TOV Logo" className="h-10 w-auto mr-2" />
+            <span className="font-bold text-xl dark:text-white">Property OS</span>
           </div>
           
           {/* User Profile */}
           <div className="px-4 mb-6">
             <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
               <div className="flex items-center">
-                <Avatar className="h-10 w-10 border-2 border-primary">
-                  <AvatarFallback className="bg-primary/10 text-primary">
-                    {getInitials(user.firstName, user.lastName)}
-                  </AvatarFallback>
-                  {user.profileImage && <AvatarImage src={user.profileImage} alt={`${user.firstName} ${user.lastName}`} />}
-                </Avatar>
+                <ProfileAvatar userRole={role} size="md" className="border-2 border-primary" />
                 <div className="ml-3 flex-1 min-w-0">
                   <p className="font-medium truncate">
                     {user.firstName && user.lastName 
@@ -287,10 +282,8 @@ export function StandardLayout({
         {/* Mobile Top Bar */}
         <header className="md:hidden flex h-14 items-center justify-between px-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 fixed top-0 left-0 right-0 z-40">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-lg">T</span>
-            </div>
-            <span className="font-bold">{mobileTitle || title || "TOV"}</span>
+            <img src={tovLogo} alt="TOV Logo" className="h-8 w-auto" />
+            <span className="font-bold">{mobileTitle || title || "TOV OS"}</span>
           </div>
           <div className="flex items-center space-x-3">
             <Button
@@ -354,10 +347,8 @@ export function StandardLayout({
             <div className="h-full w-full max-w-[300px] bg-white dark:bg-gray-900 flex flex-col animate-in slide-in-from-left">
               <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
                 <div className="flex items-center">
-                  <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center mr-2">
-                    <span className="text-primary-foreground font-bold text-lg">T</span>
-                  </div>
-                  <span className="font-bold text-lg">TOV</span>
+                  <img src={tovLogo} alt="TOV Logo" className="h-8 w-auto mr-2" />
+                  <span className="font-bold text-lg">Property OS</span>
                 </div>
                 <Button
                   variant="ghost"
@@ -372,12 +363,7 @@ export function StandardLayout({
               {/* User Profile */}
               <div className="p-4 border-b border-gray-200 dark:border-gray-800">
                 <div className="flex items-center">
-                  <Avatar className="h-12 w-12 border-2 border-primary">
-                    <AvatarFallback className="bg-primary/10 text-primary">
-                      {getInitials(user.firstName, user.lastName)}
-                    </AvatarFallback>
-                    {user.profileImage && <AvatarImage src={user.profileImage} alt={`${user.firstName} ${user.lastName}`} />}
-                  </Avatar>
+                  <ProfileAvatar userRole={role} size="lg" className="border-2 border-primary" />
                   <div className="ml-3 min-w-0">
                     <p className="font-medium truncate">
                       {user.firstName && user.lastName 
