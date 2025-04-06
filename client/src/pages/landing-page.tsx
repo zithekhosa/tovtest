@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import tovLogo from "@/assets/images/tov-logo.png";
@@ -25,16 +25,17 @@ export default function LandingPage() {
   const { user } = useAuth();
 
   // Redirect to appropriate dashboard if user is already logged in
-  if (user) {
-    const roleRoutes = {
-      tenant: "/tenant/dashboard",
-      landlord: "/landlord/dashboard",
-      agency: "/agency/dashboard",
-      maintenance: "/maintenance/dashboard"
-    };
-    navigate(roleRoutes[user.role] || "/");
-    return null;
-  }
+  useEffect(() => {
+    if (user) {
+      const roleRoutes = {
+        tenant: "/tenant/dashboard",
+        landlord: "/landlord/dashboard",
+        agency: "/agency/dashboard",
+        maintenance: "/maintenance/dashboard"
+      };
+      navigate(roleRoutes[user.role] || "/");
+    }
+  }, [user, navigate]);
 
   // Sample featured properties data - simplified
   const featuredProperties = [
