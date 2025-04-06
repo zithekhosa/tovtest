@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { ProfileAvatar } from "@/components/ui/profile-avatar";
 import tovLogo from "@/assets/images/tov-logo.png";
 import { 
   User, Home, Building, Users, Wrench, FileText, 
@@ -20,10 +21,6 @@ export default function Sidebar({ role }: SidebarProps) {
   const [location, navigate] = useLocation();
 
   if (!user) return null;
-
-  const getInitials = (firstName: string, lastName: string) => {
-    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
-  };
 
   // Determine navigation items based on user role
   const getNavItems = () => {
@@ -216,13 +213,7 @@ export default function Sidebar({ role }: SidebarProps) {
       <div className="flex-1 overflow-y-auto py-6 px-4">
         <div className="pb-6 mb-6 border-b border-gray-200 dark:border-gray-800">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-              <span className="text-primary-foreground font-semibold">
-                {user.firstName && user.lastName 
-                  ? getInitials(user.firstName, user.lastName) 
-                  : user.username.substring(0, 2).toUpperCase()}
-              </span>
-            </div>
+            <ProfileAvatar userRole={role} size="md" />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                 {user.firstName && user.lastName 

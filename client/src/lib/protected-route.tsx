@@ -2,9 +2,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
 import { Redirect, Route } from "wouter";
 import { UserRoleType } from "@shared/schema";
-import Header from "@/components/layout/Header";
-import Sidebar from "@/components/layout/Sidebar";
-import MobileNav from "@/components/layout/MobileNav";
+import AppLayout from "@/components/layout/AppLayout";
 
 export function ProtectedRoute({
   path,
@@ -57,18 +55,9 @@ export function ProtectedRoute({
   // User is authenticated and has proper role, render component with layout
   return (
     <Route path={path}>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-        <Header />
-        <div className="flex">
-          <Sidebar role={user.role} />
-          <main className="flex-1 pt-16 pb-20 md:ml-64 md:pb-10">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10">
-              <Component user={user} />
-            </div>
-          </main>
-        </div>
-        <MobileNav role={user.role} />
-      </div>
+      <AppLayout role={user.role}>
+        <Component user={user} />
+      </AppLayout>
     </Route>
   );
 }

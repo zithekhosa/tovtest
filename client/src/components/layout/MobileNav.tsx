@@ -3,12 +3,13 @@ import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { ProfileAvatar } from "@/components/ui/profile-avatar";
+import tovLogo from "@/assets/images/tov-logo.png";
 import { 
   Menu, X, Home, Building, Users, Wrench, FileText, 
   MessageSquare, Settings, LogOut, DollarSign, 
   Search, Bell, ChevronRight, LayoutDashboard, PieChart
 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { UserRoleType } from "@shared/schema";
 import type { LucideIcon } from "lucide-react";
@@ -32,9 +33,7 @@ export default function MobileNav({ role }: MobileNavProps) {
 
   if (!user) return null;
 
-  const getInitials = (firstName: string, lastName: string) => {
-    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
-  };
+  // ProfileAvatar component now handles initials
 
   // Determine navigation items based on user role
   const getNavItems = (): NavItem[] => {
@@ -203,10 +202,8 @@ export default function MobileNav({ role }: MobileNavProps) {
             </Button>
             
             <div className="flex items-center">
-              <div className="h-8 w-8 bg-primary rounded-md flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-lg">T</span>
-              </div>
-              <span className="font-bold text-lg ml-2 dark:text-white">TOV</span>
+              <img src={tovLogo} alt="TOV Logo" className="h-8 w-auto" />
+              <span className="font-medium text-gray-700 dark:text-gray-200 ml-2">Property OS</span>
             </div>
           </div>
           
@@ -214,14 +211,7 @@ export default function MobileNav({ role }: MobileNavProps) {
             <Bell className="h-5 w-5 text-gray-700 dark:text-gray-300 relative" />
             <div className="relative">
               <div className="w-2 h-2 bg-red-500 rounded-full absolute -top-0.5 -right-0.5"></div>
-              <Avatar className="h-8 w-8 border border-gray-200 dark:border-gray-700">
-                <AvatarFallback className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">
-                  {user.firstName && user.lastName 
-                    ? getInitials(user.firstName, user.lastName) 
-                    : user.username.substring(0, 2).toUpperCase()}
-                </AvatarFallback>
-                <AvatarImage src={user.profileImage || ""} />
-              </Avatar>
+              <ProfileAvatar userRole={role} size="sm" className="border border-gray-200 dark:border-gray-700" />
             </div>
           </div>
         </div>
@@ -242,14 +232,7 @@ export default function MobileNav({ role }: MobileNavProps) {
           {/* User Section */}
           <div className="p-4 border-b border-gray-100 dark:border-gray-800">
             <div className="flex items-center gap-3 mb-4">
-              <Avatar className="h-11 w-11 border">
-                <AvatarFallback className="bg-primary/10 text-primary">
-                  {user.firstName && user.lastName 
-                    ? getInitials(user.firstName, user.lastName) 
-                    : user.username.substring(0, 2).toUpperCase()}
-                </AvatarFallback>
-                <AvatarImage src={user.profileImage || ""} />
-              </Avatar>
+              <ProfileAvatar userRole={role} size="lg" className="border" />
               <div className="flex-1 min-w-0">
                 <p className="font-medium truncate">
                   {user.firstName && user.lastName 
