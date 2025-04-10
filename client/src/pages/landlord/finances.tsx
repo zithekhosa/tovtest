@@ -240,12 +240,12 @@ export default function Finances() {
   return (
     <StandardLayout title="Financial Management" subtitle="Track and analyze your property finances">
       <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-5 mb-6">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="transactions">Transactions</TabsTrigger>
-          <TabsTrigger value="property-analysis">Property Analysis</TabsTrigger>
-          <TabsTrigger value="reports">Reports</TabsTrigger>
-          <TabsTrigger value="forecasting">Forecasting</TabsTrigger>
+        <TabsList className="flex flex-wrap mb-6 overflow-x-auto whitespace-nowrap">
+          <TabsTrigger value="overview" className="min-w-fit">Overview</TabsTrigger>
+          <TabsTrigger value="transactions" className="min-w-fit">Transactions</TabsTrigger>
+          <TabsTrigger value="property-analysis" className="min-w-fit">Property Analysis</TabsTrigger>
+          <TabsTrigger value="reports" className="min-w-fit">Reports</TabsTrigger>
+          <TabsTrigger value="forecasting" className="min-w-fit">Forecasting</TabsTrigger>
         </TabsList>
         
         {/* OVERVIEW TAB */}
@@ -376,35 +376,41 @@ export default function Finances() {
               <CardDescription>Financial performance metrics for your properties</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="border rounded-md">
-                <div className="grid grid-cols-6 gap-2 p-3 bg-muted font-medium text-sm">
-                  <div>Property</div>
-                  <div>Monthly Rent</div>
-                  <div>Annual Income</div>
-                  <div>Expenses</div>
-                  <div>Net Income</div>
-                  <div>ROI</div>
-                </div>
-                {properties.slice(0, 5).map((property, index) => {
-                  const annualRent = property.rentAmount * 12;
-                  const expenses = annualRent * 0.3;
-                  const netIncome = annualRent - expenses;
-                  const propertyValue = property.rentAmount * 12 * 10;
-                  const roi = (netIncome / propertyValue) * 100;
-                  
-                  return (
-                    <div key={property.id} className={`grid grid-cols-6 gap-2 p-3 text-sm ${index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900'}`}>
-                      <div className="font-medium">{property.title}</div>
-                      <div>{formatCurrency(property.rentAmount)}</div>
-                      <div>{formatCurrency(annualRent)}</div>
-                      <div>{formatCurrency(expenses)}</div>
-                      <div>{formatCurrency(netIncome)}</div>
-                      <div className={roi > 5 ? 'text-emerald-500' : 'text-amber-500'}>
-                        {roi.toFixed(1)}%
-                      </div>
-                    </div>
-                  );
-                })}
+              <div className="border rounded-md overflow-x-auto">
+                <table className="min-w-full">
+                  <thead>
+                    <tr className="bg-muted">
+                      <th className="p-3 font-medium text-sm text-left">Property</th>
+                      <th className="p-3 font-medium text-sm text-left">Monthly Rent</th>
+                      <th className="p-3 font-medium text-sm text-left">Annual Income</th>
+                      <th className="p-3 font-medium text-sm text-left">Expenses</th>
+                      <th className="p-3 font-medium text-sm text-left">Net Income</th>
+                      <th className="p-3 font-medium text-sm text-left">ROI</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {properties.slice(0, 5).map((property, index) => {
+                      const annualRent = property.rentAmount * 12;
+                      const expenses = annualRent * 0.3;
+                      const netIncome = annualRent - expenses;
+                      const propertyValue = property.rentAmount * 12 * 10;
+                      const roi = (netIncome / propertyValue) * 100;
+                      
+                      return (
+                        <tr key={property.id} className={`text-sm ${index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900'}`}>
+                          <td className="p-3 font-medium">{property.title}</td>
+                          <td className="p-3">{formatCurrency(property.rentAmount)}</td>
+                          <td className="p-3">{formatCurrency(annualRent)}</td>
+                          <td className="p-3">{formatCurrency(expenses)}</td>
+                          <td className="p-3">{formatCurrency(netIncome)}</td>
+                          <td className={`p-3 ${roi > 5 ? 'text-emerald-500' : 'text-amber-500'}`}>
+                            {roi.toFixed(1)}%
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
             </CardContent>
           </Card>
@@ -460,43 +466,49 @@ export default function Finances() {
             </CardHeader>
             <CardContent>
               {filteredPayments.length > 0 ? (
-                <div className="border rounded-md">
-                  <div className="grid grid-cols-5 gap-2 p-3 bg-muted font-medium">
-                    <div>Date</div>
-                    <div>Description</div>
-                    <div>Property</div>
-                    <div>Status</div>
-                    <div className="text-right">Amount</div>
-                  </div>
-                  {filteredPayments.map((payment: Payment) => {
-                    // Find related lease and property
-                    const lease = leases.find(l => l.id === payment.leaseId);
-                    const property = lease 
-                      ? properties.find(p => p.id === lease.propertyId) 
-                      : undefined;
-                    const isIncome = payment.paymentType === "rent";
-                    
-                    return (
-                      <div key={payment.id} className="grid grid-cols-5 gap-2 p-3 border-t text-sm">
-                        <div>{formatDate(payment.paymentDate.toString())}</div>
-                        <div>{payment.description || (isIncome ? 'Rent Payment' : 'Expense')}</div>
-                        <div>{property?.title || 'Unknown'}</div>
-                        <div>
-                          <Badge 
-                            variant="outline"
-                            className={payment.status === 'paid' 
-                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
-                              : 'bg-amber-50 text-amber-700 border-amber-200'}
-                          >
-                            {payment.status}
-                          </Badge>
-                        </div>
-                        <div className={`text-right font-medium ${isIncome ? 'text-emerald-600' : 'text-red-600'}`}>
-                          {isIncome ? '+' : '-'}{formatCurrency(payment.amount)}
-                        </div>
-                      </div>
-                    );
-                  })}
+                <div className="border rounded-md overflow-x-auto">
+                  <table className="min-w-full">
+                    <thead>
+                      <tr className="bg-muted">
+                        <th className="p-3 font-medium text-sm text-left">Date</th>
+                        <th className="p-3 font-medium text-sm text-left">Description</th>
+                        <th className="p-3 font-medium text-sm text-left">Property</th>
+                        <th className="p-3 font-medium text-sm text-left">Status</th>
+                        <th className="p-3 font-medium text-sm text-right">Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredPayments.map((payment: Payment) => {
+                        // Find related lease and property
+                        const lease = leases.find(l => l.id === payment.leaseId);
+                        const property = lease 
+                          ? properties.find(p => p.id === lease.propertyId) 
+                          : undefined;
+                        const isIncome = payment.paymentType === "rent";
+                        
+                        return (
+                          <tr key={payment.id} className="text-sm border-t">
+                            <td className="p-3">{formatDate(payment.paymentDate.toString())}</td>
+                            <td className="p-3">{payment.description || (isIncome ? 'Rent Payment' : 'Expense')}</td>
+                            <td className="p-3">{property?.title || 'Unknown'}</td>
+                            <td className="p-3">
+                              <Badge 
+                                variant="outline"
+                                className={payment.status === 'paid' 
+                                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                                  : 'bg-amber-50 text-amber-700 border-amber-200'}
+                              >
+                                {payment.status}
+                              </Badge>
+                            </td>
+                            <td className={`p-3 text-right font-medium ${isIncome ? 'text-emerald-600' : 'text-red-600'}`}>
+                              {isIncome ? '+' : '-'}{formatCurrency(payment.amount)}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 </div>
               ) : (
                 <div className="text-center py-8 border rounded-md">
@@ -554,7 +566,7 @@ export default function Finances() {
             {/* Property Analysis */}
             <Card className="lg:col-span-2">
               <CardHeader>
-                <CardTitle>{selectedProperty?.name || 'Property Analysis'}</CardTitle>
+                <CardTitle>{selectedProperty?.title || 'Property Analysis'}</CardTitle>
                 <CardDescription>
                   {selectedProperty?.address || 'Select a property to view financial details'}
                 </CardDescription>
@@ -727,29 +739,35 @@ export default function Finances() {
                   </ResponsiveContainer>
                 </div>
                 
-                <div className="border rounded-md">
-                  <div className="grid grid-cols-3 gap-2 p-3 bg-muted font-medium text-sm">
-                    <div>Property</div>
-                    <div>Market Value</div>
-                    <div>Valuation Change</div>
-                  </div>
-                  {properties.map((property, index) => {
-                    // Calculate property value (10 years of rent)
-                    const value = property.rentAmount * 12 * 10;
-                    
-                    return (
-                      <div key={property.id} className="grid grid-cols-3 gap-2 p-3 border-t text-sm">
-                        <div className="font-medium">{property.title}</div>
-                        <div>{formatCurrency(value)}</div>
-                        <div className="text-emerald-500">+2.8%</div>
-                      </div>
-                    );
-                  })}
-                  <div className="grid grid-cols-3 gap-2 p-3 border-t bg-muted font-medium">
-                    <div>Total Portfolio Value</div>
-                    <div>{formatCurrency(totalPortfolioValue)}</div>
-                    <div className="text-emerald-500">+2.8%</div>
-                  </div>
+                <div className="border rounded-md overflow-x-auto">
+                  <table className="min-w-full">
+                    <thead>
+                      <tr className="bg-muted">
+                        <th className="p-3 font-medium text-sm text-left">Property</th>
+                        <th className="p-3 font-medium text-sm text-left">Market Value</th>
+                        <th className="p-3 font-medium text-sm text-left">Valuation Change</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {properties.map((property, index) => {
+                        // Calculate property value (10 years of rent)
+                        const value = property.rentAmount * 12 * 10;
+                        
+                        return (
+                          <tr key={property.id} className="text-sm border-t">
+                            <td className="p-3 font-medium">{property.title}</td>
+                            <td className="p-3">{formatCurrency(value)}</td>
+                            <td className="p-3 text-emerald-500">+2.8%</td>
+                          </tr>
+                        );
+                      })}
+                      <tr className="bg-muted font-medium border-t">
+                        <td className="p-3">Total Portfolio Value</td>
+                        <td className="p-3">{formatCurrency(totalPortfolioValue)}</td>
+                        <td className="p-3 text-emerald-500">+2.8%</td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
                 
                 <div className="mt-4 flex justify-end">
@@ -863,21 +881,27 @@ export default function Finances() {
                   </ResponsiveContainer>
                 </div>
                 
-                <div className="border rounded-md mt-4">
-                  <div className="grid grid-cols-3 gap-2 p-3 bg-muted font-medium text-sm">
-                    <div>Property</div>
-                    <div>ROI</div>
-                    <div>Cap Rate</div>
-                  </div>
-                  {propertyPerformanceData.map((property, index) => (
-                    <div key={property.id} className="grid grid-cols-3 gap-2 p-3 border-t text-sm">
-                      <div className="font-medium">{property.name}</div>
-                      <div className={property.roi > 5 ? 'text-emerald-500' : 'text-amber-500'}>
-                        {property.roi}%
-                      </div>
-                      <div>{property.capRate}%</div>
-                    </div>
-                  ))}
+                <div className="border rounded-md mt-4 overflow-x-auto">
+                  <table className="min-w-full">
+                    <thead>
+                      <tr className="bg-muted">
+                        <th className="p-3 font-medium text-sm text-left">Property</th>
+                        <th className="p-3 font-medium text-sm text-left">ROI</th>
+                        <th className="p-3 font-medium text-sm text-left">Cap Rate</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {propertyPerformanceData.map((property, index) => (
+                        <tr key={property.id} className="text-sm border-t">
+                          <td className="p-3 font-medium">{property.name}</td>
+                          <td className={`p-3 ${property.roi > 5 ? 'text-emerald-500' : 'text-amber-500'}`}>
+                            {property.roi}%
+                          </td>
+                          <td className="p-3">{property.capRate}%</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
                 
                 <div className="mt-4 flex justify-end">
@@ -923,30 +947,36 @@ export default function Finances() {
                   </ResponsiveContainer>
                 </div>
                 
-                <div className="border rounded-md mt-4">
-                  <div className="grid grid-cols-4 gap-2 p-3 bg-muted font-medium text-sm">
-                    <div>Year</div>
-                    <div>Projected Income</div>
-                    <div>Projected Expenses</div>
-                    <div>Net Cash Flow</div>
-                  </div>
-                  {[0, 1, 2, 3, 4].map((yearOffset) => {
-                    const year = 2025 + yearOffset;
-                    const incomeGrowth = 1 + (yearOffset * 0.03);
-                    const expenseGrowth = 1 + (yearOffset * 0.02);
-                    const projectedIncome = monthlyIncome * 12 * incomeGrowth;
-                    const projectedExpenses = estimatedAnnualExpenses * expenseGrowth;
-                    const netCashFlow = projectedIncome - projectedExpenses;
-                    
-                    return (
-                      <div key={year} className="grid grid-cols-4 gap-2 p-3 border-t text-sm">
-                        <div className="font-medium">{year}</div>
-                        <div>{formatCurrency(projectedIncome)}</div>
-                        <div>{formatCurrency(projectedExpenses)}</div>
-                        <div className="font-medium text-emerald-600">{formatCurrency(netCashFlow)}</div>
-                      </div>
-                    );
-                  })}
+                <div className="border rounded-md mt-4 overflow-x-auto">
+                  <table className="min-w-full">
+                    <thead>
+                      <tr className="bg-muted">
+                        <th className="p-3 font-medium text-sm text-left">Year</th>
+                        <th className="p-3 font-medium text-sm text-left">Projected Income</th>
+                        <th className="p-3 font-medium text-sm text-left">Projected Expenses</th>
+                        <th className="p-3 font-medium text-sm text-left">Net Cash Flow</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[0, 1, 2, 3, 4].map((yearOffset) => {
+                        const year = 2025 + yearOffset;
+                        const incomeGrowth = 1 + (yearOffset * 0.03);
+                        const expenseGrowth = 1 + (yearOffset * 0.02);
+                        const projectedIncome = monthlyIncome * 12 * incomeGrowth;
+                        const projectedExpenses = estimatedAnnualExpenses * expenseGrowth;
+                        const netCashFlow = projectedIncome - projectedExpenses;
+                        
+                        return (
+                          <tr key={year} className="text-sm border-t">
+                            <td className="p-3 font-medium">{year}</td>
+                            <td className="p-3">{formatCurrency(projectedIncome)}</td>
+                            <td className="p-3">{formatCurrency(projectedExpenses)}</td>
+                            <td className="p-3 font-medium text-emerald-600">{formatCurrency(netCashFlow)}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 </div>
               </CardContent>
             </Card>
