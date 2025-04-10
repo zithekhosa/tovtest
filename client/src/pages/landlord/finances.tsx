@@ -338,7 +338,7 @@ export default function Finances() {
                 <CardDescription>Annual expenses by category</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-[300px]">
+                <div className="h-[300px] relative">
                   <ResponsiveContainer width="100%" height="100%">
                     <RechartPieChart>
                       <Pie
@@ -346,7 +346,12 @@ export default function Finances() {
                         cx="50%"
                         cy="50%"
                         labelLine={false}
-                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        label={({ name, percent }) => {
+                          // On small screens, only show percentage
+                          return window.innerWidth < 768 ? 
+                            `${(percent * 100).toFixed(0)}%` :
+                            `${name}: ${(percent * 100).toFixed(0)}%`;
+                        }}
                         outerRadius={80}
                         fill="#8884d8"
                         dataKey="value"
@@ -356,7 +361,13 @@ export default function Finances() {
                         ))}
                       </Pie>
                       <Tooltip formatter={(value) => formatCurrency(value as number)} />
-                      <Legend layout="vertical" verticalAlign="middle" align="right" />
+                      {/* Move legend to bottom on mobile screens */}
+                      <Legend 
+                        layout={window.innerWidth < 768 ? "horizontal" : "vertical"}
+                        verticalAlign={window.innerWidth < 768 ? "bottom" : "middle"}
+                        align={window.innerWidth < 768 ? "center" : "right"}
+                        wrapperStyle={window.innerWidth < 768 ? { paddingTop: '20px' } : {}}
+                      />
                     </RechartPieChart>
                   </ResponsiveContainer>
                 </div>
@@ -1016,25 +1027,31 @@ export default function Finances() {
                   </ResponsiveContainer>
                 </div>
                 
-                <div className="border rounded-md mt-4">
-                  <div className="grid grid-cols-3 gap-2 p-3 bg-muted font-medium text-sm">
-                    <div>Year</div>
-                    <div>Projected Value</div>
-                    <div>Annual Growth</div>
-                  </div>
-                  {[0, 1, 2, 3, 4].map((yearOffset) => {
-                    const year = 2025 + yearOffset;
-                    const growthFactor = Math.pow(1.028, yearOffset);
-                    const projectedValue = totalPortfolioValue * growthFactor;
-                    
-                    return (
-                      <div key={year} className="grid grid-cols-3 gap-2 p-3 border-t text-sm">
-                        <div className="font-medium">{year}</div>
-                        <div>{formatCurrency(projectedValue)}</div>
-                        <div className="text-emerald-500">+2.8%</div>
-                      </div>
-                    );
-                  })}
+                <div className="border rounded-md mt-4 overflow-x-auto">
+                  <table className="min-w-full">
+                    <thead>
+                      <tr className="bg-muted">
+                        <th className="p-3 font-medium text-sm text-left">Year</th>
+                        <th className="p-3 font-medium text-sm text-left">Projected Value</th>
+                        <th className="p-3 font-medium text-sm text-left">Annual Growth</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[0, 1, 2, 3, 4].map((yearOffset) => {
+                        const year = 2025 + yearOffset;
+                        const growthFactor = Math.pow(1.028, yearOffset);
+                        const projectedValue = totalPortfolioValue * growthFactor;
+                        
+                        return (
+                          <tr key={year} className="text-sm border-t">
+                            <td className="p-3 font-medium">{year}</td>
+                            <td className="p-3">{formatCurrency(projectedValue)}</td>
+                            <td className="p-3 text-emerald-500">+2.8%</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 </div>
                 
                 <div className="p-4 bg-muted mt-4 rounded-md">
