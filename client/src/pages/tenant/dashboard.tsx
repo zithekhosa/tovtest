@@ -19,10 +19,14 @@ import {
   X,
   Search,
   ChevronDown,
+  ChevronRight,
   User,
   MapPin,
   Star,
-  Plus
+  Plus,
+  Droplets,
+  Zap,
+  Building
 } from "lucide-react";
 import { Property, Payment, Lease, Document } from "@shared/schema";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -835,6 +839,16 @@ export default function TenantDashboard() {
         default: return 'bg-amber-500';
       }
     };
+    
+    // Filter for active maintenance requests (pending or in progress)
+    const activeRequests = recentMaintenanceRequests.filter(
+      request => ['pending', 'in progress'].includes(request.status?.toLowerCase() || '')
+    );
+    
+    // Filter for completed maintenance requests
+    const completedRequests = recentMaintenanceRequests.filter(
+      request => request.status?.toLowerCase() === 'completed'
+    );
     
     return (
       <Card className="overflow-hidden relative">

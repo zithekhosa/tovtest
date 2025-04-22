@@ -1,0 +1,37 @@
+The above error occurred in the <RecentMaintenance> component:
+
+    at RecentMaintenance (https://62ed9c2e-1f2d-49a2-91e2-3543ab2d4f7d-00-122fasuv1rkk9.spock.replit.dev/src/pages/tenant/dashboard.tsx:1738:9)
+    at div
+    at div
+    at https://62ed9c2e-1f2d-49a2-91e2-3543ab2d4f7d-00-122fasuv1rkk9.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-CPFL7ZFD.js?v=29b824b0:41:13
+    at Presence (https://62ed9c2e-1f2d-49a2-91e2-3543ab2d4f7d-00-122fasuv1rkk9.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-AZCBCMZO.js?v=29b824b0:24:11)
+    at https://62ed9c2e-1f2d-49a2-91e2-3543ab2d4f7d-00-122fasuv1rkk9.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tabs.js?v=29b824b0:175:13
+    at _c5 (https://62ed9c2e-1f2d-49a2-91e2-3543ab2d4f7d-00-122fasuv1rkk9.spock.replit.dev/src/components/ui/tabs.tsx:72:12)
+    at div
+    at https://62ed9c2e-1f2d-49a2-91e2-3543ab2d4f7d-00-122fasuv1rkk9.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-CPFL7ZFD.js?v=29b824b0:41:13
+    at Provider (https://62ed9c2e-1f2d-49a2-91e2-3543ab2d4f7d-00-122fasuv1rkk9.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LSQNWB54.js?v=29b824b0:38:15)
+    at https://62ed9c2e-1f2d-49a2-91e2-3543ab2d4f7d-00-122fasuv1rkk9.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tabs.js?v=29b824b0:53:7
+    at div
+    at main
+    at div
+    at div
+    at TenantDashboard (https://62ed9c2e-1f2d-49a2-91e2-3543ab2d4f7d-00-122fasuv1rkk9.spock.replit.dev/src/pages/tenant/dashboard.tsx:159:20)
+    at div
+    at main
+    at div
+    at AppLayout (https://62ed9c2e-1f2d-49a2-91e2-3543ab2d4f7d-00-122fasuv1rkk9.spock.replit.dev/src/components/layout/AppLayout.tsx:23:37)
+    at Route (https://62ed9c2e-1f2d-49a2-91e2-3543ab2d4f7d-00-122fasuv1rkk9.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=29b824b0:323:16)
+    at ProtectedRoute (https://62ed9c2e-1f2d-49a2-91e2-3543ab2d4f7d-00-122fasuv1rkk9.spock.replit.dev/src/lib/protected-route.tsx:23:3)
+    at Switch (https://62ed9c2e-1f2d-49a2-91e2-3543ab2d4f7d-00-122fasuv1rkk9.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=29b824b0:379:17)
+    at Router
+    at App
+    at WebSocketProvider (https://62ed9c2e-1f2d-49a2-91e2-3543ab2d4f7d-00-122fasuv1rkk9.spock.replit.dev/src/hooks/use-websocket-context.tsx:21:37)
+    at ThemeProvider (https://62ed9c2e-1f2d-49a2-91e2-3543ab2d4f7d-00-122fasuv1rkk9.spock.replit.dev/src/hooks/use-theme.tsx:164:33)
+    at AuthProvider (https://62ed9c2e-1f2d-49a2-91e2-3543ab2d4f7d-00-122fasuv1rkk9.spock.replit.dev/src/hooks/use-auth.tsx:40:32)
+    at QueryClientProvider (https://62ed9c2e-1f2d-49a2-91e2-3543ab2d4f7d-00-122fasuv1rkk9.spock.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=29b824b0:2805:3)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+activeRequests is not defined
+WebSocket error: 
+Event {isTrusted: true}
