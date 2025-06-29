@@ -394,69 +394,113 @@ export default function MaintenanceMarketplace() {
               </div>
             </div>
 
-            {/* Service Providers Grid - Fiverr Style */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {/* Service Providers Grid - Enhanced Fiverr Style */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredProviders.map((provider) => (
-                <Card key={provider.id} className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 overflow-hidden border border-gray-200 bg-white">
+                <Card key={provider.id} className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 overflow-hidden border border-gray-200 bg-white cursor-pointer">
                   {/* Service Image */}
                   <div className="relative">
                     <img
                       src={provider.gallery[0]}
                       alt={provider.title}
-                      className="w-full h-48 object-cover"
+                      className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-300"
                     />
-                    <div className="absolute top-3 left-3">
-                      <Badge className={`${getLevelColor(provider.level)} text-white border-0 text-xs font-semibold`}>
+                    <div className="absolute top-4 left-4">
+                      <Badge className={`${getLevelColor(provider.level)} text-white border-0 text-sm font-bold px-3 py-1`}>
                         {provider.level}
                       </Badge>
                     </div>
-                    <div className="absolute top-3 right-3">
+                    <div className="absolute top-4 right-4">
                       <Button
                         variant="ghost"
                         size="sm"
-                        className={`bg-white/90 hover:bg-white p-2 h-8 w-8 ${provider.isFavorite ? 'text-red-500' : 'text-gray-600'}`}
+                        className={`bg-white/90 hover:bg-white p-2 h-9 w-9 rounded-full ${provider.isFavorite ? 'text-red-500' : 'text-gray-600'}`}
                       >
-                        <Heart className={`h-4 w-4 ${provider.isFavorite ? 'fill-current' : ''}`} />
+                        <Heart className={`h-5 w-5 ${provider.isFavorite ? 'fill-current' : ''}`} />
                       </Button>
                     </div>
+                    
+                    {/* Online Status Indicator */}
+                    {provider.isOnline && (
+                      <div className="absolute bottom-4 left-4">
+                        <div className="flex items-center gap-2 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium">
+                          <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                          Online
+                        </div>
+                      </div>
+                    )}
                   </div>
                   
                   {/* Provider Info */}
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-3 mb-3">
-                      <Avatar className="h-8 w-8">
+                  <CardContent className="p-6">
+                    {/* Provider Details */}
+                    <div className="flex items-center gap-3 mb-4">
+                      <Avatar className="h-10 w-10">
                         <AvatarImage src={provider.avatar} alt={provider.name} />
-                        <AvatarFallback className="text-xs">{provider.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                        <AvatarFallback className="text-sm font-semibold">{provider.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                       </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-gray-900 text-sm truncate">{provider.name}</p>
-                        <p className="text-xs text-gray-500">Level {provider.level.split(' ')[1] || '2'} Seller</p>
+                      <div className="flex-1">
+                        <p className="font-bold text-gray-900 text-base">{provider.name}</p>
+                        <p className="text-sm text-gray-600">Professional Seller</p>
                       </div>
-                      {provider.isOnline && (
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      )}
                     </div>
                     
                     {/* Service Title */}
-                    <h3 className="font-medium text-gray-900 text-sm mb-3 line-clamp-2 leading-tight min-h-[2.5rem]">
+                    <h3 className="font-semibold text-gray-900 text-lg mb-3 line-clamp-2 leading-snug min-h-[3.5rem]">
                       {provider.title}
                     </h3>
                     
-                    {/* Rating */}
-                    <div className="flex items-center gap-1 mb-3">
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      <span className="font-semibold text-gray-900 text-sm">{provider.rating}</span>
-                      <span className="text-gray-500 text-sm">({provider.reviews})</span>
+                    {/* Skills Tags */}
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {provider.skills.slice(0, 2).map((skill, index) => (
+                        <Badge key={index} variant="secondary" className="text-xs px-2 py-1">
+                          {skill}
+                        </Badge>
+                      ))}
+                      {provider.skills.length > 2 && (
+                        <Badge variant="outline" className="text-xs px-2 py-1">
+                          +{provider.skills.length - 2} more
+                        </Badge>
+                      )}
                     </div>
                     
-                    {/* Price */}
-                    <div className="flex items-center justify-between">
-                      <div className="text-right">
-                        <p className="text-xs text-gray-500 uppercase tracking-wide">Starting at</p>
-                        <p className="text-lg font-bold text-gray-900">
+                    {/* Rating & Reviews */}
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="flex items-center gap-1">
+                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        <span className="font-bold text-gray-900">{provider.rating}</span>
+                      </div>
+                      <span className="text-gray-500 text-sm">({provider.reviews} reviews)</span>
+                      <span className="text-gray-300">•</span>
+                      <span className="text-gray-600 text-sm">{provider.completedJobs} orders</span>
+                    </div>
+                    
+                    {/* Response Time & Delivery */}
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="flex items-center gap-1 text-sm text-gray-600">
+                        <Clock className="h-4 w-4" />
+                        <span>{provider.responseTime}</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-sm text-gray-600">
+                        <Shield className="h-4 w-4" />
+                        <span>{provider.deliveryTime}</span>
+                      </div>
+                    </div>
+                    
+                    {/* Price & CTA */}
+                    <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                      <div>
+                        <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Starting at</p>
+                        <p className="text-2xl font-bold text-gray-900">
                           BWP {provider.startingPrice}
                         </p>
                       </div>
+                      <Button 
+                        className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-200"
+                      >
+                        View Details
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
