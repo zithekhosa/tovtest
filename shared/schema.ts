@@ -644,6 +644,460 @@ export const insertTenantRatingSchema = createInsertSchema(tenantRatings).pick({
 export type InsertTenantRating = z.infer<typeof insertTenantRatingSchema>;
 export type TenantRating = typeof tenantRatings.$inferSelect;
 
+// Financial Accounts and Transactions
+export const financialAccounts = pgTable("financial_accounts", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  accountType: text("account_type").notNull(), // bank, mobile_money, escrow
+  accountName: text("account_name").notNull(),
+  accountNumber: text("account_number"),
+  bankName: text("bank_name"),
+  currency: text("currency").notNull().default("BWP"),
+  balance: numeric("balance", { precision: 12, scale: 2 }).default("0.00"),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at"),
+});
+
+export const financialAccountsRelations = relations(financialAccounts, ({ one, many }) => ({
+  user: one(users, {
+    fields: [financialAccounts.userId],
+    references: [users.id],
+    relationName: "user_financial_accounts",
+  }),
+  transactions: many(financialTransactions, { relationName: "account_transactions" }),
+}));
+
+// Financial Transactions (comprehensive transaction tracking)
+export const financialTransactions = pgTable("financial_transactions", {
+  id: serial("id").primaryKey(),
+  accountId: integer("account_id").notNull(),
+  userId: integer("user_id").notNull(),
+  transactionType: text("transaction_type").notNull(), // rent_payment, security_deposit, maintenance_fee, commission, etc.
+  amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
+  currency: text("currency").notNull().default("BWP"),
+  description: text("description").notNull(),
+  reference: text("reference"), // external reference number
+  status: text("status").notNull().default("pending"), // pending, completed, failed, cancelled
+  paymentMethod: text("payment_method").notNull(),
+  relatedEntityType: text("related_entity_type"), // lease, property, maintenance_request, etc.
+  relatedEntityId: integer("related_entity_id"),
+  processedAt: timestamp("processed_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at"),
+});
+
+export const financialTransactionsRelations = relations(financialTransactions, ({ one }) => ({
+  account: one(financialAccounts, {
+    fields: [financialTransactions.accountId],
+    references: [financialAccounts.id],
+    relationName: "account_transactions",
+  }),
+  user: one(users, {
+    fields: [financialTransactions.userId],
+    references: [users.id],
+    relationName: "user_financial_transactions",
+  }),
+}));
+
+// Property Analytics and Performance Metrics
+export const propertyAnalytics = pgTable("property_analytics", {
+  id: serial("id").primaryKey(),
+  propertyId: integer("property_id").notNull(),
+  period: text("period").notNull(), // monthly, quarterly, yearly
+  periodStart: timestamp("period_start").notNull(),
+  periodEnd: timestamp("period_end").notNull(),
+  occupancyRate: real("occupancy_rate"), // percentage
+  averageRent: numeric("average_rent", { precision: 10, scale: 2 }),
+  totalIncome: numeric("total_income", { precision: 12, scale: 2 }),
+  totalExpenses: numeric("total_expenses", { precision: 12, scale: 2 }),
+  netIncome: numeric("net_income", { precision: 12, scale: 2 }),
+  roi: real("roi"), // return on investment percentage
+  maintenanceCosts: numeric("maintenance_costs", { precision: 10, scale: 2 }),
+  vacancyDays: integer("vacancy_days"),
+  tenantTurnover: integer("tenant_turnover"),
+  marketValue: numeric("market_value", { precision: 12, scale: 2 }),
+  appreciationRate: real("appreciation_rate"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at"),
+});
+
+export const propertyAnalyticsRelations = relations(propertyAnalytics, ({ one }) => ({
+  property: one(properties, {
+    fields: [propertyAnalytics.propertyId],
+    references: [properties.id],
+    relationName: "property_analytics",
+  }),
+}));
+
+// Notification System
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  type: text("type").notNull(), // payment_due, maintenance_update, lease_expiry, etc.
+  priority: text("priority").notNull().default("medium"), // low, medium, high, urgent
+  relatedEntityType: text("related_entity_type"),
+  relatedEntityId: integer("related_entity_id"),
+  isRead: boolean("is_read").notNull().default(false),
+  actionRequired: boolean("action_required").notNull().default(false),
+  actionUrl: text("action_url"),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  readAt: timestamp("read_at"),
+});
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, {
+    fields: [notifications.userId],
+    references: [users.id],
+    relationName: "user_notifications",
+  }),
+}));
+
+// Audit Trail for all critical operations
+export const auditLogs = pgTable("audit_logs", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  action: text("action").notNull(), // create, update, delete, login, etc.
+  entityType: text("entity_type").notNull(), // user, property, lease, payment, etc.
+  entityId: integer("entity_id"),
+  oldValues: jsonb("old_values"),
+  newValues: jsonb("new_values"),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  sessionId: text("session_id"),
+  success: boolean("success").notNull().default(true),
+  errorMessage: text("error_message"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const auditLogsRelations = relations(auditLogs, ({ one }) => ({
+  user: one(users, {
+    fields: [auditLogs.userId],
+    references: [users.id],
+    relationName: "user_audit_logs",
+  }),
+}));
+
+// Property Inspections
+export const propertyInspections = pgTable("property_inspections", {
+  id: serial("id").primaryKey(),
+  propertyId: integer("property_id").notNull(),
+  inspectorId: integer("inspector_id").notNull(),
+  inspectionType: text("inspection_type").notNull(), // move_in, move_out, routine, maintenance
+  scheduledDate: timestamp("scheduled_date").notNull(),
+  completedDate: timestamp("completed_date"),
+  status: text("status").notNull().default("scheduled"),
+  overallCondition: text("overall_condition"), // excellent, good, fair, poor
+  findings: jsonb("findings"), // structured inspection data
+  images: jsonb("images").$type<string[]>(),
+  report: text("report"),
+  actionItems: jsonb("action_items"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at"),
+});
+
+export const propertyInspectionsRelations = relations(propertyInspections, ({ one }) => ({
+  property: one(properties, {
+    fields: [propertyInspections.propertyId],
+    references: [properties.id],
+    relationName: "property_inspections",
+  }),
+  inspector: one(users, {
+    fields: [propertyInspections.inspectorId],
+    references: [users.id],
+    relationName: "inspector_inspections",
+  }),
+}));
+
+// Lease Templates for standardization
+export const leaseTemplates = pgTable("lease_templates", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  templateContent: text("template_content").notNull(),
+  propertyType: text("property_type"),
+  region: text("region"),
+  isActive: boolean("is_active").notNull().default(true),
+  createdBy: integer("created_by").notNull(),
+  version: text("version").notNull().default("1.0"),
+  legallyReviewed: boolean("legally_reviewed").notNull().default(false),
+  reviewedAt: timestamp("reviewed_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at"),
+});
+
+export const leaseTemplatesRelations = relations(leaseTemplates, ({ one }) => ({
+  creator: one(users, {
+    fields: [leaseTemplates.createdBy],
+    references: [users.id],
+    relationName: "user_lease_templates",
+  }),
+}));
+
+// Expense Categories for better financial tracking
+export const expenseCategories = pgTable("expense_categories", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  parentCategoryId: integer("parent_category_id"),
+  isActive: boolean("is_active").notNull().default(true),
+  isTaxDeductible: boolean("is_tax_deductible").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const expenseCategoriesRelations = relations(expenseCategories, ({ one, many }) => ({
+  parentCategory: one(expenseCategories, {
+    fields: [expenseCategories.parentCategoryId],
+    references: [expenseCategories.id],
+    relationName: "parent_expense_category",
+  }),
+  subCategories: many(expenseCategories, { relationName: "parent_expense_category" }),
+  expenses: many(expenses, { relationName: "category_expenses" }),
+}));
+
+// Expenses tracking
+export const expenses = pgTable("expenses", {
+  id: serial("id").primaryKey(),
+  propertyId: integer("property_id"),
+  userId: integer("user_id").notNull(),
+  categoryId: integer("category_id").notNull(),
+  amount: numeric("amount", { precision: 10, scale: 2 }).notNull(),
+  description: text("description").notNull(),
+  expenseDate: timestamp("expense_date").notNull(),
+  vendor: text("vendor"),
+  receiptUrl: text("receipt_url"),
+  isRecurring: boolean("is_recurring").notNull().default(false),
+  recurringPeriod: text("recurring_period"), // monthly, quarterly, yearly
+  isTaxDeductible: boolean("is_tax_deductible").notNull().default(false),
+  status: text("status").notNull().default("pending"), // pending, approved, rejected
+  approvedBy: integer("approved_by"),
+  approvedAt: timestamp("approved_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at"),
+});
+
+export const expensesRelations = relations(expenses, ({ one }) => ({
+  property: one(properties, {
+    fields: [expenses.propertyId],
+    references: [properties.id],
+    relationName: "property_expenses",
+  }),
+  user: one(users, {
+    fields: [expenses.userId],
+    references: [users.id],
+    relationName: "user_expenses",
+  }),
+  category: one(expenseCategories, {
+    fields: [expenses.categoryId],
+    references: [expenseCategories.id],
+    relationName: "category_expenses",
+  }),
+  approver: one(users, {
+    fields: [expenses.approvedBy],
+    references: [users.id],
+    relationName: "user_approved_expenses",
+  }),
+}));
+
+// Property Valuation History
+export const propertyValuations = pgTable("property_valuations", {
+  id: serial("id").primaryKey(),
+  propertyId: integer("property_id").notNull(),
+  valuationType: text("valuation_type").notNull(), // market, insurance, tax, rental
+  valuationAmount: numeric("valuation_amount", { precision: 12, scale: 2 }).notNull(),
+  valuationDate: timestamp("valuation_date").notNull(),
+  valuatorId: integer("valuator_id"),
+  methodology: text("methodology"),
+  comparableProperties: jsonb("comparable_properties"),
+  marketConditions: text("market_conditions"),
+  reportUrl: text("report_url"),
+  isOfficial: boolean("is_official").notNull().default(false),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at"),
+});
+
+export const propertyValuationsRelations = relations(propertyValuations, ({ one }) => ({
+  property: one(properties, {
+    fields: [propertyValuations.propertyId],
+    references: [properties.id],
+    relationName: "property_valuations",
+  }),
+  valuator: one(users, {
+    fields: [propertyValuations.valuatorId],
+    references: [users.id],
+    relationName: "valuator_assessments",
+  }),
+}));
+
+// Create comprehensive insert schemas for new tables
+export const insertFinancialAccountSchema = createInsertSchema(financialAccounts).pick({
+  userId: true,
+  accountType: true,
+  accountName: true,
+  accountNumber: true,
+  bankName: true,
+  currency: true,
+  balance: true,
+  isActive: true,
+});
+
+export const insertFinancialTransactionSchema = createInsertSchema(financialTransactions).pick({
+  accountId: true,
+  userId: true,
+  transactionType: true,
+  amount: true,
+  currency: true,
+  description: true,
+  reference: true,
+  status: true,
+  paymentMethod: true,
+  relatedEntityType: true,
+  relatedEntityId: true,
+});
+
+export const insertPropertyAnalyticsSchema = createInsertSchema(propertyAnalytics).pick({
+  propertyId: true,
+  period: true,
+  periodStart: true,
+  periodEnd: true,
+  occupancyRate: true,
+  averageRent: true,
+  totalIncome: true,
+  totalExpenses: true,
+  netIncome: true,
+  roi: true,
+  maintenanceCosts: true,
+  vacancyDays: true,
+  tenantTurnover: true,
+  marketValue: true,
+  appreciationRate: true,
+});
+
+export const insertNotificationSchema = createInsertSchema(notifications).pick({
+  userId: true,
+  title: true,
+  message: true,
+  type: true,
+  priority: true,
+  relatedEntityType: true,
+  relatedEntityId: true,
+  actionRequired: true,
+  actionUrl: true,
+  expiresAt: true,
+});
+
+export const insertAuditLogSchema = createInsertSchema(auditLogs).pick({
+  userId: true,
+  action: true,
+  entityType: true,
+  entityId: true,
+  oldValues: true,
+  newValues: true,
+  ipAddress: true,
+  userAgent: true,
+  sessionId: true,
+  success: true,
+  errorMessage: true,
+});
+
+export const insertPropertyInspectionSchema = createInsertSchema(propertyInspections).pick({
+  propertyId: true,
+  inspectorId: true,
+  inspectionType: true,
+  scheduledDate: true,
+  completedDate: true,
+  status: true,
+  overallCondition: true,
+  findings: true,
+  images: true,
+  report: true,
+  actionItems: true,
+});
+
+export const insertLeaseTemplateSchema = createInsertSchema(leaseTemplates).pick({
+  name: true,
+  description: true,
+  templateContent: true,
+  propertyType: true,
+  region: true,
+  isActive: true,
+  createdBy: true,
+  version: true,
+  legallyReviewed: true,
+});
+
+export const insertExpenseCategorySchema = createInsertSchema(expenseCategories).pick({
+  name: true,
+  description: true,
+  parentCategoryId: true,
+  isActive: true,
+  isTaxDeductible: true,
+});
+
+export const insertExpenseSchema = createInsertSchema(expenses).pick({
+  propertyId: true,
+  userId: true,
+  categoryId: true,
+  amount: true,
+  description: true,
+  expenseDate: true,
+  vendor: true,
+  receiptUrl: true,
+  isRecurring: true,
+  recurringPeriod: true,
+  isTaxDeductible: true,
+  status: true,
+});
+
+export const insertPropertyValuationSchema = createInsertSchema(propertyValuations).pick({
+  propertyId: true,
+  valuationType: true,
+  valuationAmount: true,
+  valuationDate: true,
+  valuatorId: true,
+  methodology: true,
+  comparableProperties: true,
+  marketConditions: true,
+  reportUrl: true,
+  isOfficial: true,
+  expiresAt: true,
+});
+
+// Type definitions for new tables
+export type InsertFinancialAccount = z.infer<typeof insertFinancialAccountSchema>;
+export type FinancialAccount = typeof financialAccounts.$inferSelect;
+
+export type InsertFinancialTransaction = z.infer<typeof insertFinancialTransactionSchema>;
+export type FinancialTransaction = typeof financialTransactions.$inferSelect;
+
+export type InsertPropertyAnalytics = z.infer<typeof insertPropertyAnalyticsSchema>;
+export type PropertyAnalytics = typeof propertyAnalytics.$inferSelect;
+
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type Notification = typeof notifications.$inferSelect;
+
+export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
+export type AuditLog = typeof auditLogs.$inferSelect;
+
+export type InsertPropertyInspection = z.infer<typeof insertPropertyInspectionSchema>;
+export type PropertyInspection = typeof propertyInspections.$inferSelect;
+
+export type InsertLeaseTemplate = z.infer<typeof insertLeaseTemplateSchema>;
+export type LeaseTemplate = typeof leaseTemplates.$inferSelect;
+
+export type InsertExpenseCategory = z.infer<typeof insertExpenseCategorySchema>;
+export type ExpenseCategory = typeof expenseCategories.$inferSelect;
+
+export type InsertExpense = z.infer<typeof insertExpenseSchema>;
+export type Expense = typeof expenses.$inferSelect;
+
+export type InsertPropertyValuation = z.infer<typeof insertPropertyValuationSchema>;
+export type PropertyValuation = typeof propertyValuations.$inferSelect;
+
 // Now that all tables are defined, we can add user relations
 export const usersRelations = relations(users, ({ many }) => ({
   properties: many(properties, { relationName: "user_properties" }),
@@ -660,4 +1114,33 @@ export const usersRelations = relations(users, ({ many }) => ({
   givenLandlordRatings: many(landlordRatings, { relationName: "tenant_given_ratings" }),
   tenantRatings: many(tenantRatings, { relationName: "tenant_ratings" }),
   givenTenantRatings: many(tenantRatings, { relationName: "landlord_given_ratings" }),
+  // New relations
+  financialAccounts: many(financialAccounts, { relationName: "user_financial_accounts" }),
+  financialTransactions: many(financialTransactions, { relationName: "user_financial_transactions" }),
+  notifications: many(notifications, { relationName: "user_notifications" }),
+  auditLogs: many(auditLogs, { relationName: "user_audit_logs" }),
+  inspections: many(propertyInspections, { relationName: "inspector_inspections" }),
+  leaseTemplates: many(leaseTemplates, { relationName: "user_lease_templates" }),
+  expenses: many(expenses, { relationName: "user_expenses" }),
+  approvedExpenses: many(expenses, { relationName: "user_approved_expenses" }),
+  valuations: many(propertyValuations, { relationName: "valuator_assessments" }),
+}));
+
+// Enhanced property relations
+export const enhancedPropertiesRelations = relations(properties, ({ one, many }) => ({
+  landlord: one(users, {
+    fields: [properties.landlordId],
+    references: [users.id],
+    relationName: "user_properties",
+  }),
+  leases: many(leases, { relationName: "property_leases" }),
+  maintenanceRequests: many(maintenanceRequests, { relationName: "property_maintenance_requests" }),
+  documents: many(documents, { relationName: "property_documents" }),
+  applications: many(applications, { relationName: "property_applications" }),
+  analytics: many(propertyAnalytics, { relationName: "property_analytics" }),
+  inspections: many(propertyInspections, { relationName: "property_inspections" }),
+  expenses: many(expenses, { relationName: "property_expenses" }),
+  valuations: many(propertyValuations, { relationName: "property_valuations" }),
+  landlordRatings: many(landlordRatings, { relationName: "property_landlord_ratings" }),
+  tenantRatings: many(tenantRatings, { relationName: "property_tenant_ratings" }),
 }));
