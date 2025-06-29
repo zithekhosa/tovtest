@@ -243,7 +243,7 @@ export function Sidebar() {
       <aside className="hidden md:flex flex-col w-64 bg-white border-r border-gray-200 h-screen fixed top-0 left-0">
         <div className="flex items-center h-16 px-6 border-b border-gray-200">
           <Link href="/" className="flex items-center">
-            <span className="font-bold text-xl text-primary">TOV</span>
+            <img src="/tov-logo.png" alt="TOV Property Management" className="h-8 w-auto" />
             <span className="font-medium text-gray-700 ml-2">Property OS</span>
           </Link>
         </div>

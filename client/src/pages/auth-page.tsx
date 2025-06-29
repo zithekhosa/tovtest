@@ -13,7 +13,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Building, Eye, EyeOff, Home, Users, Wrench } from "lucide-react";
 import { UserRoleType } from "@shared/schema";
-import tovLogo from "@/assets/images/tov-logo.png";
+// TOV logo is now served from public directory
 
 export default function AuthPage() {
   const [email, setEmail] = useState("");
@@ -62,7 +62,7 @@ export default function AuthPage() {
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center">
-              <img src={tovLogo} alt="TOV Logo" className="h-10 w-auto" />
+              <img src="/tov-logo.png" alt="TOV Property Management" className="h-10 w-auto" />
             </div>
             <nav className="hidden md:flex space-x-4">
               <Button variant="ghost" onClick={() => navigate("/maintenance/marketplace")}>Marketplace</Button>
@@ -218,7 +218,7 @@ export default function AuthPage() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between">
             <div className="flex items-center mb-4 md:mb-0">
-              <img src={tovLogo} alt="TOV Logo" className="h-8 w-auto" />
+              <img src="/tov-logo.png" alt="TOV Property Management" className="h-8 w-auto" />
               <span className="ml-2 text-gray-600">&copy; 2024 TOV Property Management. All rights reserved.</span>
             </div>
             <div className="flex space-x-4">

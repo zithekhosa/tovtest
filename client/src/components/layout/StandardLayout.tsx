@@ -12,7 +12,7 @@ import { ProfileAvatar } from "@/components/ui/profile-avatar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserRoleType } from "@shared/schema";
 import type { LucideIcon } from "lucide-react";
-import tovLogo from "@/assets/images/tov-logo.png";
+// TOV logo is now served from public directory
 
 interface NavItem {
   href: string;
@@ -212,7 +212,7 @@ export function StandardLayout({
         {/* Mobile Top Bar */}
         <header className="md:hidden flex h-14 items-center justify-between px-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 fixed top-0 left-0 right-0 z-40">
           <div className="flex items-center space-x-2">
-            <img src={tovLogo} alt="TOV Logo" className="h-8 w-auto" />
+            <img src="/tov-logo.png" alt="TOV Property Management" className="h-8 w-auto" />
             <span className="font-bold">{mobileTitle || title || "TOV OS"}</span>
           </div>
           <div className="flex items-center space-x-3">
@@ -277,7 +277,7 @@ export function StandardLayout({
             <div className="h-full w-full max-w-[300px] bg-white dark:bg-gray-900 flex flex-col animate-in slide-in-from-left">
               <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
                 <div className="flex items-center">
-                  <img src={tovLogo} alt="TOV Logo" className="h-8 w-auto mr-2" />
+                  <img src="/tov-logo.png" alt="TOV Property Management" className="h-8 w-auto mr-2" />
                   <span className="font-bold text-lg">Property OS</span>
                 </div>
                 <Button
