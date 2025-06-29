@@ -1,8 +1,13 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
-import tovLogo from "@/assets/images/tov-logo.png";
+import { useQuery } from "@tanstack/react-query";
+import { Property } from "@shared/schema";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { 
   Search, 
   MapPin, 
@@ -10,17 +15,31 @@ import {
   Bath, 
   Square,
   Star,
-  Globe,
   Heart,
   LogIn,
   Menu,
   Building,
   Home,
-  Wrench
+  Wrench,
+  MessageCircle,
+  Filter,
+  TrendingUp,
+  ArrowRight,
+  X,
+  Send,
+  Sparkles
 } from "lucide-react";
 
 export default function LandingPage() {
   const [searchInput, setSearchInput] = useState("");
+  const [isAiChatOpen, setIsAiChatOpen] = useState(false);
+  const [aiMessage, setAiMessage] = useState("");
+  const [chatMessages, setChatMessages] = useState([
+    {
+      role: "assistant",
+      content: "Hi! I'm your AI property assistant. Tell me about your dream home - location, lifestyle, budget, or any specific needs. I'll help you find the perfect property!"
+    }
+  ]);
   const [location, navigate] = useLocation();
   const { user } = useAuth();
 
@@ -37,278 +56,498 @@ export default function LandingPage() {
     }
   }, [user, navigate]);
 
-  // Sample featured properties data - simplified
+  const handleAiSearch = () => {
+    if (!aiMessage.trim()) return;
+    
+    setChatMessages(prev => [
+      ...prev,
+      { role: "user", content: aiMessage },
+      { 
+        role: "assistant", 
+        content: `Based on "${aiMessage}", I found several properties that match your lifestyle. Let me show you some options that fit your criteria.`
+      }
+    ]);
+    setAiMessage("");
+  };
+
   const featuredProperties = [
     {
       id: 1,
-      title: "Luxury Apartment in CBD",
-      location: "Gaborone, Main Mall",
-      price: 15000,
+      title: "Modern Executive Apartment",
+      address: "Block 10, Gaborone",
+      city: "Gaborone",
+      rentAmount: 8500,
       bedrooms: 3,
       bathrooms: 2,
-      area: 120,
-      image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=1470&auto=format&fit=crop"
+      squareFootage: 1200,
+      images: ["https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400"],
+      isPromoted: true,
+      isFeatured: true,
+      amenities: ["Pool", "Gym", "Security"]
     },
     {
       id: 2,
-      title: "Family Home in Phakalane",
-      location: "Phakalane Golf Estate",
-      price: 25000,
+      title: "Family House with Garden",
+      address: "Extension 15, Gaborone",
+      city: "Gaborone",
+      rentAmount: 12000,
       bedrooms: 4,
       bathrooms: 3,
-      area: 250,
-      image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=1475&auto=format&fit=crop"
+      squareFootage: 1800,
+      images: ["https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=400"],
+      isPromoted: false,
+      isFeatured: true,
+      amenities: ["Garden", "Garage", "Study Room"]
     },
     {
       id: 3,
-      title: "Modern Office Space",
-      location: "Gaborone, Fairgrounds",
-      price: 35000,
-      bedrooms: null,
+      title: "Luxury Penthouse Suite",
+      address: "CBD, Gaborone",
+      city: "Gaborone",
+      rentAmount: 15000,
+      bedrooms: 2,
       bathrooms: 2,
-      area: 300,
-      image: "https://images.unsplash.com/photo-1497366811353-6870744d04b2?q=80&w=1469&auto=format&fit=crop"
+      squareFootage: 1000,
+      images: ["https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400"],
+      isPromoted: true,
+      isFeatured: true,
+      amenities: ["City View", "Balcony", "Concierge"]
+    },
+    {
+      id: 4,
+      title: "Cozy Student Accommodation",
+      address: "Near UB, Gaborone",
+      city: "Gaborone",
+      rentAmount: 3500,
+      bedrooms: 1,
+      bathrooms: 1,
+      squareFootage: 450,
+      images: ["https://images.unsplash.com/photo-1484154218962-a197022b5858?w=400"],
+      isPromoted: false,
+      isFeatured: true,
+      amenities: ["WiFi", "Study Area", "Transport"]
+    },
+    {
+      id: 5,
+      title: "Corporate Housing",
+      address: "Broadhurst, Gaborone",
+      city: "Gaborone",
+      rentAmount: 9500,
+      bedrooms: 2,
+      bathrooms: 2,
+      squareFootage: 900,
+      images: ["https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=400"],
+      isPromoted: true,
+      isFeatured: true,
+      amenities: ["Furnished", "Parking", "24/7 Security"]
+    },
+    {
+      id: 6,
+      title: "Townhouse with Patio",
+      address: "Phakalane, Gaborone",
+      city: "Gaborone",
+      rentAmount: 11000,
+      bedrooms: 3,
+      bathrooms: 2,
+      squareFootage: 1400,
+      images: ["https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400"],
+      isPromoted: false,
+      isFeatured: true,
+      amenities: ["Patio", "Pet Friendly", "Shopping Center Nearby"]
     }
   ];
 
-  // Sample categories for simplified navigation
-  const categories = [
-    { name: "Apartments", icon: "🏢" },
-    { name: "Houses", icon: "🏠" },
-    { name: "Commercial", icon: "🏪" },
-    { name: "Short-term", icon: "🔑" }
-  ];
-
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950">
-      {/* Super simple Airbnb-style Header */}
-      <header className="py-4 px-4 md:px-6 lg:px-8 flex items-center justify-between border-b border-gray-100 dark:border-gray-800">
-        <div className="flex items-center gap-2">
-          <img src={tovLogo} alt="TOV Logo" className="h-8 w-auto" />
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="text-sm font-medium gap-1.5 rounded-full"
-            onClick={() => navigate("/auth")}
-          >
-            <LogIn className="h-4 w-4" />
-            <span>Login</span>
-          </Button>
-          <Button
-            size="sm"
-            className="text-sm font-medium rounded-full hidden sm:flex"
-            onClick={() => navigate("/auth")}
-          >
-            Sign up
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className="rounded-full md:hidden"
-          >
-            <Menu className="h-4 w-4" />
-          </Button>
-        </div>
-      </header>
-
-      <main>
-        {/* Hero Section - Ultra simplified */}
-        <section className="pt-6 pb-12 md:pt-10 md:pb-16 px-4 md:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-gray-900 dark:text-white">
-              Find Your Perfect Place in Botswana
-            </h1>
-            <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
-              Simple property management for tenants, landlords, and service providers
-            </p>
-            
-            {/* Simplified Search */}
-            <div className="mt-8 max-w-md mx-auto">
-              <div className="flex items-center bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-full p-1 shadow-sm">
-                <div className="flex-1 pl-4 pr-1">
-                  <input
-                    type="text"
-                    placeholder="Where are you looking?"
-                    value={searchInput}
-                    onChange={(e) => setSearchInput(e.target.value)}
-                    className="w-full bg-transparent border-0 focus:outline-none focus:ring-0 text-sm py-2"
-                  />
-                </div>
-                <Button size="sm" className="rounded-full px-4">
-                  <Search className="h-4 w-4 mr-2" />
-                  Search
-                </Button>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
+      {/* Header */}
+      <header className="bg-white/90 backdrop-blur-md border-b border-gray-200 sticky top-0 z-40">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-green-600 rounded-lg flex items-center justify-center">
+                <Building className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
+                  TOV
+                </h1>
+                <p className="text-xs text-gray-500">Property OS</p>
               </div>
             </div>
             
-            {/* Quick Category Filters */}
-            <div className="mt-8 flex flex-wrap justify-center gap-2">
-              {categories.map((category) => (
-                <button
-                  key={category.name}
-                  className="inline-flex items-center px-4 py-2 bg-gray-50 hover:bg-gray-100 dark:bg-gray-900 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-800 rounded-full text-sm transition-colors"
-                >
-                  <span className="mr-2">{category.icon}</span>
-                  <span>{category.name}</span>
-                </button>
-              ))}
+            <nav className="hidden md:flex items-center space-x-6">
+              <Button variant="ghost" size="sm">Properties</Button>
+              <Button variant="ghost" size="sm">Services</Button>
+              <Button variant="ghost" size="sm">About</Button>
+              <Button variant="ghost" size="sm">Contact</Button>
+            </nav>
+            
+            <div className="flex items-center space-x-3">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => navigate("/auth")}
+                className="hidden sm:flex"
+              >
+                <LogIn className="h-4 w-4 mr-2" />
+                Sign In
+              </Button>
+              <Button 
+                size="sm"
+                onClick={() => navigate("/auth")}
+                className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700"
+              >
+                Get Started
+              </Button>
+              <Button variant="ghost" size="sm" className="md:hidden">
+                <Menu className="h-4 w-4" />
+              </Button>
             </div>
           </div>
-        </section>
-        
-        {/* Featured Properties - Simplified Airbnb Style */}
-        <section className="px-4 md:px-6 lg:px-8 pb-16">
-          <div className="max-w-6xl mx-auto">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
-              Featured Properties
-            </h2>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-8">
-              {featuredProperties.map((property) => (
-                <div key={property.id} className="group cursor-pointer">
-                  {/* Property image */}
-                  <div className="aspect-[4/3] relative overflow-hidden rounded-lg mb-3">
-                    <img
-                      src={property.image}
-                      alt={property.title}
-                      className="w-full h-full object-cover transition duration-300 group-hover:scale-105"
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <section className="py-16 lg:py-24">
+        <div className="container mx-auto px-4">
+          <div className="text-center max-w-4xl mx-auto mb-12">
+            <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              Find Your Perfect
+              <span className="bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent"> Home</span>
+            </h1>
+            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+              Discover amazing properties in Botswana. From modern apartments to family homes, 
+              find your ideal living space with our AI-powered search.
+            </p>
+          </div>
+
+          {/* Enhanced Search Bar */}
+          <div className="max-w-4xl mx-auto mb-12">
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+              <div className="flex flex-col lg:flex-row gap-4">
+                <div className="flex-1">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                    <Input
+                      placeholder="Search by location, property type, or neighborhood..."
+                      value={searchInput}
+                      onChange={(e) => setSearchInput(e.target.value)}
+                      className="pl-10 h-12 text-lg border-0 focus:ring-2 focus:ring-blue-500"
                     />
-                    <button className="absolute top-3 right-3 h-8 w-8 rounded-full bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center text-gray-500 hover:text-primary transition-colors">
-                      <Heart className="h-4 w-4" />
-                    </button>
                   </div>
+                </div>
+                
+                <div className="flex gap-3">
+                  <Button 
+                    variant="outline" 
+                    size="lg"
+                    className="h-12 px-6"
+                  >
+                    <Filter className="h-4 w-4 mr-2" />
+                    Filters
+                  </Button>
                   
-                  {/* Property details */}
-                  <div>
-                    <div className="flex justify-between items-start">
-                      <h3 className="font-medium text-gray-900 dark:text-white">{property.title}</h3>
-                      <div className="flex items-center">
-                        <Star className="h-3.5 w-3.5 text-yellow-500 fill-current mr-1" />
-                        <span className="text-sm font-medium">4.9</span>
-                      </div>
-                    </div>
-                    
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{property.location}</p>
-                    
-                    <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mt-2">
-                      {property.bedrooms && (
-                        <span className="flex items-center">
-                          <BedDouble className="h-3.5 w-3.5 mr-1" />
-                          {property.bedrooms}
-                        </span>
-                      )}
-                      {property.bathrooms && (
-                        <span className="flex items-center">
-                          <Bath className="h-3.5 w-3.5 mr-1" />
-                          {property.bathrooms}
-                        </span>
-                      )}
-                      <span className="flex items-center">
-                        <Square className="h-3.5 w-3.5 mr-1" />
-                        {property.area}m²
-                      </span>
-                    </div>
-                    
-                    <p className="font-medium text-gray-900 dark:text-white mt-2">
-                      {property.price.toLocaleString()} <span className="text-gray-500 font-normal">BWP/month</span>
+                  <Button 
+                    size="lg"
+                    onClick={() => setIsAiChatOpen(true)}
+                    className="h-12 px-6 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                  >
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    AI Search
+                  </Button>
+                  
+                  <Button 
+                    size="lg"
+                    className="h-12 px-8 bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700"
+                  >
+                    Search
+                  </Button>
+                </div>
+              </div>
+              
+              {/* Quick Filters */}
+              <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-100">
+                <Badge variant="secondary" className="cursor-pointer hover:bg-blue-100">
+                  <MapPin className="h-3 w-3 mr-1" />
+                  Gaborone
+                </Badge>
+                <Badge variant="secondary" className="cursor-pointer hover:bg-blue-100">
+                  <BedDouble className="h-3 w-3 mr-1" />
+                  2+ Bedrooms
+                </Badge>
+                <Badge variant="secondary" className="cursor-pointer hover:bg-blue-100">
+                  <TrendingUp className="h-3 w-3 mr-1" />
+                  Under BWP 10,000
+                </Badge>
+                <Badge variant="secondary" className="cursor-pointer hover:bg-blue-100">
+                  <Building className="h-3 w-3 mr-1" />
+                  Apartments
+                </Badge>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Properties */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Featured Properties</h2>
+              <p className="text-gray-600">Handpicked properties for you</p>
+            </div>
+            <Button variant="outline" className="hidden md:flex">
+              View All
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {featuredProperties.map((property) => (
+              <Card key={property.id} className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden border-0 shadow-lg">
+                <div className="relative">
+                  <img
+                    src={property.images[0]}
+                    alt={property.title}
+                    className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute top-3 left-3 flex gap-2">
+                    {property.isPromoted && (
+                      <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white">
+                        <Star className="h-3 w-3 mr-1" />
+                        Promoted
+                      </Badge>
+                    )}
+                    {property.isFeatured && (
+                      <Badge className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
+                        Featured
+                      </Badge>
+                    )}
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="absolute top-3 right-3 bg-white/90 hover:bg-white"
+                  >
+                    <Heart className="h-4 w-4" />
+                  </Button>
+                </div>
+                
+                <CardContent className="p-6">
+                  <div className="mb-3">
+                    <h3 className="font-semibold text-lg text-gray-900 mb-1">{property.title}</h3>
+                    <p className="text-gray-600 text-sm flex items-center">
+                      <MapPin className="h-4 w-4 mr-1" />
+                      {property.address}, {property.city}
                     </p>
                   </div>
+                  
+                  <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
+                    <span className="flex items-center">
+                      <BedDouble className="h-4 w-4 mr-1" />
+                      {property.bedrooms}
+                    </span>
+                    <span className="flex items-center">
+                      <Bath className="h-4 w-4 mr-1" />
+                      {property.bathrooms}
+                    </span>
+                    <span className="flex items-center">
+                      <Square className="h-4 w-4 mr-1" />
+                      {property.squareFootage}m²
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-2xl font-bold text-gray-900">
+                        BWP {property.rentAmount.toLocaleString()}
+                      </p>
+                      <p className="text-sm text-gray-500">per month</p>
+                    </div>
+                    <Button size="sm" className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700">
+                      View Details
+                    </Button>
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-1 mt-4">
+                    {property.amenities.slice(0, 3).map((amenity, index) => (
+                      <Badge key={index} variant="secondary" className="text-xs">
+                        {amenity}
+                      </Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* AI Chat Modal */}
+      {isAiChatOpen && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-lg h-[600px] flex flex-col">
+            <div className="flex items-center justify-between p-6 border-b">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center">
+                  <Sparkles className="h-4 w-4 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">AI Property Assistant</h3>
+                  <p className="text-sm text-gray-500">Find your perfect home</p>
+                </div>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setIsAiChatOpen(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              {chatMessages.map((message, index) => (
+                <div
+                  key={index}
+                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div
+                    className={`max-w-[80%] p-3 rounded-xl ${
+                      message.role === 'user'
+                        ? 'bg-gradient-to-r from-blue-600 to-green-600 text-white'
+                        : 'bg-gray-100 text-gray-900'
+                    }`}
+                  >
+                    {message.content}
+                  </div>
                 </div>
               ))}
             </div>
             
-            <div className="mt-8 text-center">
-              <Button variant="outline" className="rounded-full px-6">
-                Show more properties
-              </Button>
+            <div className="p-6 border-t">
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Describe your ideal home..."
+                  value={aiMessage}
+                  onChange={(e) => setAiMessage(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleAiSearch()}
+                  className="flex-1"
+                />
+                <Button 
+                  onClick={handleAiSearch}
+                  disabled={!aiMessage.trim()}
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
-        </section>
-        
-        {/* Simple User Type Selection */}
-        <section className="px-4 md:px-6 lg:px-8 py-16 bg-gray-50 dark:bg-gray-900">
-          <div className="max-w-5xl mx-auto text-center">
-            <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
-              Choose your path
-            </h2>
-            <p className="text-gray-600 dark:text-gray-300 mb-10">
-              Sign in to TOV based on your role
+        </div>
+      )}
+
+      {/* Services Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Complete Property Ecosystem</h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Everything you need for property management, from tenant portals to maintenance services
             </p>
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Button 
-                variant="outline" 
-                className="p-4 h-auto rounded-lg flex flex-col items-center gap-2 hover:bg-primary/5"
-                onClick={() => navigate("/auth")}
-              >
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Home className="h-5 w-5 text-primary" />
-                </div>
-                <span>Tenant</span>
-                <span className="text-xs text-gray-500">Find and rent properties</span>
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                className="p-4 h-auto rounded-lg flex flex-col items-center gap-2 hover:bg-primary/5"
-                onClick={() => navigate("/auth")}
-              >
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Building className="h-5 w-5 text-primary" />
-                </div>
-                <span>Landlord</span>
-                <span className="text-xs text-gray-500">Manage your properties</span>
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                className="p-4 h-auto rounded-lg flex flex-col items-center gap-2 hover:bg-primary/5"
-                onClick={() => navigate("/auth")}
-              >
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Globe className="h-5 w-5 text-primary" />
-                </div>
-                <span>Agency</span>
-                <span className="text-xs text-gray-500">List client properties</span>
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                className="p-4 h-auto rounded-lg flex flex-col items-center gap-2 hover:bg-primary/5"
-                onClick={() => navigate("/auth")}
-              >
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Wrench className="h-5 w-5 text-primary" />
-                </div>
-                <span>Maintenance</span>
-                <span className="text-xs text-gray-500">Offer service providers</span>
-              </Button>
-            </div>
           </div>
-        </section>
-        
-        {/* Simple Footer */}
-        <footer className="px-4 md:px-6 lg:px-8 py-8 border-t border-gray-100 dark:border-gray-800">
-          <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center">
-            <div className="mb-4 md:mb-0">
-              <img src={tovLogo} alt="TOV Logo" className="h-6 w-auto" />
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                Simple property management for Botswana
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <Home className="h-6 w-6 text-blue-600" />
+              </div>
+              <h3 className="font-semibold text-lg mb-2">For Tenants</h3>
+              <p className="text-gray-600 text-sm">Find and apply for properties, pay rent, and request maintenance</p>
+            </Card>
+
+            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <Building className="h-6 w-6 text-green-600" />
+              </div>
+              <h3 className="font-semibold text-lg mb-2">For Landlords</h3>
+              <p className="text-gray-600 text-sm">Manage properties, track finances, and communicate with tenants</p>
+            </Card>
+
+            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
+              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <TrendingUp className="h-6 w-6 text-purple-600" />
+              </div>
+              <h3 className="font-semibold text-lg mb-2">For Agencies</h3>
+              <p className="text-gray-600 text-sm">List properties, manage leads, and track commissions</p>
+            </Card>
+
+            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
+              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <Wrench className="h-6 w-6 text-orange-600" />
+              </div>
+              <h3 className="font-semibold text-lg mb-2">For Maintenance</h3>
+              <p className="text-gray-600 text-sm">Find jobs, bid on projects, and build your reputation</p>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-white border-t border-gray-200 py-12">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-green-600 rounded-lg flex items-center justify-center">
+                  <Building className="h-5 w-5 text-white" />
+                </div>
+                <span className="text-lg font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
+                  TOV Property OS
+                </span>
+              </div>
+              <p className="text-gray-600 text-sm">
+                Revolutionizing property management in Africa with cutting-edge technology.
               </p>
             </div>
             
-            <div className="flex gap-6">
-              <Button variant="link" size="sm" className="text-gray-500">About</Button>
-              <Button variant="link" size="sm" className="text-gray-500">Terms</Button>
-              <Button variant="link" size="sm" className="text-gray-500">Privacy</Button>
-              <Button variant="link" size="sm" className="text-gray-500">Contact</Button>
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-4">Platform</h4>
+              <ul className="space-y-2 text-sm text-gray-600">
+                <li><a href="#" className="hover:text-blue-600">For Tenants</a></li>
+                <li><a href="#" className="hover:text-blue-600">For Landlords</a></li>
+                <li><a href="#" className="hover:text-blue-600">For Agencies</a></li>
+                <li><a href="#" className="hover:text-blue-600">For Maintenance</a></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-4">Support</h4>
+              <ul className="space-y-2 text-sm text-gray-600">
+                <li><a href="#" className="hover:text-blue-600">Help Center</a></li>
+                <li><a href="#" className="hover:text-blue-600">Contact Us</a></li>
+                <li><a href="#" className="hover:text-blue-600">Privacy Policy</a></li>
+                <li><a href="#" className="hover:text-blue-600">Terms of Service</a></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-4">Connect</h4>
+              <div className="flex space-x-3">
+                <Button variant="outline" size="sm">Twitter</Button>
+                <Button variant="outline" size="sm">LinkedIn</Button>
+              </div>
             </div>
           </div>
-        </footer>
-      </main>
+          
+          <Separator className="my-8" />
+          
+          <div className="text-center text-sm text-gray-600">
+            <p>&copy; 2025 TOV Property Operating System. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
