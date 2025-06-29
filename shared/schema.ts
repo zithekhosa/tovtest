@@ -13,7 +13,7 @@ export const UserRole = {
 
 export type UserRoleType = (typeof UserRole)[keyof typeof UserRole];
 
-// User table (updated for multi-role support)
+// User table
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
@@ -21,30 +21,11 @@ export const users = pgTable("users", {
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   email: text("email").notNull().unique(),
+  role: text("role").notNull().$type<UserRoleType>(),
   phone: text("phone"),
   profileImage: text("profile_image"),
-  primaryRole: text("primary_role").$type<UserRoleType>(), // Their main role for default selection
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
-
-// User Roles junction table for multi-role support
-export const userRoles = pgTable("user_roles", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull(),
-  role: text("role").notNull().$type<UserRoleType>(),
-  isActive: boolean("is_active").notNull().default(true),
-  verificationStatus: text("verification_status").notNull().default("verified"), // pending, verified, rejected
-  verificationDate: timestamp("verification_date"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-});
-
-export const userRolesRelations = relations(userRoles, ({ one }) => ({
-  user: one(users, {
-    fields: [userRoles.userId],
-    references: [users.id],
-    relationName: "user_roles",
-  }),
-}));
 
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
@@ -52,16 +33,9 @@ export const insertUserSchema = createInsertSchema(users).pick({
   firstName: true,
   lastName: true,
   email: true,
+  role: true,
   phone: true,
   profileImage: true,
-  primaryRole: true,
-});
-
-export const insertUserRoleSchema = createInsertSchema(userRoles).pick({
-  userId: true,
-  role: true,
-  isActive: true,
-  verificationStatus: true,
 });
 
 // Property table
@@ -428,12 +402,6 @@ export const insertMessageSchema = createInsertSchema(messages).pick({
 // Type definitions
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
-export type UserWithRoles = User & {
-  roles: UserRole[];
-};
-
-export type InsertUserRole = z.infer<typeof insertUserRoleSchema>;
-export type UserRole = typeof userRoles.$inferSelect;
 
 export type InsertProperty = z.infer<typeof insertPropertySchema>;
 export type Property = typeof properties.$inferSelect;
@@ -1130,11 +1098,8 @@ export type Expense = typeof expenses.$inferSelect;
 export type InsertPropertyValuation = z.infer<typeof insertPropertyValuationSchema>;
 export type PropertyValuation = typeof propertyValuations.$inferSelect;
 
-// Updated user relations for multi-role support
+// Now that all tables are defined, we can add user relations
 export const usersRelations = relations(users, ({ many }) => ({
-  // Role management
-  roles: many(userRoles, { relationName: "user_roles" }),
-  // Existing relations
   properties: many(properties, { relationName: "user_properties" }),
   leases: many(leases, { relationName: "user_leases" }),
   payments: many(payments, { relationName: "user_payments" }),
@@ -1149,7 +1114,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   givenLandlordRatings: many(landlordRatings, { relationName: "tenant_given_ratings" }),
   tenantRatings: many(tenantRatings, { relationName: "tenant_ratings" }),
   givenTenantRatings: many(tenantRatings, { relationName: "landlord_given_ratings" }),
-  // Enhanced relations
+  // New relations
   financialAccounts: many(financialAccounts, { relationName: "user_financial_accounts" }),
   financialTransactions: many(financialTransactions, { relationName: "user_financial_transactions" }),
   notifications: many(notifications, { relationName: "user_notifications" }),

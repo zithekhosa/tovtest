@@ -20,40 +20,28 @@ export default function AuthPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [userRole, setUserRole] = useState<UserRoleType>("tenant");
-  const { user, loginMutation, registerMutation } = useAuth();
+  const { user, loginMutation, registerMutation, userRoles } = useAuth();
   const [location, navigate] = useLocation();
-  
-  // Parse demo role from URL
-  const urlParams = new URLSearchParams(window.location.search);
-  const demoRole = urlParams.get('demo') as UserRoleType;
 
-  // Demo credentials mapping
-  const demoCredentials = {
-    landlord: { username: "demo-landlord", password: "password123" },
-    tenant: { username: "demo-tenant", password: "password123" },
-    agency: { username: "demo-agency", password: "password123" },
-    maintenance: { username: "demo-maintenance", password: "password123" },
-  };
-
-  // Create form with demo credentials if provided
+  // Create form
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      username: demoRole ? demoCredentials[demoRole]?.username || "" : "",
-      password: demoRole ? demoCredentials[demoRole]?.password || "" : "",
+      username: "",
+      password: "",
     },
   });
 
   // If user is already logged in, redirect to appropriate dashboard
   useEffect(() => {
-    if (user && user.primaryRole) {
+    if (user) {
       const roleRedirectMap: Record<string, string> = {
         tenant: "/tenant/dashboard",
         landlord: "/landlord/dashboard",
         agency: "/agency/dashboard",
         maintenance: "/maintenance/dashboard"
       };
-      navigate(roleRedirectMap[user.primaryRole] || "/");
+      navigate(roleRedirectMap[user.role] || "/");
     }
   }, [user, navigate]);
 

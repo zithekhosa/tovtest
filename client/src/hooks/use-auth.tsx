@@ -1,10 +1,10 @@
-import { createContext, ReactNode, useContext, useState } from "react";
+import { createContext, ReactNode, useContext } from "react";
 import {
   useQuery,
   useMutation,
   UseMutationResult,
 } from "@tanstack/react-query";
-import { User, insertUserSchema } from "@shared/schema";
+import { User, insertUserSchema, UserRole } from "@shared/schema";
 import { getQueryFn, apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -32,6 +32,7 @@ type AuthContextType = {
   loginMutation: UseMutationResult<Omit<User, "password">, Error, z.infer<typeof loginSchema>>;
   logoutMutation: UseMutationResult<void, Error, void>;
   registerMutation: UseMutationResult<Omit<User, "password">, Error, z.infer<typeof registerSchema>>;
+  userRoles: typeof UserRole;
 };
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -39,7 +40,6 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
   const [_, navigate] = useLocation();
-  
   const {
     data: user,
     error,
@@ -123,6 +123,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loginMutation,
         logoutMutation,
         registerMutation,
+        userRoles: UserRole,
       }}
     >
       {children}
