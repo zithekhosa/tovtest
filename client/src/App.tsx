@@ -20,6 +20,7 @@ import TenantProfile from "@/pages/tenant-profile";
 import AgencyProfile from "@/pages/agency-profile";
 import MaintenanceProfile from "@/pages/maintenance-profile";
 import TestFacebookDashboard from "@/pages/test-facebook-dashboard";
+import RoleSelectionPage from "@/pages/role-selection";
 
 // Tenant pages
 import TenantDashboard from "@/pages/tenant/dashboard";
@@ -60,8 +61,9 @@ function Router() {
   return (
     <Switch>
       {/* Public routes */}
-      <Route path="/" component={LandingPage} />
+      <Route path="/" component={RoleSelectionPage} />
       <Route path="/auth" component={AuthPage} />
+      <Route path="/landing" component={LandingPage} />
       <Route path="/providers-signup" component={ProvidersSignup} />
       <Route path="/properties/search" component={PropertySearchPage} />
       <Route path="/test-facebook" component={TestFacebookDashboard} />
