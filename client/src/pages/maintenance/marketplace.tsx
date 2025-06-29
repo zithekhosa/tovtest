@@ -270,10 +270,10 @@ export default function MaintenanceMarketplace() {
         </div>
 
         {/* Categories & Filters */}
-        <div className="flex flex-col lg:flex-row gap-6">
+        <div className="flex flex-col xl:flex-row gap-6">
           {/* Sidebar Categories */}
-          <div className="lg:w-80">
-            <Card>
+          <div className="xl:w-80">
+            <Card className="sticky top-6">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Filter className="h-5 w-5" />
@@ -287,17 +287,30 @@ export default function MaintenanceMarketplace() {
                     <button
                       key={category.id}
                       onClick={() => setSelectedCategory(category.id)}
-                      className={`w-full flex items-center justify-between p-3 rounded-lg text-left transition-colors ${
+                      className={`w-full flex items-center justify-between p-3 rounded-xl text-left transition-all duration-200 ${
                         selectedCategory === category.id
-                          ? 'bg-blue-50 text-blue-600 border border-blue-200'
-                          : 'hover:bg-gray-50 text-gray-700'
+                          ? 'bg-gradient-to-r from-blue-50 to-green-50 text-blue-600 border border-blue-200 shadow-sm'
+                          : 'hover:bg-gray-50 text-gray-700 hover:shadow-sm'
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <Icon className="h-4 w-4" />
+                        <div className={`p-2 rounded-lg ${
+                          selectedCategory === category.id 
+                            ? 'bg-blue-100' 
+                            : 'bg-gray-100'
+                        }`}>
+                          <Icon className="h-4 w-4" />
+                        </div>
                         <span className="font-medium">{category.name}</span>
                       </div>
-                      <Badge variant="secondary" className="text-xs">
+                      <Badge 
+                        variant="secondary" 
+                        className={`text-xs ${
+                          selectedCategory === category.id 
+                            ? 'bg-blue-100 text-blue-700' 
+                            : ''
+                        }`}
+                      >
                         {category.count}
                       </Badge>
                     </button>
@@ -307,16 +320,19 @@ export default function MaintenanceMarketplace() {
             </Card>
 
             {/* Filters */}
-            <Card className="mt-6">
+            <Card className="mt-6 sticky top-96">
               <CardHeader>
-                <CardTitle>Filters</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Filter className="h-5 w-5" />
+                  Filters
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Budget</label>
+                  <label className="text-sm font-medium mb-2 block">Budget Range</label>
                   <Select value={priceRange} onValueChange={setPriceRange}>
-                    <SelectTrigger>
-                      <SelectValue />
+                    <SelectTrigger className="h-11">
+                      <SelectValue placeholder="Select budget range" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Any Budget</SelectItem>
@@ -330,8 +346,8 @@ export default function MaintenanceMarketplace() {
                 <div>
                   <label className="text-sm font-medium mb-2 block">Delivery Time</label>
                   <Select value={deliveryTime} onValueChange={setDeliveryTime}>
-                    <SelectTrigger>
-                      <SelectValue />
+                    <SelectTrigger className="h-11">
+                      <SelectValue placeholder="Select delivery time" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Any Time</SelectItem>
@@ -344,20 +360,47 @@ export default function MaintenanceMarketplace() {
 
                 <Separator />
                 
-                <div className="space-y-2">
-                  <h4 className="font-medium">Pro Services</h4>
-                  <label className="flex items-center space-x-2">
-                    <input type="checkbox" className="rounded" />
-                    <span className="text-sm">Top Rated Sellers</span>
-                  </label>
-                  <label className="flex items-center space-x-2">
-                    <input type="checkbox" className="rounded" />
-                    <span className="text-sm">Online Now</span>
-                  </label>
-                  <label className="flex items-center space-x-2">
-                    <input type="checkbox" className="rounded" />
-                    <span className="text-sm">Local Providers</span>
-                  </label>
+                <div className="space-y-3">
+                  <h4 className="font-medium text-gray-900">Pro Services</h4>
+                  <div className="space-y-3">
+                    <label className="flex items-center space-x-3 cursor-pointer">
+                      <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                      <div className="flex items-center gap-2">
+                        <Award className="h-4 w-4 text-yellow-500" />
+                        <span className="text-sm font-medium">Top Rated Sellers</span>
+                      </div>
+                    </label>
+                    <label className="flex items-center space-x-3 cursor-pointer">
+                      <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span className="text-sm font-medium">Online Now</span>
+                      </div>
+                    </label>
+                    <label className="flex items-center space-x-3 cursor-pointer">
+                      <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4 text-blue-500" />
+                        <span className="text-sm font-medium">Local Providers</span>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div className="pt-2">
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => {
+                      setSelectedCategory("all");
+                      setPriceRange("all");
+                      setDeliveryTime("all");
+                    }}
+                  >
+                    Clear All Filters
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -388,99 +431,107 @@ export default function MaintenanceMarketplace() {
             </div>
 
             {/* Service Providers Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {filteredProviders.map((provider) => (
                 <Card key={provider.id} className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden border-0 shadow-lg">
-                  <div className="relative">
-                    <img
-                      src={provider.gallery[0]}
-                      alt={provider.title}
-                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <div className="absolute top-3 left-3 flex gap-2">
-                      <Badge className={`${getLevelColor(provider.level)} text-white border-0`}>
-                        {provider.level}
-                      </Badge>
-                      {provider.isOnline && (
-                        <Badge className="bg-green-500 text-white">
-                          Online
+                  <div className="flex h-full">
+                    {/* Left: Image */}
+                    <div className="relative w-48 flex-shrink-0">
+                      <img
+                        src={provider.gallery[0]}
+                        alt={provider.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      <div className="absolute top-3 left-3 flex flex-col gap-2">
+                        <Badge className={`${getLevelColor(provider.level)} text-white border-0 text-xs`}>
+                          {provider.level}
                         </Badge>
-                      )}
+                        {provider.isOnline && (
+                          <Badge className="bg-green-500 text-white text-xs">
+                            Online
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="absolute top-3 right-3 flex flex-col gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className={`bg-white/90 hover:bg-white p-2 h-8 w-8 ${provider.isFavorite ? 'text-red-500' : ''}`}
+                        >
+                          <Heart className={`h-3 w-3 ${provider.isFavorite ? 'fill-current' : ''}`} />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="bg-white/90 hover:bg-white p-2 h-8 w-8"
+                        >
+                          <Share className="h-3 w-3" />
+                        </Button>
+                      </div>
                     </div>
-                    <div className="absolute top-3 right-3 flex gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className={`bg-white/90 hover:bg-white ${provider.isFavorite ? 'text-red-500' : ''}`}
-                      >
-                        <Heart className={`h-4 w-4 ${provider.isFavorite ? 'fill-current' : ''}`} />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="bg-white/90 hover:bg-white"
-                      >
-                        <Share className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-3 mb-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={provider.avatar} alt={provider.name} />
-                        <AvatarFallback>{provider.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-gray-900 truncate">{provider.name}</h3>
-                        <div className="flex items-center gap-1 mt-1">
-                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                          <span className="font-medium text-gray-900">{provider.rating}</span>
-                          <span className="text-gray-500 text-sm">({provider.reviews})</span>
+                    
+                    {/* Right: Content */}
+                    <CardContent className="p-6 flex-1 flex flex-col">
+                      <div className="flex items-start gap-3 mb-3">
+                        <Avatar className="h-12 w-12 flex-shrink-0">
+                          <AvatarImage src={provider.avatar} alt={provider.name} />
+                          <AvatarFallback>{provider.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-lg text-gray-900">{provider.name}</h3>
+                          <div className="flex items-center gap-1 mt-1">
+                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                            <span className="font-medium text-gray-900">{provider.rating}</span>
+                            <span className="text-gray-500 text-sm">({provider.reviews} reviews)</span>
+                          </div>
+                          <div className="flex items-center gap-1 mt-1 text-sm text-gray-500">
+                            <Clock className="h-3 w-3" />
+                            <span>Responds in {provider.responseTime}</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    
-                    <h4 className="font-medium text-gray-900 mb-2 line-clamp-2">
-                      {provider.title}
-                    </h4>
-                    
-                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                      {provider.description}
-                    </p>
-                    
-                    <div className="flex flex-wrap gap-1 mb-4">
-                      {provider.skills.slice(0, 3).map((skill, index) => (
-                        <Badge key={index} variant="secondary" className="text-xs">
-                          {skill}
-                        </Badge>
-                      ))}
-                    </div>
-                    
-                    <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
-                        <span>{provider.deliveryTime}</span>
+                      
+                      <h4 className="font-medium text-gray-900 mb-3 text-lg leading-tight">
+                        {provider.title}
+                      </h4>
+                      
+                      <p className="text-gray-600 text-sm mb-4 line-clamp-3 flex-1">
+                        {provider.description}
+                      </p>
+                      
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {provider.skills.map((skill, index) => (
+                          <Badge key={index} variant="secondary" className="text-xs">
+                            {skill}
+                          </Badge>
+                        ))}
                       </div>
-                      <div className="flex items-center gap-1">
-                        <CheckCircle className="h-4 w-4" />
-                        <span>{provider.completedJobs} completed</span>
+                      
+                      <div className="flex items-center justify-between text-sm text-gray-500 mb-4 pt-2 border-t">
+                        <div className="flex items-center gap-1">
+                          <Clock className="h-4 w-4" />
+                          <span>{provider.deliveryTime}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <CheckCircle className="h-4 w-4" />
+                          <span>{provider.completedJobs} completed</span>
+                        </div>
                       </div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="text-right">
-                        <p className="text-sm text-gray-500">Starting at</p>
-                        <p className="text-xl font-bold text-gray-900">
-                          BWP {provider.startingPrice}
-                        </p>
+                      
+                      <div className="flex items-center justify-between mt-auto">
+                        <div>
+                          <p className="text-sm text-gray-500">Starting at</p>
+                          <p className="text-2xl font-bold text-gray-900">
+                            BWP {provider.startingPrice}
+                          </p>
+                        </div>
+                        <Button className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 px-6">
+                          View Details
+                          <ArrowRight className="h-4 w-4 ml-2" />
+                        </Button>
                       </div>
-                      <Button className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700">
-                        View Details
-                        <ArrowRight className="h-4 w-4 ml-2" />
-                      </Button>
-                    </div>
-                  </CardContent>
+                    </CardContent>
+                  </div>
                 </Card>
               ))}
             </div>
