@@ -164,13 +164,12 @@ export default function LandingPage() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-green-600 rounded-lg flex items-center justify-center">
-                <Building className="h-6 w-6 text-white" />
-              </div>
+              <img 
+                src="/tov-logo.png" 
+                alt="TOV Property Management" 
+                className="h-10 w-auto"
+              />
               <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
-                  TOV
-                </h1>
                 <p className="text-xs text-gray-500">Property OS</p>
               </div>
             </div>
