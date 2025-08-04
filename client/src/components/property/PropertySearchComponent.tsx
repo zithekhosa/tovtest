@@ -317,7 +317,7 @@ export default function PropertySearchComponent({
         </div>
       ) : searchSubmitted && properties && properties.length === 0 ? (
         <div className="text-center p-8 border border-dashed rounded-lg">
-          <h3 className="text-xl font-semibold mb-2">No properties found</h3>
+          <h3 className="text-heading-3 mb-2">No properties found</h3>
           <p className="text-gray-500 mb-4">Try adjusting your search criteria</p>
           <Button onClick={resetFilters} variant="outline">Reset Filters</Button>
         </div>

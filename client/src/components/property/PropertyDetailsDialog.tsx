@@ -124,7 +124,7 @@ export default function PropertyDetailsDialog({
         </div>
         
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">
+          <DialogTitle className="text-heading-2">
             {property.title || `${property.propertyType} in ${property.city}`}
           </DialogTitle>
           <DialogDescription className="flex items-center text-primary">
@@ -156,18 +156,18 @@ export default function PropertyDetailsDialog({
             </div>
           )}
           
-          {property.squareFootage !== null && property.squareFootage !== undefined && (
+          {property.squareMeters !== null && property.squareMeters !== undefined && (
             <div className="flex flex-col items-center p-3 bg-gray-50 rounded-md">
               <Square className="text-primary mb-1" />
               <span className="text-sm text-gray-500">Area</span>
-              <span className="font-medium">{property.squareFootage} m²</span>
+              <span className="font-medium">{property.squareMeters} m²</span>
             </div>
           )}
         </div>
         
         <div className="mb-4">
           <h3 className="text-lg font-semibold mb-2">Price</h3>
-          <div className="text-2xl font-bold text-primary">
+          <div className="text-heading-2 text-primary">
             {formatCurrency(property.rentAmount)}<span className="text-base font-normal text-gray-500"> / month</span>
           </div>
           {property.securityDeposit && (

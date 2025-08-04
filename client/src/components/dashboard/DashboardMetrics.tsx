@@ -27,17 +27,17 @@ export function MetricsCard({ title, value, description, icon, trend, progress, 
   let bgColorClass = "bg-primary/10";
   
   if (iconClasses.includes("text-blue")) {
-    bgColorClass = "bg-blue-100";
+    bgColorClass = "bg-primary/10";
   } else if (iconClasses.includes("text-green")) {
-    bgColorClass = "bg-green-100";
+    bgColorClass = "bg-success";
   } else if (iconClasses.includes("text-amber")) {
-    bgColorClass = "bg-amber-100";
+    bgColorClass = "bg-warning/20";
   } else if (iconClasses.includes("text-purple")) {
-    bgColorClass = "bg-purple-100";
+    bgColorClass = "bg-accent";
   }
 
   return (
-    <div className={`tov-metrics-card bg-white border p-3 hover:bg-gray-50 transition-colors flex items-center ${className || ''}`}>
+    <div className={`tov-metrics-card bg-white border p-3 btn-premium-ghost transition-colors flex items-center ${className || ''}`}>
       <div className={`h-8 w-8 ${bgColorClass} flex items-center justify-center shrink-0 mr-3`}>
         {icon}
       </div>
@@ -49,11 +49,11 @@ export function MetricsCard({ title, value, description, icon, trend, progress, 
           {trend && (
             <div className="flex items-center text-xs">
               {trend.isPositive ? (
-                <TrendingUp className="mr-0.5 h-3 w-3 text-green-500 shrink-0" />
+                <TrendingUp className="mr-0.5 h-3 w-3 text-success-foreground shrink-0" />
               ) : (
-                <TrendingDown className="mr-0.5 h-3 w-3 text-red-500 shrink-0" />
+                <TrendingDown className="mr-0.5 h-3 w-3 text-destructive-foreground shrink-0" />
               )}
-              <span className={`${trend.isPositive ? "text-green-500" : "text-red-500"} tov-text-ellipsis`}>
+              <span className={`${trend.isPositive ? "text-success-foreground" : "text-destructive-foreground"} tov-text-ellipsis`}>
                 {trend.value}%
               </span>
             </div>
@@ -155,7 +155,7 @@ export function getLandlordMetrics(propertyCount = 5, vacancyCount = 1, monthlyI
       title: "Properties",
       value: propertyCount,
       description: `${propertyCount - vacancyCount} occupied, ${vacancyCount} vacant`,
-      icon: <Building className="h-5 w-5 text-blue-600" />,
+      icon: <Building className="h-5 w-5 text-primary" />,
       progress: {
         value: propertyCount - vacancyCount,
         max: propertyCount
@@ -165,7 +165,7 @@ export function getLandlordMetrics(propertyCount = 5, vacancyCount = 1, monthlyI
       title: "Monthly Income",
       value: formatCurrency(monthlyIncome),
       description: "Across all properties",
-      icon: <DollarSign className="h-5 w-5 text-green-600" />,
+      icon: <DollarSign className="h-5 w-5 text-success-foreground" />,
       trend: {
         value: 9.5,
         isPositive: true
@@ -175,13 +175,13 @@ export function getLandlordMetrics(propertyCount = 5, vacancyCount = 1, monthlyI
       title: "Maintenance",
       value: "4",
       description: "2 pending, 2 in progress",
-      icon: <Wrench className="h-5 w-5 text-amber-600" />
+      icon: <Wrench className="h-5 w-5 text-warning-foreground" />
     },
     {
       title: "Leases Renewing",
       value: "2",
       description: "Within the next 60 days",
-      icon: <Calendar className="h-5 w-5 text-purple-600" />
+      icon: <Calendar className="h-5 w-5 text-primary" />
     }
   ];
 }

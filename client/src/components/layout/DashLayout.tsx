@@ -29,9 +29,9 @@ export default function DashLayout({ children }: DashLayoutProps) {
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
-      <Sidebar role={user.role as UserRoleType} />
+      <Sidebar />
       <div className="flex-1 overflow-auto">
-        <main className="container mx-auto py-6 px-4 md:px-6 lg:px-8">
+        <main className="container-wide py-6">
           {children}
         </main>
       </div>

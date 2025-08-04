@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { Property, User } from "@shared/schema";
-import { DashLayout } from "@/layout/dash-layout";
+import DashLayout from "@/components/layout/DashLayout";
 import { useParams, useLocation } from "wouter";
 import { 
   Loader2, 
@@ -176,7 +176,7 @@ export default function AgencyPropertyDetail() {
     return (
       <DashLayout>
         <div className="bg-white p-6 rounded-lg text-center">
-          <h3 className="text-lg font-medium">Property not found</h3>
+          <h3 className="text-body-large">Property not found</h3>
           <p className="text-gray-500 mb-4">The property you're looking for doesn't exist or you don't have permission to view it.</p>
           <Button onClick={() => navigate("/agency/properties")}>
             Back to Properties
@@ -254,44 +254,44 @@ export default function AgencyPropertyDetail() {
                 <div className="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
                   <Home className="h-5 w-5 text-gray-500 mb-1" />
                   <span className="text-sm font-medium">Type</span>
-                  <span className="text-sm text-gray-600">{property.propertyType}</span>
+                  <span className="text-body-small">{property.propertyType}</span>
                 </div>
                 <div className="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
                   <Bed className="h-5 w-5 text-gray-500 mb-1" />
                   <span className="text-sm font-medium">Bedrooms</span>
-                  <span className="text-sm text-gray-600">{property.bedrooms}</span>
+                  <span className="text-body-small">{property.bedrooms}</span>
                 </div>
                 <div className="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
                   <Bath className="h-5 w-5 text-gray-500 mb-1" />
                   <span className="text-sm font-medium">Bathrooms</span>
-                  <span className="text-sm text-gray-600">{property.bathrooms}</span>
+                  <span className="text-body-small">{property.bathrooms}</span>
                 </div>
                 <div className="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
                   <Car className="h-5 w-5 text-gray-500 mb-1" />
                   <span className="text-sm font-medium">Parking</span>
-                  <span className="text-sm text-gray-600">{property.parkingSpaces || 0} spaces</span>
+                  <span className="text-body-small">{property.parkingSpaces || 0} spaces</span>
                 </div>
                 <div className="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
                   <AreaChart className="h-5 w-5 text-gray-500 mb-1" />
                   <span className="text-sm font-medium">Area</span>
-                  <span className="text-sm text-gray-600">{property.squareFootage || 0} sqft</span>
+                  <span className="text-body-small">{property.squareFootage || 0} sqft</span>
                 </div>
                 <div className="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
                   <DollarSign className="h-5 w-5 text-gray-500 mb-1" />
                   <span className="text-sm font-medium">Rent</span>
-                  <span className="text-sm text-gray-600">{formatCurrency(property.rentAmount)}</span>
+                  <span className="text-body-small">{formatCurrency(property.rentAmount)}</span>
                 </div>
                 <div className="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
                   <Calendar className="h-5 w-5 text-gray-500 mb-1" />
                   <span className="text-sm font-medium">Available</span>
-                  <span className="text-sm text-gray-600">
+                  <span className="text-body-small">
                     {property.available ? 'Yes' : 'No'}
                   </span>
                 </div>
                 <div className="flex flex-col items-center p-3 bg-gray-50 rounded-lg">
                   <Calendar className="h-5 w-5 text-gray-500 mb-1" />
                   <span className="text-sm font-medium">Min Lease</span>
-                  <span className="text-sm text-gray-600">{property.minLeaseTerm || 12} months</span>
+                  <span className="text-body-small">{property.minLeaseTerm || 12} months</span>
                 </div>
               </div>
               
@@ -340,20 +340,20 @@ export default function AgencyPropertyDetail() {
                 <div className="flex justify-between mb-1">
                   <p className="text-sm font-medium">Rent vs. Market Average</p>
                   {property.rentAmount > metrics?.similarRentAverage ? (
-                    <Badge variant="outline" className="text-amber-600 bg-amber-50">Above Average</Badge>
+                    <Badge variant="outline" className="text-warning-foreground bg-warning/10">Above Average</Badge>
                   ) : (
-                    <Badge variant="outline" className="text-green-600 bg-green-50">Below Average</Badge>
+                    <Badge variant="outline" className="text-success-foreground bg-success/10">Below Average</Badge>
                   )}
                 </div>
                 <div className="relative pt-1">
                   <div className="flex mb-1 items-center justify-between">
                     <div>
-                      <span className="text-xs font-semibold inline-block py-1 px-2 rounded-full text-green-600 bg-green-200">
+                      <span className="text-xs font-semibold inline-block py-1 px-2 rounded-full text-success-foreground bg-success/30">
                         Market Avg: {formatCurrency(metrics?.similarRentAverage || 0)}
                       </span>
                     </div>
                     <div>
-                      <span className="text-xs font-semibold inline-block py-1 px-2 rounded-full text-blue-600 bg-blue-200">
+                      <span className="text-xs font-semibold inline-block py-1 px-2 rounded-full text-primary bg-primary/30">
                         This Property: {formatCurrency(property.rentAmount)}
                       </span>
                     </div>
@@ -367,7 +367,7 @@ export default function AgencyPropertyDetail() {
                   <p className="text-sm font-semibold">{metrics?.marketCompetitiveness}%</p>
                 </div>
                 <Progress value={metrics?.marketCompetitiveness || 0} className="h-2" />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-caption mt-1">
                   {metrics?.marketCompetitiveness && metrics.marketCompetitiveness > 70 
                     ? "High competition in this area" 
                     : metrics?.marketCompetitiveness && metrics.marketCompetitiveness > 30
@@ -404,7 +404,7 @@ export default function AgencyPropertyDetail() {
                   <CardContent>
                     <div className="flex items-center">
                       <Eye className="h-5 w-5 text-primary mr-2" />
-                      <p className="text-2xl font-bold">{metrics?.totalViews || 0}</p>
+                      <p className="text-heading-2">{metrics?.totalViews || 0}</p>
                     </div>
                     <p className="text-sm text-gray-500 mt-1">
                       {metrics?.viewsLast7Days || 0} in last 7 days
@@ -418,7 +418,7 @@ export default function AgencyPropertyDetail() {
                   <CardContent>
                     <div className="flex items-center">
                       <PhoneCall className="h-5 w-5 text-primary mr-2" />
-                      <p className="text-2xl font-bold">{metrics?.callsRequested || 0}</p>
+                      <p className="text-heading-2">{metrics?.callsRequested || 0}</p>
                     </div>
                     <p className="text-sm text-gray-500 mt-1">
                       {Math.round(((metrics?.callsRequested || 0) / (metrics?.totalViews || 1)) * 100)}% of viewers
@@ -432,7 +432,7 @@ export default function AgencyPropertyDetail() {
                   <CardContent>
                     <div className="flex items-center">
                       <Mail className="h-5 w-5 text-primary mr-2" />
-                      <p className="text-2xl font-bold">{metrics?.emailsRequested || 0}</p>
+                      <p className="text-heading-2">{metrics?.emailsRequested || 0}</p>
                     </div>
                     <p className="text-sm text-gray-500 mt-1">
                       {Math.round(((metrics?.emailsRequested || 0) / (metrics?.totalViews || 1)) * 100)}% of viewers
@@ -446,7 +446,7 @@ export default function AgencyPropertyDetail() {
                   <CardContent>
                     <div className="flex items-center">
                       <Calendar className="h-5 w-5 text-primary mr-2" />
-                      <p className="text-2xl font-bold">{metrics?.viewingsScheduled || 0}</p>
+                      <p className="text-heading-2">{metrics?.viewingsScheduled || 0}</p>
                     </div>
                     <p className="text-sm text-gray-500 mt-1">
                       {Math.round(((metrics?.viewingsScheduled || 0) / ((metrics?.callsRequested || 0) + (metrics?.emailsRequested || 0))) * 100)}% conversion
@@ -470,7 +470,7 @@ export default function AgencyPropertyDetail() {
               {!metrics?.leads.length ? (
                 <div className="text-center py-8">
                   <Users className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium">No leads yet</h3>
+                  <h3 className="text-body-large">No leads yet</h3>
                   <p className="text-gray-500 mb-4">When potential renters show interest, they'll appear here.</p>
                 </div>
               ) : (
@@ -504,10 +504,10 @@ export default function AgencyPropertyDetail() {
                         <TableCell>{lead.date}</TableCell>
                         <TableCell>
                           <Badge className={
-                            lead.status === "new" ? "bg-blue-100 text-blue-800" :
-                            lead.status === "contacted" ? "bg-yellow-100 text-yellow-800" :
-                            lead.status === "viewing_scheduled" ? "bg-purple-100 text-purple-800" :
-                            lead.status === "converted" ? "bg-green-100 text-green-800" :
+                            lead.status === "new" ? "bg-primary/10 text-primary" :
+                            lead.status === "contacted" ? "bg-warning text-warning-foreground" :
+                            lead.status === "viewing_scheduled" ? "bg-accent text-primary" :
+                            lead.status === "converted" ? "bg-success text-success-foreground" :
                             "bg-gray-100 text-gray-800"
                           }>
                             {lead.status === "new" ? "New Lead" :

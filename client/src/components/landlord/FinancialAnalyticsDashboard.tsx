@@ -191,8 +191,8 @@ export default function FinancialAnalyticsDashboard({ properties, leases, paymen
           </CardHeader>
           <CardContent>
             <div className="flex items-center">
-              <Building className="h-5 w-5 text-blue-500 mr-2 shrink-0" />
-              <div className="text-2xl font-bold tov-truncate-text">{formatCurrency(totalPortfolioValue)}</div>
+              <Building className="h-5 w-5 text-primary mr-2 shrink-0" />
+              <div className="text-heading-2 tov-truncate-text">{formatCurrency(totalPortfolioValue)}</div>
             </div>
             <p className="text-xs text-muted-foreground mt-1 tov-text-ellipsis">
               {properties.length} properties in portfolio
@@ -206,8 +206,8 @@ export default function FinancialAnalyticsDashboard({ properties, leases, paymen
           </CardHeader>
           <CardContent>
             <div className="flex items-center">
-              <TrendingUp className={`h-5 w-5 ${cashFlow >= 0 ? 'text-green-500' : 'text-red-500'} mr-2 shrink-0`} />
-              <div className="text-2xl font-bold tov-truncate-text">{formatCurrency(cashFlow / 12)}</div>
+              <TrendingUp className={`h-5 w-5 ${cashFlow >= 0 ? 'text-success-foreground' : 'text-destructive-foreground'} mr-2 shrink-0`} />
+              <div className="text-heading-2 tov-truncate-text">{formatCurrency(cashFlow / 12)}</div>
             </div>
             <p className="text-xs text-muted-foreground mt-1 tov-text-ellipsis">
               {cashFlow >= 0 ? 'Positive' : 'Negative'} monthly cash flow
@@ -222,7 +222,7 @@ export default function FinancialAnalyticsDashboard({ properties, leases, paymen
           <CardContent>
             <div className="flex items-center">
               <DollarSign className="h-5 w-5 text-amber-500 mr-2 shrink-0" />
-              <div className="text-2xl font-bold tov-truncate-text">{occupancyRate.toFixed(0)}%</div>
+              <div className="text-heading-2 tov-truncate-text">{occupancyRate.toFixed(0)}%</div>
             </div>
             <div className="mt-2">
               <Progress value={occupancyRate} className="h-1" />
@@ -237,7 +237,7 @@ export default function FinancialAnalyticsDashboard({ properties, leases, paymen
           <CardContent>
             <div className="flex items-center">
               <Percent className="h-5 w-5 text-indigo-500 mr-2 shrink-0" />
-              <div className="text-2xl font-bold tov-truncate-text">
+              <div className="text-heading-2 tov-truncate-text">
                 {(capRateData.reduce((sum, item) => sum + item.capRate, 0) / capRateData.length).toFixed(2)}%
               </div>
             </div>
@@ -287,27 +287,27 @@ export default function FinancialAnalyticsDashboard({ properties, leases, paymen
                 </ResponsiveContainer>
               </div>
               <div className="grid grid-cols-3 gap-4 mt-6">
-                <Card className="bg-blue-50">
+                <Card className="bg-primary/10">
                   <CardContent className="p-4 flex flex-col items-center justify-center">
-                    <p className="text-blue-700 text-sm font-medium">Collection Rate</p>
-                    <p className="text-2xl font-bold">
+                    <p className="text-primary text-sm font-medium">Collection Rate</p>
+                    <p className="text-heading-2">
                       {((monthlyIncomeData.reduce((sum, month) => sum + month.actual, 0) / 
                          monthlyIncomeData.reduce((sum, month) => sum + month.expected, 0)) * 100).toFixed(1)}%
                     </p>
                   </CardContent>
                 </Card>
-                <Card className="bg-green-50">
+                <Card className="bg-success/10">
                   <CardContent className="p-4 flex flex-col items-center justify-center">
-                    <p className="text-green-700 text-sm font-medium">Avg. Monthly Income</p>
-                    <p className="text-2xl font-bold">
+                    <p className="text-success-foreground text-sm font-medium">Avg. Monthly Income</p>
+                    <p className="text-heading-2">
                       {formatCurrency(monthlyIncomeData.reduce((sum, month) => sum + month.actual, 0) / 12)}
                     </p>
                   </CardContent>
                 </Card>
-                <Card className="bg-purple-50">
+                <Card className="bg-accent/10">
                   <CardContent className="p-4 flex flex-col items-center justify-center">
-                    <p className="text-purple-700 text-sm font-medium">Yearly Total</p>
-                    <p className="text-2xl font-bold">
+                    <p className="text-primary text-sm font-medium">Yearly Total</p>
+                    <p className="text-heading-2">
                       {formatCurrency(monthlyIncomeData.reduce((sum, month) => sum + month.actual, 0))}
                     </p>
                   </CardContent>
@@ -349,8 +349,8 @@ export default function FinancialAnalyticsDashboard({ properties, leases, paymen
               <div className="grid grid-cols-3 gap-4 mt-6">
                 <Card className="bg-orange-50">
                   <CardContent className="p-4 flex flex-col items-center justify-center">
-                    <p className="text-orange-700 text-sm font-medium">Avg. ROI</p>
-                    <p className="text-2xl font-bold">
+                    <p className="text-warning-foreground text-sm font-medium">Avg. ROI</p>
+                    <p className="text-heading-2">
                       {(propertyROIData.reduce((sum, prop) => sum + prop.roi, 0) / propertyROIData.length).toFixed(2)}%
                     </p>
                   </CardContent>
@@ -366,13 +366,13 @@ export default function FinancialAnalyticsDashboard({ properties, leases, paymen
                     </p>
                   </CardContent>
                 </Card>
-                <Card className="bg-red-50">
+                <Card className="bg-destructive/10">
                   <CardContent className="p-4 flex flex-col items-center justify-center">
-                    <p className="text-red-700 text-sm font-medium">Needs Attention</p>
+                    <p className="text-destructive-foreground text-sm font-medium">Needs Attention</p>
                     <p className="text-xl font-bold truncate">
                       {propertyROIData.sort((a, b) => a.roi - b.roi)[0]?.name || "N/A"}
                     </p>
-                    <p className="text-sm font-medium text-red-600">
+                    <p className="text-sm font-medium text-destructive-foreground">
                       {propertyROIData.sort((a, b) => a.roi - b.roi)[0]?.roi.toFixed(2)}%
                     </p>
                   </CardContent>
@@ -417,7 +417,7 @@ export default function FinancialAnalyticsDashboard({ properties, leases, paymen
                   </div>
                 </div>
                 <div className="flex flex-col justify-center">
-                  <h3 className="text-lg font-medium mb-4">Expense Summary</h3>
+                  <h3 className="text-body-large mb-4">Expense Summary</h3>
                   <div className="space-y-3">
                     {expenseBreakdown.map((expense, index) => (
                       <div key={index} className="flex items-center">
@@ -498,7 +498,7 @@ export default function FinancialAnalyticsDashboard({ properties, leases, paymen
                           </div>
                           <Progress 
                             value={(item.value / mortgageEquityData.reduce((sum, i) => sum + i.value, 0)) * 100} 
-                            className={`h-1 mt-1 ${item.name === 'Equity' ? '[&>div]:bg-green-500' : '[&>div]:bg-red-500'}`}
+                            className={`h-1 mt-1 ${item.name === 'Equity' ? '[&>div]:bg-success' : '[&>div]:bg-destructive'}`}
                           />
                         </div>
                       </div>
@@ -510,14 +510,14 @@ export default function FinancialAnalyticsDashboard({ properties, leases, paymen
                   <h3 className="text-md font-medium mb-4">Loan-to-Value Ratio</h3>
                   <div className="bg-gray-100 p-4 rounded-lg">
                     <div className="text-center mb-4">
-                      <p className="text-sm text-gray-600">Overall LTV Ratio</p>
+                      <p className="text-body-small">Overall LTV Ratio</p>
                       <p className="text-3xl font-bold">
                         {(mortgageEquityData[1].value / (mortgageEquityData[0].value + mortgageEquityData[1].value) * 100).toFixed(1)}%
                       </p>
                     </div>
                     <div className="h-2 bg-gray-200 rounded-full mb-6">
                       <div 
-                        className="h-2 bg-gradient-to-r from-green-500 to-red-500 rounded-full"
+                        className="h-2 bg-gradient-to-r from-success to-red-500 rounded-full"
                         style={{ 
                           width: `${(mortgageEquityData[1].value / (mortgageEquityData[0].value + mortgageEquityData[1].value) * 100)}%` 
                         }}

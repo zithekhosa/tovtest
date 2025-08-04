@@ -166,8 +166,8 @@ export default function FacebookLandlordDashboard() {
         description: `You currently manage ${propertyCount} properties with ${occupancyRate}% occupancy rate, generating ${formatCurrency(totalMonthlyIncome)} in monthly rental income.`,
         date: new Date(),
         icon: <Building className="h-5 w-5" />,
-        iconBg: 'bg-blue-100',
-        iconColor: 'text-blue-600',
+        iconBg: 'bg-primary/10',
+        iconColor: 'text-primary',
         actionUrl: '/landlord/properties',
         actionLabel: 'Manage Properties'
       });
@@ -185,8 +185,8 @@ export default function FacebookLandlordDashboard() {
           description: `You have ${pendingCount} pending maintenance ${pendingCount === 1 ? 'request' : 'requests'} that ${pendingCount === 1 ? 'requires' : 'require'} your attention.`,
           date: new Date(new Date().setDate(new Date().getDate() - 1)),
           icon: <Wrench className="h-5 w-5" />,
-          iconBg: 'bg-orange-100',
-          iconColor: 'text-orange-600',
+          iconBg: 'bg-warning',
+          iconColor: 'text-warning-foreground',
           actionUrl: '/landlord/maintenance',
           actionLabel: 'View Requests'
         });
@@ -201,8 +201,8 @@ export default function FacebookLandlordDashboard() {
       description: `Your rent collection rate is currently at 85%. ${recentPayments?.length ? 'Recent payments have been received on time.' : 'No recent payments have been recorded.'}`,
       date: new Date(new Date().setDate(new Date().getDate() - 2)),
       icon: <DollarSign className="h-5 w-5" />,
-      iconBg: 'bg-green-100',
-      iconColor: 'text-green-600',
+      iconBg: 'bg-success',
+      iconColor: 'text-success-foreground',
       actionUrl: '/landlord/financial-management',
       actionLabel: 'View Finances'
     });
@@ -225,8 +225,8 @@ export default function FacebookLandlordDashboard() {
         description: `You have ${expiringLeases.length} ${expiringLeases.length === 1 ? 'lease' : 'leases'} expiring in the next 60 days. Plan for renewals or new tenants.`,
         date: new Date(new Date().setDate(new Date().getDate() - 3)),
         icon: <CalendarDays className="h-5 w-5" />,
-        iconBg: 'bg-purple-100',
-        iconColor: 'text-purple-600',
+        iconBg: 'bg-accent',
+        iconColor: 'text-primary',
         actionUrl: '/landlord/leases',
         actionLabel: 'Review Leases'
       });
@@ -247,8 +247,8 @@ export default function FacebookLandlordDashboard() {
           description: `Tenant ${tenant.firstName} has been living in your property for ${Math.floor(Math.random() * 24) + 1} months with excellent payment history.`,
           date: new Date(new Date().setDate(new Date().getDate() - randomDaysAgo)),
           icon: <UserCheck className="h-5 w-5" />,
-          iconBg: 'bg-blue-100',
-          iconColor: 'text-blue-600',
+          iconBg: 'bg-primary/10',
+          iconColor: 'text-primary',
           actionUrl: `/landlord/tenants/${tenant.id}`,
           actionLabel: 'View Profile'
         });
@@ -304,19 +304,19 @@ export default function FacebookLandlordDashboard() {
       label: 'Properties', 
       value: propertyCount,
       icon: <Building className="h-4 w-4" />,
-      color: 'text-blue-600'
+      color: 'text-primary'
     },
     { 
       label: 'Tenants', 
       value: tenants?.length || 0,
       icon: <Users className="h-4 w-4" />,
-      color: 'text-green-600'
+      color: 'text-success-foreground'
     },
     { 
       label: 'Monthly Income', 
       value: formatCurrency(totalMonthlyIncome),
       icon: <DollarSign className="h-4 w-4" />,
-      color: 'text-purple-600'
+      color: 'text-primary'
     },
   ];
 
@@ -353,7 +353,7 @@ export default function FacebookLandlordDashboard() {
               {/* Occupancy Rate */}
               <div className="flex flex-col items-center space-y-1 shrink-0">
                 <div className="w-16 h-16 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center shadow-sm">
-                  <div className="text-amber-600 flex items-center justify-center">
+                  <div className="text-warning-foreground flex items-center justify-center">
                     <Home className="h-4 w-4" />
                   </div>
                   <div className="text-sm font-semibold mt-1">{occupancyRate}%</div>

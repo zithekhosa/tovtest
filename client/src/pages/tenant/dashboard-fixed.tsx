@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
-import { DashLayout } from "@/layout/dash-layout";
+import DashLayout from "@/components/layout/DashLayout";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { MetricsCard, getTenantMetrics } from "@/components/dashboard/DashboardMetrics";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatCurrency, formatDate, apiRequest } from "@/lib/utils";
 import { Lease, Payment, MaintenanceRequest, Property } from "@shared/schema";
 import { ResponsiveGrid, ScrollableGrid } from "@/components/ui/responsive-grid";
-import { ContentContainer, PageSection } from "@/components/layout/ContentContainer";
+import { ContentContainer } from "@/components/layout/ContentContainer";
 import { SectionHeader } from "@/components/ui/section-header";
 import { MobileOptimizedCard, HorizontalCard, CompactCard } from "@/components/ui/mobile-optimized-card";
 
@@ -68,6 +68,7 @@ export default function TenantDashboard() {
     isLoading: isLoadingLeases,
   } = useQuery<Lease[]>({
     queryKey: ["/api/leases/tenant"],
+    queryFn: () => apiRequest("GET", "/api/leases/tenant"),
   });
 
   // Find the active lease
@@ -79,6 +80,7 @@ export default function TenantDashboard() {
     isLoading: isLoadingProperty
   } = useQuery<Property>({
     queryKey: ["/api/properties", activeLease?.propertyId],
+    queryFn: () => apiRequest("GET", `/api/properties/${activeLease?.propertyId}`),
     enabled: !!activeLease?.propertyId,
   });
 
@@ -95,6 +97,7 @@ export default function TenantDashboard() {
     profileImage?: string;
   }>({
     queryKey: ["/api/users", property?.landlordId],
+    queryFn: () => apiRequest("GET", `/api/users/${property?.landlordId}`),
     enabled: !!property?.landlordId,
   });
 
@@ -104,6 +107,7 @@ export default function TenantDashboard() {
     isLoading: isLoadingPayments
   } = useQuery<Payment[]>({
     queryKey: ["/api/payments/tenant"],
+    queryFn: () => apiRequest("GET", "/api/payments/tenant"),
   });
 
   // Fetch maintenance requests
@@ -112,6 +116,7 @@ export default function TenantDashboard() {
     isLoading: isLoadingMaintenance
   } = useQuery<MaintenanceRequest[]>({
     queryKey: ["/api/maintenance/tenant"],
+    queryFn: () => apiRequest("GET", "/api/maintenance/tenant"),
   });
 
   const isLoading = 
@@ -183,7 +188,7 @@ export default function TenantDashboard() {
       <DashLayout>
         <div className="p-6 bg-white rounded-xl shadow-md text-center">
           <Building className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold mb-2">No Active Lease Found</h2>
+          <h2 className="text-heading-3 mb-2">No Active Lease Found</h2>
           <p className="text-gray-500 mb-4">You don't have an active lease in the system.</p>
         </div>
       </DashLayout>
@@ -238,164 +243,179 @@ export default function TenantDashboard() {
               />
               
               {/* Mobile-Optimized Scrollable Grid for Cards */}
-              <ScrollableGrid itemWidth="min-w-[300px]" gap="gap-5">
+              <ScrollableGrid itemWidth="min-w-[300px]" gap="lg">
                 {/* Rent Due Card */}
-                <MobileOptimizedCard
-                  title="Next Rent Payment"
-                  icon={<DollarSign className="h-5 w-5 text-primary" />}
-                  headerClassName="pb-2"
-                  contentClassName="px-4 py-4"
-                  footer={
-                    <div className="text-xs text-center text-muted-foreground w-full">
-                      Payment methods: Credit Card, Bank Transfer, Mobile Money
-                    </div>
-                  }
-                >
-                  <div className="space-y-4">
-                    <div className="flex items-end justify-between">
+                <Card>
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="h-5 w-5 text-primary" />
                       <div>
-                        <p className="text-sm text-muted-foreground">Amount Due</p>
-                        <p className="text-2xl font-bold">{formatCurrency(activeLease.rentAmount)}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm text-muted-foreground">Due Date</p>
-                        <p className="text-md font-medium">{formatDate(nextRentDate)}</p>
-                        {lastPayment && (
-                          <Badge variant="outline" className="bg-green-50 text-green-700 mt-1">
-                            Last Payment: Paid
-                          </Badge>
-                        )}
+                        <CardTitle className="text-md font-medium">Next Rent Payment</CardTitle>
                       </div>
                     </div>
-                    
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Time Remaining</span>
-                        <span className="font-medium">{daysUntilRentDue} days</span>
-                      </div>
-                      <Progress value={(30 - daysUntilRentDue) / 30 * 100} className="h-2" />
-                    </div>
-                    
-                    <Button className="w-full gap-2" asChild>
-                      <Link href="/tenant/payments">
-                        <CreditCard className="h-4 w-4 shrink-0" />
-                        Pay Now
-                      </Link>
-                    </Button>
-                  </div>
-                </MobileOptimizedCard>
-
-                {/* Property Card */}
-                <MobileOptimizedCard
-                  title="Your Property"
-                  icon={<Home className="h-5 w-5 text-primary" />}
-                  headerClassName="pb-2"
-                  contentClassName="px-4 py-4"
-                >
-                  <div className="space-y-4">
-                    <div className="aspect-video bg-muted rounded-md relative">
-                      {property.images && property.images.length > 0 ? (
-                        <img
-                          src={property.images[0]}
-                          alt={property.address}
-                          className="object-cover w-full h-full rounded-md"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-muted rounded-md">
-                          <Home className="h-10 w-10 text-muted-foreground opacity-50" />
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="space-y-3">
-                      <div>
-                        <h3 className="font-medium truncate">{property.address}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          {property.city}, {property.state} {property.zipCode}
-                        </p>
-                      </div>
-                      <div className="flex justify-between text-sm">
+                  </CardHeader>
+                  <CardContent className="px-4 py-4">
+                    <div className="space-y-4">
+                      <div className="flex items-end justify-between">
                         <div>
-                          <p className="text-muted-foreground">Type</p>
-                          <p>{property.propertyType || "Residential"}</p>
+                          <p className="text-sm text-muted-foreground">Amount Due</p>
+                          <p className="text-heading-2">{formatCurrency(activeLease.rentAmount)}</p>
                         </div>
-                        <div>
-                          <p className="text-muted-foreground">Bedrooms</p>
-                          <p>{property.bedrooms}</p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">Bathrooms</p>
-                          <p>{property.bathrooms}</p>
+                        <div className="text-right">
+                          <p className="text-sm text-muted-foreground">Due Date</p>
+                          <p className="text-md font-medium">{formatDate(nextRentDate)}</p>
+                          {lastPayment && (
+                            <Badge variant="outline" className="bg-success/10 text-success-foreground mt-1">
+                              Last Payment: Paid
+                            </Badge>
+                          )}
                         </div>
                       </div>
-                      <Button variant="outline" className="w-full" asChild>
-                        <Link href="/tenant/properties">
-                          <Eye className="h-4 w-4 mr-2 shrink-0" />
-                          View Details
+                      
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Time Remaining</span>
+                          <span className="font-medium">{daysUntilRentDue} days</span>
+                        </div>
+                        <Progress value={(30 - daysUntilRentDue) / 30 * 100} className="h-2" />
+                      </div>
+                      
+                      <Button className="w-full gap-2" asChild>
+                        <Link href="/tenant/payments">
+                          <CreditCard className="h-4 w-4 shrink-0" />
+                          Pay Now
                         </Link>
                       </Button>
                     </div>
-                  </div>
-                </MobileOptimizedCard>
+                  </CardContent>
+                  <CardFooter className="px-4 py-2">
+                    <div className="text-xs text-center text-muted-foreground w-full">
+                      Payment methods: Credit Card, Bank Transfer, Mobile Money
+                    </div>
+                  </CardFooter>
+                </Card>
 
-                {/* Maintenance Requests Summary */}
-                <MobileOptimizedCard
-                  title="Maintenance Status"
-                  icon={<Wrench className="h-5 w-5 text-primary" />}
-                  headerClassName="pb-2"
-                  contentClassName="px-4 py-4"
-                >
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-3 gap-2 text-center">
-                      <div className="bg-amber-50 dark:bg-amber-900/20 rounded-md p-2">
-                        <div className="text-amber-600 dark:text-amber-400 font-semibold text-lg">{pendingMaintenanceCount}</div>
-                        <div className="text-xs text-amber-700 dark:text-amber-400">Pending</div>
-                      </div>
-                      <div className="bg-blue-50 dark:bg-blue-900/20 rounded-md p-2">
-                        <div className="text-blue-600 dark:text-blue-400 font-semibold text-lg">{inProgressMaintenanceCount}</div>
-                        <div className="text-xs text-blue-700 dark:text-blue-400">In Progress</div>
-                      </div>
-                      <div className="bg-green-50 dark:bg-green-900/20 rounded-md p-2">
-                        <div className="text-green-600 dark:text-green-400 font-semibold text-lg">{completedMaintenanceCount}</div>
-                        <div className="text-xs text-green-700 dark:text-green-400">Completed</div>
+                {/* Property Card */}
+                <Card>
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center gap-2">
+                      <Home className="h-5 w-5 text-primary" />
+                      <div>
+                        <CardTitle className="text-md font-medium">Your Property</CardTitle>
                       </div>
                     </div>
-                    
-                    {maintenanceRequests && maintenanceRequests.length > 0 ? (
-                      <div className="space-y-3">
-                        <h4 className="text-sm font-medium">Recent Requests</h4>
-                        {maintenanceRequests.slice(0, 2).map((request) => (
-                          <div key={request.id} className="flex justify-between items-start border-b border-gray-100 dark:border-gray-800 pb-2">
-                            <div>
-                              <p className="text-sm font-medium truncate w-40">{request.title}</p>
-                              <p className="text-xs text-muted-foreground">{formatDate(request.createdAt)}</p>
-                            </div>
-                            <Badge variant="outline" className={
-                              request.status === "pending" 
-                                ? "bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400" 
-                                : request.status === "in progress" 
-                                  ? "bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400" 
-                                  : "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400"
-                            }>
-                              {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
-                            </Badge>
+                  </CardHeader>
+                  <CardContent className="px-4 py-4">
+                    <div className="space-y-4">
+                      <div className="aspect-video bg-muted rounded-md relative">
+                        {property.images && property.images.length > 0 ? (
+                          <img
+                            src={property.images[0]}
+                            alt={property.address}
+                            className="object-cover w-full h-full rounded-md"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-muted rounded-md">
+                            <Home className="h-10 w-10 text-muted-foreground opacity-50" />
                           </div>
-                        ))}
+                        )}
                       </div>
-                    ) : (
-                      <div className="text-center py-3">
-                        <p className="text-sm text-muted-foreground">No maintenance requests</p>
+                      
+                      <div className="space-y-3">
+                        <div>
+                          <h3 className="font-medium truncate">{property.address}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            {property.city}, {property.state} {property.zipCode}
+                          </p>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <div>
+                            <p className="text-muted-foreground">Type</p>
+                            <p>{property.propertyType || "Residential"}</p>
+                          </div>
+                          <div>
+                            <p className="text-muted-foreground">Bedrooms</p>
+                            <p>{property.bedrooms}</p>
+                          </div>
+                          <div>
+                            <p className="text-muted-foreground">Bathrooms</p>
+                            <p>{property.bathrooms}</p>
+                          </div>
+                        </div>
+                        <Button variant="outline" className="w-full" asChild>
+                          <Link href="/tenant/properties">
+                            <Eye className="h-4 w-4 mr-2 shrink-0" />
+                            View Details
+                          </Link>
+                        </Button>
                       </div>
-                    )}
-                    
-                    <Button className="w-full" asChild>
-                      <Link href="/tenant/maintenance">
-                        <Plus className="h-4 w-4 mr-2 shrink-0" />
-                        Submit New Request
-                      </Link>
-                    </Button>
-                  </div>
-                </MobileOptimizedCard>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Maintenance Requests Summary */}
+                <Card>
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center gap-2">
+                      <Wrench className="h-5 w-5 text-primary" />
+                      <div>
+                        <CardTitle className="text-md font-medium">Maintenance Status</CardTitle>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="px-4 py-4">
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-3 gap-2 text-center">
+                        <div className="bg-warning/10 dark:bg-amber-900/20 rounded-md p-2">
+                          <div className="text-warning-foreground dark:text-warning-foreground font-semibold text-lg">{pendingMaintenanceCount}</div>
+                          <div className="text-xs text-warning-foreground dark:text-warning-foreground">Pending</div>
+                        </div>
+                        <div className="bg-primary/10 dark:bg-primary/20 rounded-md p-2">
+                          <div className="text-primary dark:text-primary font-semibold text-lg">{inProgressMaintenanceCount}</div>
+                          <div className="text-xs text-primary dark:text-primary">In Progress</div>
+                        </div>
+                        <div className="bg-success/10 dark:bg-success/20 rounded-md p-2">
+                          <div className="text-success-foreground dark:text-success-foreground font-semibold text-lg">{completedMaintenanceCount}</div>
+                          <div className="text-xs text-success-foreground dark:text-success-foreground">Completed</div>
+                        </div>
+                      </div>
+                      
+                      {maintenanceRequests && maintenanceRequests.length > 0 ? (
+                        <div className="space-y-3">
+                          <h4 className="text-sm font-medium">Recent Requests</h4>
+                          {maintenanceRequests.slice(0, 2).map((request) => (
+                            <div key={request.id} className="flex justify-between items-start border-b border-gray-100 dark:border-gray-800 pb-2">
+                              <div>
+                                <p className="text-sm font-medium truncate w-40">{request.title}</p>
+                                <p className="text-xs text-muted-foreground">{formatDate(request.createdAt)}</p>
+                              </div>
+                              <Badge variant="outline" className={
+                                request.status === "pending" 
+                                  ? "bg-warning/10 text-warning-foreground dark:bg-amber-900/20 dark:text-warning-foreground" 
+                                  : request.status === "in progress" 
+                                    ? "bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary" 
+                                    : "bg-success/10 text-success-foreground dark:bg-success/20 dark:text-success-foreground"
+                              }>
+                                {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-3">
+                          <p className="text-sm text-muted-foreground">No maintenance requests</p>
+                        </div>
+                      )}
+                      
+                      <Button className="w-full" asChild>
+                        <Link href="/tenant/maintenance">
+                          <Plus className="h-4 w-4 mr-2 shrink-0" />
+                          Submit New Request
+                        </Link>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
               </ScrollableGrid>
 
               {/* Lease Details */}
@@ -406,7 +426,7 @@ export default function TenantDashboard() {
                       <CardTitle className="text-md font-medium">Lease Information</CardTitle>
                       <CardDescription>Details about your current lease agreement</CardDescription>
                     </div>
-                    <Badge className="bg-green-50 text-green-700">Active</Badge>
+                    <Badge className="bg-success/10 text-success-foreground">Active</Badge>
                   </div>
                 </CardHeader>
                 <CardContent>

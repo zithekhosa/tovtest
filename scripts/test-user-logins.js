@@ -4,8 +4,9 @@
  */
 
 import fetch from 'node-fetch';
+import chalk from 'chalk';
 
-const BASE_URL = 'http://localhost:5000';
+const BASE_URL = 'http://localhost:3002';
 const DEMO_ACCOUNTS = [
   { username: 'demo-landlord', password: 'password123', role: 'landlord' },
   { username: 'demo-tenant', password: 'password123', role: 'tenant' },

@@ -30,11 +30,11 @@ export function PropertyCard({
   const getBadgeColor = () => {
     switch (status) {
       case 'Fully Occupied':
-        return 'bg-green-500';
+        return 'bg-success';
       case 'Partially Occupied':
-        return 'bg-yellow-500';
+        return 'bg-warning/100';
       case 'Vacant':
-        return 'bg-red-500';
+        return 'bg-destructive';
       default:
         return 'bg-gray-500';
     }
@@ -69,15 +69,15 @@ export function PropertyCard({
       </div>
       <div className="p-4">
         <h3 className="font-semibold text-gray-900">{name}</h3>
-        <p className="text-sm text-gray-600 mt-1">{address}</p>
+        <p className="text-body-small mt-1">{address}</p>
         <div className="flex items-center space-x-3 mt-3">
           <div className="flex items-center">
             <Building className="text-gray-400 mr-1 h-4 w-4" />
-            <span className="text-sm text-gray-600">{units} Units</span>
+            <span className="text-body-small">{units} Units</span>
           </div>
           <div className="flex items-center">
             <User className="text-gray-400 mr-1 h-4 w-4" />
-            <span className="text-sm text-gray-600">{tenants} Tenants</span>
+            <span className="text-body-small">{tenants} Tenants</span>
           </div>
         </div>
         <div className="mt-4 flex justify-between">

@@ -1,5 +1,5 @@
 import { createContext, useContext, ReactNode, useState, useCallback, useEffect } from 'react';
-import { useWebSocket } from './use-websocket';
+import useWebSocket from './use-websocket';
 
 type MessageType = 'maintenance_update' | 'property_notification' | 'chat_message';
 
@@ -18,7 +18,7 @@ interface WebSocketContextType {
 
 const WebSocketContext = createContext<WebSocketContextType | null>(null);
 
-export function WebSocketProvider({ children }: { children: ReactNode }) {
+function WebSocketProvider({ children }: { children: ReactNode }) {
   const [messages, setMessages] = useState<WebSocketMessage[]>([]);
   
   // Handle incoming messages
@@ -83,10 +83,13 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useWebSocketContext() {
+function useWebSocketContext() {
   const context = useContext(WebSocketContext);
   if (!context) {
     throw new Error('useWebSocketContext must be used within a WebSocketProvider');
   }
   return context;
 }
+
+export { WebSocketProvider, useWebSocketContext };
+export default useWebSocketContext;

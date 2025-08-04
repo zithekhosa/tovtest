@@ -115,7 +115,7 @@ export default function ProvidersSignup() {
       onSuccess: () => {
         // Auto login after registration
         loginMutation.mutate({
-          username: data.username,
+          email: data.email,
           password: data.password,
         });
       }
@@ -124,7 +124,10 @@ export default function ProvidersSignup() {
 
   // Handle login submission
   const onLoginSubmit = (data: z.infer<typeof loginSchema>) => {
-    loginMutation.mutate(data);
+    loginMutation.mutate({
+      email: data.email,
+      password: data.password,
+    });
   };
 
   return (
@@ -221,7 +224,7 @@ export default function ProvidersSignup() {
                       <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div className="space-y-4">
-                            <h3 className="text-lg font-medium">Account Information</h3>
+                            <h3 className="text-body-large">Account Information</h3>
                             
                             <FormField
                               control={registerForm.control}
@@ -334,7 +337,7 @@ export default function ProvidersSignup() {
                           </div>
                           
                           <div className="space-y-4">
-                            <h3 className="text-lg font-medium">
+                            <h3 className="text-body-large">
                               {activeTab === 'provider' ? 'Professional Information' : 'Agency Information'}
                             </h3>
                             

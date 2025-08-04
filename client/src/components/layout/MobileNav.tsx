@@ -94,14 +94,56 @@ export default function MobileNav({ role }: MobileNavProps) {
         {
           href: "/tenant/properties",
           icon: Building,
-          label: "My Rental",
+          label: "My Property",
           active: location.includes("properties"),
+        },
+        {
+          href: "/tenant/payments",
+          icon: DollarSign,
+          label: "Payments",
+          active: location.includes("payments"),
         },
         {
           href: "/tenant/maintenance",
           icon: Wrench,
           label: "Maintenance",
           active: location.includes("maintenance"),
+        },
+        {
+          href: "/tenant/applications",
+          icon: FileText,
+          label: "Applications",
+          active: location.includes("applications"),
+        },
+        {
+          href: "/tenant/property-search",
+          icon: Search,
+          label: "Find Property",
+          active: location.includes("property-search"),
+        },
+        {
+          href: "/tenant/marketplace",
+          icon: PieChart,
+          label: "Marketplace",
+          active: location.includes("marketplace"),
+        },
+        {
+          href: "/tenant/lease-history",
+          icon: FileText,
+          label: "Lease History",
+          active: location.includes("lease-history"),
+        },
+        {
+          href: "/tenant/appointment-booking",
+          icon: Bell,
+          label: "Book Inspection",
+          active: location.includes("appointment-booking"),
+        },
+        {
+          href: "/tenant/rating-reviews",
+          icon: Bell,
+          label: "Rate Experience",
+          active: location.includes("rating-reviews"),
         },
         {
           href: "/tenant/documents",
@@ -177,7 +219,7 @@ export default function MobileNav({ role }: MobileNavProps) {
       ],
     };
 
-    return roleSpecificItems[role];
+    return roleSpecificItems[role] || roleSpecificItems.tenant; // fallback to tenant if role is undefined
   };
 
   const navItems: NavItem[] = getNavItems();
@@ -210,7 +252,7 @@ export default function MobileNav({ role }: MobileNavProps) {
           <div className="flex items-center space-x-3">
             <Bell className="h-5 w-5 text-gray-700 dark:text-gray-300 relative" />
             <div className="relative">
-              <div className="w-2 h-2 bg-red-500 rounded-full absolute -top-0.5 -right-0.5"></div>
+              <div className="w-2 h-2 bg-destructive rounded-full absolute -top-0.5 -right-0.5"></div>
               <ProfileAvatar userRole={role} size="sm" className="border border-gray-200 dark:border-gray-700" />
             </div>
           </div>
@@ -240,7 +282,7 @@ export default function MobileNav({ role }: MobileNavProps) {
                     : user.username}
                 </p>
                 <Badge variant="outline" className="text-xs mt-0.5 font-normal">
-                  {role.charAt(0).toUpperCase() + role.slice(1)}
+                  {role ? role.charAt(0).toUpperCase() + role.slice(1) : 'User'}
                 </Badge>
               </div>
               <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
@@ -287,7 +329,7 @@ export default function MobileNav({ role }: MobileNavProps) {
               
               <Button
                 variant="ghost"
-                className="w-full justify-start px-4 py-2.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 dark:text-red-400 rounded-lg mt-1"
+                className="w-full justify-start px-4 py-2.5 text-destructive-foreground hover:bg-destructive/10 dark:hover:bg-destructive/20 dark:text-red-400 rounded-lg mt-1"
                 onClick={() => {
                   handleLogout();
                   setIsOpen(false);

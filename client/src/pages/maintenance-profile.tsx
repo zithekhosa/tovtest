@@ -117,7 +117,7 @@ export default function MaintenanceProfile() {
   if (!isMaintenanceProvider) {
     return (
       <div className="container max-w-6xl mx-auto py-8 px-4">
-        <h1 className="text-2xl font-bold mb-4">User is not a maintenance provider</h1>
+        <h1 className="text-heading-2 mb-4">User is not a maintenance provider</h1>
         <p>The requested user is not a maintenance service provider.</p>
         <Button className="mt-4" onClick={() => navigate('/')}>
           Return to Home
@@ -178,7 +178,7 @@ export default function MaintenanceProfile() {
               <CardDescription className="flex items-center justify-center gap-2 text-base">
                 <Badge>Maintenance Provider</Badge>
                 <span className="flex items-center">
-                  <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
+                  <Star className="h-4 w-4 fill-primary text-primary mr-1" />
                   {avgRating.toFixed(1)}
                 </span>
               </CardDescription>
@@ -260,7 +260,7 @@ export default function MaintenanceProfile() {
                   <span>Overall Rating</span>
                   <span className="flex items-center">
                     {avgRating.toFixed(1)}
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 ml-1" />
+                    <Star className="h-4 w-4 fill-primary text-primary ml-1" />
                   </span>
                 </div>
                 <Progress value={avgRating * 20} className="h-2" />
@@ -319,7 +319,7 @@ export default function MaintenanceProfile() {
             
             {/* Jobs Tab */}
             <TabsContent value="jobs" className="mt-4">
-              <h2 className="text-xl font-semibold mb-4">Completed Maintenance Jobs</h2>
+              <h2 className="text-heading-3 mb-4">Completed Maintenance Jobs</h2>
               {isLoadingJobs ? (
                 <div className="flex justify-center py-8">
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -327,7 +327,7 @@ export default function MaintenanceProfile() {
               ) : !jobs?.length ? (
                 <Card className="bg-muted/50">
                   <CardContent className="py-8 text-center">
-                    <h3 className="text-lg font-medium mb-2">No Jobs Completed</h3>
+                    <h3 className="text-body-large mb-2">No Jobs Completed</h3>
                     <p className="text-muted-foreground">
                       This provider hasn't completed any maintenance jobs yet.
                     </p>
@@ -388,9 +388,9 @@ export default function MaintenanceProfile() {
             
             {/* Reviews Tab */}
             <TabsContent value="reviews" className="mt-4">
-              <h2 className="text-xl font-semibold mb-4">Reviews & Ratings</h2>
+              <h2 className="text-heading-3 mb-4">Reviews & Ratings</h2>
               <div className="py-8 text-center">
-                <h3 className="text-lg font-medium mb-2">Maintenance Ratings Coming Soon</h3>
+                <h3 className="text-body-large mb-2">Maintenance Ratings Coming Soon</h3>
                 <p className="text-muted-foreground mb-4">
                   The maintenance rating system is currently under development.
                 </p>

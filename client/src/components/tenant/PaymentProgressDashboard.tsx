@@ -92,10 +92,10 @@ export default function PaymentProgressDashboard({ payments, lease, rentAmount }
   
   const getPaymentStatusColor = (status: string) => {
     switch (status) {
-      case 'paid': return 'text-green-500';
-      case 'overdue': return 'text-red-500';
+      case 'paid': return 'text-success-foreground';
+      case 'overdue': return 'text-destructive-foreground';
       case 'due-soon': return 'text-amber-500';
-      default: return 'text-blue-500';
+      default: return 'text-primary';
     }
   };
   
@@ -110,10 +110,10 @@ export default function PaymentProgressDashboard({ payments, lease, rentAmount }
   
   const getPaymentStatusIcon = (status: string) => {
     switch (status) {
-      case 'paid': return <CheckCircle2 className="h-6 w-6 text-green-500" />;
-      case 'overdue': return <AlertTriangle className="h-6 w-6 text-red-500" />;
+      case 'paid': return <CheckCircle2 className="h-6 w-6 text-success-foreground" />;
+      case 'overdue': return <AlertTriangle className="h-6 w-6 text-destructive-foreground" />;
       case 'due-soon': return <Clock className="h-6 w-6 text-amber-500" />;
-      default: return <Calendar className="h-6 w-6 text-blue-500" />;
+      default: return <Calendar className="h-6 w-6 text-primary" />;
     }
   };
   
@@ -147,7 +147,7 @@ export default function PaymentProgressDashboard({ payments, lease, rentAmount }
                   {getPaymentStatusText(paymentStatus.status)}
                 </h3>
                 {paymentStatus.status !== 'paid' && (
-                  <p className="text-sm text-gray-600">
+                  <p className="text-body-small">
                     {paymentStatus.status === 'overdue' 
                       ? `Overdue by ${paymentStatus.daysLeft} days` 
                       : `${paymentStatus.daysLeft} days until payment`}
@@ -156,7 +156,7 @@ export default function PaymentProgressDashboard({ payments, lease, rentAmount }
               </div>
             </div>
             <div className="text-right">
-              <div className="text-2xl font-bold">{formatCurrency(rentAmount)}</div>
+              <div className="text-heading-2">{formatCurrency(rentAmount)}</div>
               <p className="text-sm text-gray-500">Monthly Rent</p>
             </div>
           </div>
@@ -169,7 +169,7 @@ export default function PaymentProgressDashboard({ payments, lease, rentAmount }
               </div>
               <Progress 
                 value={paymentStatus.status === 'overdue' ? 100 : (100 - (paymentStatus.daysLeft / 30) * 100)} 
-                className={`h-2 ${paymentStatus.status === 'overdue' ? 'bg-red-100' : ''}`}
+                className={`h-2 ${paymentStatus.status === 'overdue' ? 'bg-destructive' : ''}`}
               />
             </div>
           )}
@@ -186,7 +186,7 @@ export default function PaymentProgressDashboard({ payments, lease, rentAmount }
             <DollarSign className="h-8 w-8 text-emerald-500 mr-3" />
             <div>
               <h3 className="font-semibold">{consistencyPercentage.toFixed(0)}% On-Time Payments</h3>
-              <p className="text-sm text-gray-600">
+              <p className="text-body-small">
                 {payments.length} of {totalExpectedPayments} expected payments made
               </p>
             </div>
@@ -227,7 +227,7 @@ export default function PaymentProgressDashboard({ payments, lease, rentAmount }
               <Wallet className="h-6 w-6 text-indigo-500 mr-3" />
               <div>
                 <h3 className="font-semibold">{formatCurrency(totalPaidThisYear)}</h3>
-                <p className="text-sm text-gray-600">Paid this year</p>
+                <p className="text-body-small">Paid this year</p>
               </div>
             </div>
             <div className="text-right">

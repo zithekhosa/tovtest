@@ -105,11 +105,11 @@ export function DocumentViewer({
       case "draft":
         return <Badge variant="outline" className="bg-gray-100">Draft</Badge>;
       case "pending":
-        return <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-200">Pending</Badge>;
+        return <Badge variant="outline" className="bg-warning text-warning-foreground border-warning">Pending</Badge>;
       case "active":
-        return <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200">Active</Badge>;
+        return <Badge variant="outline" className="bg-success text-success-foreground border-success/30">Active</Badge>;
       case "expired":
-        return <Badge variant="outline" className="bg-red-100 text-red-800 border-red-200">Expired</Badge>;
+        return <Badge variant="outline" className="bg-destructive text-destructive-foreground border-destructive/30">Expired</Badge>;
       case "terminated":
         return <Badge variant="outline" className="bg-gray-100 text-gray-800 border-gray-200">Terminated</Badge>;
       default:
@@ -121,11 +121,11 @@ export function DocumentViewer({
   const getApprovalStatusIcon = (status: string) => {
     switch (status) {
       case "approved":
-        return <CheckCircle2 className="h-5 w-5 text-green-500" />;
+        return <CheckCircle2 className="h-5 w-5 text-success-foreground" />;
       case "rejected":
-        return <XCircle className="h-5 w-5 text-red-500" />;
+        return <XCircle className="h-5 w-5 text-destructive-foreground" />;
       default:
-        return <AlertCircle className="h-5 w-5 text-yellow-500" />;
+        return <AlertCircle className="h-5 w-5 text-warning-foreground" />;
     }
   };
   
@@ -224,7 +224,7 @@ export function DocumentViewer({
                   {document.clauses.map((clause) => (
                     <div key={clause.id} className={cn(
                       "space-y-1",
-                      clause.isHighlighted && "bg-yellow-50 dark:bg-yellow-900/10 p-2 rounded"
+                      clause.isHighlighted && "bg-warning/10 dark:bg-warning/10 p-2 rounded"
                     )}>
                       <h4 className="text-sm font-bold">{clause.number}. {clause.title}</h4>
                       <p className="text-sm whitespace-pre-wrap">{clause.content}</p>
@@ -277,34 +277,40 @@ export function DocumentViewer({
               <TimelineProvider>
                 <Timeline className="px-4">
                   {document.versions.map((version, index) => (
-                    <TimelineItem key={version.id}>
-                      <TimelineItem.Indicator>
-                        <History className="h-5 w-5" />
-                      </TimelineItem.Indicator>
-                      <TimelineItem.Content>
-                        <Card>
-                          <CardContent className="pt-4">
-                            <div className="flex justify-between mb-2">
-                              <h4 className="text-sm font-medium">Version {version.versionNumber}</h4>
-                              <span className="text-xs text-muted-foreground">
-                                {formatDate(version.date)}
-                              </span>
-                            </div>
-                            <p className="text-sm">{version.comment}</p>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              Changes by: {version.changedBy}
-                            </p>
-                            <Button 
-                              variant="link" 
-                              size="sm" 
-                              className="px-0 py-0 h-auto text-xs mt-2"
-                              onClick={() => window.open(version.url, "_blank")}
-                            >
-                              View this version
-                            </Button>
-                          </CardContent>
-                        </Card>
-                      </TimelineItem.Content>
+                    <TimelineItem 
+                      key={version.id}
+                    >
+                      <div className="flex items-start space-x-3">
+                        <div className="flex-shrink-0">
+                          <History className="h-4 w-4 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium">Version {version.versionNumber}</p>
+                          <p className="text-sm text-muted-foreground">{version.comment}</p>
+                        </div>
+                      </div>
+                      <Card>
+                        <CardContent className="pt-4">
+                          <div className="flex justify-between mb-2">
+                            <h4 className="text-sm font-medium">Version {version.versionNumber}</h4>
+                            <span className="text-xs text-muted-foreground">
+                              {formatDate(version.date)}
+                            </span>
+                          </div>
+                          <p className="text-sm">{version.comment}</p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Changes by: {version.changedBy}
+                          </p>
+                          <Button 
+                            variant="link" 
+                            size="sm" 
+                            className="px-0 py-0 h-auto text-xs mt-2"
+                            onClick={() => window.open(version.url, "_blank")}
+                          >
+                            View this version
+                          </Button>
+                        </CardContent>
+                      </Card>
                     </TimelineItem>
                   ))}
                 </Timeline>

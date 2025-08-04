@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
-import { DashLayout } from "@/layout/dash-layout";
+import DashLayout from "@/components/layout/DashLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -76,18 +76,18 @@ export default function Documents() {
   const getFileIcon = (fileType: string) => {
     switch (fileType.toLowerCase()) {
       case 'pdf':
-        return <svg className="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        return <svg className="h-6 w-6 text-destructive-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>;
       case 'doc':
       case 'docx':
-        return <svg className="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        return <svg className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>;
       case 'jpg':
       case 'jpeg':
       case 'png':
-        return <svg className="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        return <svg className="h-6 w-6 text-success-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>;
       default:
@@ -167,7 +167,7 @@ export default function Documents() {
                     <TableCell>{formatDate((doc.createdAt || doc.uploadedAt).toString())}</TableCell>
                     <TableCell>
                       <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        doc.isPublic ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
+                        doc.isPublic ? 'bg-success text-success-foreground' : 'bg-primary/10 text-primary'
                       }`}>
                         {doc.isPublic !== undefined ? (doc.isPublic ? 'Shared' : 'Private') : 'Shared'}
                       </div>
@@ -216,7 +216,7 @@ export default function Documents() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem>Rename</DropdownMenuItem>
-                            <DropdownMenuItem className="text-red-600">
+                            <DropdownMenuItem className="text-destructive-foreground">
                               <Trash2 className="mr-2 h-4 w-4" />
                               Delete
                             </DropdownMenuItem>
@@ -231,7 +231,7 @@ export default function Documents() {
           ) : (
             <div className="text-center py-16">
               <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900">No documents found</h3>
+              <h3 className="text-body-large text-gray-900">No documents found</h3>
               <p className="text-gray-500 mt-1 mb-4">
                 {searchTerm ? "No documents match your search criteria" : "Get started by uploading your first document"}
               </p>

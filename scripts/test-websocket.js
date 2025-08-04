@@ -8,8 +8,8 @@ import WebSocket from 'ws';
 import fetch from 'node-fetch';
 import chalk from 'chalk';
 
-const BASE_URL = 'http://localhost:5000';
-const WS_URL = 'ws://localhost:5000/ws';
+const BASE_URL = 'http://localhost:3002';
+const WS_URL = 'ws://localhost:3002/ws';
 
 async function login(username, password) {
   try {

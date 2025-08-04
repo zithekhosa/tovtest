@@ -27,7 +27,7 @@ export function SectionHeader({
     )}>
       <div className="space-y-1 min-w-0 flex-1">
         <h2 className={cn(
-          "text-xl font-semibold tracking-tight sm:text-2xl truncate",
+          "text-heading-3 tracking-tight sm:text-2xl truncate",
           titleClassName
         )}>
           {title}

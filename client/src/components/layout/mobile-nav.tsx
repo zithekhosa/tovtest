@@ -174,10 +174,10 @@ export function MobileNav() {
       active: location.includes("/documents"),
     },
     {
-      href: "/settings",
+      href: `/${role}/settings`,
       icon: Settings,
       label: "Settings",
-      active: location === "/settings",
+      active: location.includes("/settings"),
     },
     {
       href: "/contact",
@@ -263,7 +263,7 @@ export function MobileNav() {
                   <p className="text-sm font-medium text-gray-900 truncate">
                     {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.username}
                   </p>
-                  <p className="text-xs text-gray-500 capitalize">{role}</p>
+                  <p className="text-caption capitalize">{role}</p>
                 </div>
               </div>
             </div>

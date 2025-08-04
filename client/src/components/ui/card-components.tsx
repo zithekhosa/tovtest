@@ -46,7 +46,7 @@ export function MetricCard({
         <div className="flex justify-between items-start">
           <div className="space-y-1">
             <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-            <div className="text-2xl font-bold">{value}</div>
+            <div className="text-heading-2">{value}</div>
           </div>
           {icon && (
             <div className={cn("p-2 rounded-full", iconBackground)}>
@@ -60,7 +60,7 @@ export function MetricCard({
         {trend && (
           <div className={cn(
             "mt-1 text-xs font-medium flex items-center",
-            trend.isPositive ? "text-green-600" : "text-red-600"
+            trend.isPositive ? "text-success-foreground" : "text-destructive-foreground"
           )}>
             {trend.isPositive ? "↑" : "↓"} {trend.value}%
           </div>

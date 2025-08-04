@@ -82,8 +82,8 @@ export default function Dashboard() {
         title: "Pending Payments",
         value: "$8,420",
         icon: DollarSign,
-        iconColor: "text-red-700",
-        iconBgColor: "bg-red-100",
+        iconColor: "text-destructive-foreground",
+        iconBgColor: "bg-destructive",
         changeValue: "$1,250",
         changeText: "since last month",
         changeDirection: "up" as const,
@@ -92,8 +92,8 @@ export default function Dashboard() {
         title: "Maintenance Requests",
         value: maintenanceRequests.length,
         icon: Wrench,
-        iconColor: "text-yellow-700",
-        iconBgColor: "bg-yellow-100",
+        iconColor: "text-warning-foreground",
+        iconBgColor: "bg-warning",
         changeValue: 2,
         changeText: "since last week",
         changeDirection: "up" as const,
@@ -125,8 +125,8 @@ export default function Dashboard() {
         description: "Urgent plumbing issue reported at Maple Grove, Unit 3A by Daniel Smith.",
         time: "2 days ago",
         icon: Wrench,
-        iconColor: "text-red-700",
-        iconBgColor: "bg-red-100",
+        iconColor: "text-destructive-foreground",
+        iconBgColor: "bg-destructive",
       },
     ];
 
@@ -203,7 +203,7 @@ export default function Dashboard() {
         {/* Properties Overview */}
         <section className="mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Your Properties</h2>
+            <h2 className="text-heading-3 text-gray-900">Your Properties</h2>
             <Link href="/properties/new">
               <Button className="inline-flex items-center">
                 <svg className="mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -239,7 +239,7 @@ export default function Dashboard() {
             ) : (
               <div className="col-span-3 bg-white p-6 rounded-lg border border-gray-200 text-center">
                 <Building className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium">No properties yet</h3>
+                <h3 className="text-body-large">No properties yet</h3>
                 <p className="text-gray-500 mb-4">Get started by adding your first property</p>
                 <Link href="/properties/new">
                   <Button>Add Your First Property</Button>
@@ -265,7 +265,7 @@ export default function Dashboard() {
         {/* Recent Maintenance Requests */}
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Recent Maintenance Requests</h2>
+            <h2 className="text-heading-3 text-gray-900">Recent Maintenance Requests</h2>
             <Link href="/maintenance">
               <a className="text-primary text-sm font-medium hover:underline">View All</a>
             </Link>
@@ -293,20 +293,20 @@ export default function Dashboard() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div className="bg-white p-6 rounded-lg border border-gray-200">
-            <h2 className="text-xl font-semibold mb-4">Your Rental</h2>
+            <h2 className="text-heading-3 mb-4">Your Rental</h2>
             <p className="text-gray-600">Rental information will be displayed here</p>
             <Button className="mt-4">View Details</Button>
           </div>
           
           <div className="bg-white p-6 rounded-lg border border-gray-200">
-            <h2 className="text-xl font-semibold mb-4">Rent Payment</h2>
+            <h2 className="text-heading-3 mb-4">Rent Payment</h2>
             <p className="text-gray-600">Next payment: $1,200 due on Oct 1, 2023</p>
             <Button className="mt-4">Pay Rent</Button>
           </div>
         </div>
         
         <div className="bg-white p-6 rounded-lg border border-gray-200 mb-6">
-          <h2 className="text-xl font-semibold mb-4">Maintenance Requests</h2>
+          <h2 className="text-heading-3 mb-4">Maintenance Requests</h2>
           <Link href="/maintenance/new">
             <Button>Submit New Request</Button>
           </Link>
@@ -326,19 +326,19 @@ export default function Dashboard() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
           <div className="bg-white p-6 rounded-lg border border-gray-200">
-            <h2 className="text-xl font-semibold mb-4">Property Listings</h2>
+            <h2 className="text-heading-3 mb-4">Property Listings</h2>
             <p className="text-gray-600">Manage your property listings</p>
             <Button className="mt-4">View Listings</Button>
           </div>
           
           <div className="bg-white p-6 rounded-lg border border-gray-200">
-            <h2 className="text-xl font-semibold mb-4">Client Inquiries</h2>
+            <h2 className="text-heading-3 mb-4">Client Inquiries</h2>
             <p className="text-gray-600">Handle inquiries from potential clients</p>
             <Button className="mt-4">View Inquiries</Button>
           </div>
           
           <div className="bg-white p-6 rounded-lg border border-gray-200">
-            <h2 className="text-xl font-semibold mb-4">Performance</h2>
+            <h2 className="text-heading-3 mb-4">Performance</h2>
             <p className="text-gray-600">Track your agency's performance</p>
             <Button className="mt-4">View Analytics</Button>
           </div>
@@ -358,13 +358,13 @@ export default function Dashboard() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div className="bg-white p-6 rounded-lg border border-gray-200">
-            <h2 className="text-xl font-semibold mb-4">Job Listings</h2>
+            <h2 className="text-heading-3 mb-4">Job Listings</h2>
             <p className="text-gray-600">Find new maintenance jobs</p>
             <Button className="mt-4">Browse Jobs</Button>
           </div>
           
           <div className="bg-white p-6 rounded-lg border border-gray-200">
-            <h2 className="text-xl font-semibold mb-4">Your Assignments</h2>
+            <h2 className="text-heading-3 mb-4">Your Assignments</h2>
             <p className="text-gray-600">View your current maintenance assignments</p>
             <Button className="mt-4">View Assignments</Button>
           </div>
@@ -378,7 +378,7 @@ export default function Dashboard() {
       <Sidebar />
       <MobileNav />
       <main className="flex-1 overflow-auto">
-        <div className="p-4 md:p-6 max-w-7xl mx-auto">
+        <div className="p-4 md:p-6 max-w-[1600px] mx-auto">
           {renderDashboardContent()}
         </div>
       </main>

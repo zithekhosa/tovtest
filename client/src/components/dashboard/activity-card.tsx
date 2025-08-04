@@ -42,9 +42,9 @@ export function ActivityCard({ title, activities, viewAllLink, className }: Acti
             <div className="flex-1">
               <div className="flex items-center justify-between">
                 <p className="font-medium text-gray-900">{activity.title}</p>
-                <span className="text-xs text-gray-500">{activity.time}</span>
+                <span className="text-caption">{activity.time}</span>
               </div>
-              <p className="text-sm text-gray-600 mt-1">{activity.description}</p>
+              <p className="text-body-small mt-1">{activity.description}</p>
             </div>
           </div>
         ))}

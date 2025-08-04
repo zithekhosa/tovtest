@@ -1,5 +1,5 @@
 import { SettingsPage } from "@/components/settings/SettingsPage";
-import { DashLayout } from "@/layout/dash-layout";
+import DashLayout from "@/components/layout/DashLayout";
 
 export default function MaintenanceSettings() {
   return (

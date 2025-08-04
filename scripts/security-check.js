@@ -7,7 +7,7 @@
 import fetch from 'node-fetch';
 import chalk from 'chalk';
 
-const BASE_URL = 'http://localhost:5000';
+const BASE_URL = 'http://localhost:3002';
 
 // List of protected routes to verify
 const PROTECTED_ROUTES = [

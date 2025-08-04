@@ -32,19 +32,19 @@ export default function TestFacebookDashboard() {
       label: 'Properties', 
       value: 5,
       icon: <Building className="h-4 w-4" />,
-      color: 'text-blue-600'
+      color: 'text-primary'
     },
     { 
       label: 'Tenants', 
       value: 12,
       icon: <Users className="h-4 w-4" />,
-      color: 'text-green-600'
+      color: 'text-success-foreground'
     },
     { 
       label: 'Monthly Income', 
       value: 'P24,500',
       icon: <DollarSign className="h-4 w-4" />,
-      color: 'text-purple-600'
+      color: 'text-primary'
     },
   ];
   
@@ -82,7 +82,7 @@ export default function TestFacebookDashboard() {
             {/* Occupancy Rate */}
             <div className="flex flex-col items-center space-y-1 shrink-0">
               <div className="w-16 h-16 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center shadow-sm">
-                <div className="text-amber-600 flex items-center justify-center">
+                <div className="text-warning-foreground flex items-center justify-center">
                   <Home className="h-4 w-4" />
                 </div>
                 <div className="text-sm font-semibold mt-1">{occupancyRate}%</div>
@@ -174,8 +174,8 @@ export default function TestFacebookDashboard() {
         {/* Post 2 */}
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl mb-4 overflow-hidden">
           <div className="flex flex-row items-center gap-3 p-4">
-            <div className="h-10 w-10 rounded-full flex items-center justify-center bg-orange-100">
-              <div className="text-orange-600">
+            <div className="h-10 w-10 rounded-full flex items-center justify-center bg-warning">
+              <div className="text-warning-foreground">
                 <Wrench className="h-5 w-5" />
               </div>
             </div>
@@ -267,8 +267,8 @@ export default function TestFacebookDashboard() {
         {/* Post 4 */}
         <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl mb-4 overflow-hidden">
           <div className="flex flex-row items-center gap-3 p-4">
-            <div className="h-10 w-10 rounded-full flex items-center justify-center bg-purple-100">
-              <div className="text-purple-600">
+            <div className="h-10 w-10 rounded-full flex items-center justify-center bg-accent">
+              <div className="text-primary">
                 <CalendarDays className="h-5 w-5" />
               </div>
             </div>
@@ -338,7 +338,7 @@ export default function TestFacebookDashboard() {
           >
             <MessageSquare className="h-6 w-6 mb-0.5" />
             <span className="text-[10px] font-medium">Messages</span>
-            <span className="absolute top-0 right-1/4 bg-red-500 text-white text-[10px] font-medium min-w-[16px] h-4 flex items-center justify-center rounded-full px-1">
+            <span className="absolute top-0 right-1/4 bg-destructive text-white text-[10px] font-medium min-w-[16px] h-4 flex items-center justify-center rounded-full px-1">
               2
             </span>
           </Link>
@@ -348,7 +348,7 @@ export default function TestFacebookDashboard() {
           >
             <Wrench className="h-6 w-6 mb-0.5" />
             <span className="text-[10px] font-medium">Maintenance</span>
-            <span className="absolute top-0 right-1/4 bg-red-500 text-white text-[10px] font-medium min-w-[16px] h-4 flex items-center justify-center rounded-full px-1">
+            <span className="absolute top-0 right-1/4 bg-destructive text-white text-[10px] font-medium min-w-[16px] h-4 flex items-center justify-center rounded-full px-1">
               3
             </span>
           </Link>

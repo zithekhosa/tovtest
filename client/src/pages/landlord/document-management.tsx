@@ -427,11 +427,11 @@ export default function DocumentManagementPage() {
       case "draft":
         return <Badge variant="outline" className="bg-gray-100">Draft</Badge>;
       case "pending":
-        return <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-200">Pending</Badge>;
+        return <Badge variant="outline" className="bg-warning text-warning-foreground border-warning">Pending</Badge>;
       case "active":
-        return <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200">Active</Badge>;
+        return <Badge variant="outline" className="bg-success text-success-foreground border-success/30">Active</Badge>;
       case "expired":
-        return <Badge variant="outline" className="bg-red-100 text-red-800 border-red-200">Expired</Badge>;
+        return <Badge variant="outline" className="bg-destructive text-destructive-foreground border-destructive/30">Expired</Badge>;
       case "terminated":
         return <Badge variant="outline" className="bg-gray-100 text-gray-800 border-gray-200">Terminated</Badge>;
       default:
@@ -470,7 +470,7 @@ export default function DocumentManagementPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Document Management</h1>
+          <h1 className="text-heading-2 tracking-tight">Document Management</h1>
           <p className="text-muted-foreground">
             Create, manage, and e-sign your property documents
           </p>
@@ -676,7 +676,7 @@ export default function DocumentManagementPage() {
                       <DropdownMenuItem onClick={handleEdit}>
                         Edit
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="text-red-600">
+                      <DropdownMenuItem className="text-destructive-foreground">
                         Delete
                       </DropdownMenuItem>
                     </DropdownMenuContent>

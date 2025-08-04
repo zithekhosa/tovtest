@@ -13,16 +13,16 @@ interface StatusColors {
 
 const statusColors: StatusColors = {
   pending: {
-    bg: "bg-yellow-100",
-    text: "text-yellow-800",
+    bg: "bg-warning",
+    text: "text-warning-foreground",
   },
   "in progress": {
-    bg: "bg-blue-100",
-    text: "text-blue-800",
+    bg: "bg-primary/10",
+    text: "text-primary",
   },
   completed: {
-    bg: "bg-green-100",
-    text: "text-green-800",
+    bg: "bg-success",
+    text: "text-success-foreground",
   },
   cancelled: {
     bg: "bg-gray-100",
@@ -36,12 +36,12 @@ const priorityColors: StatusColors = {
     text: "text-gray-800",
   },
   medium: {
-    bg: "bg-yellow-100",
-    text: "text-yellow-800",
+    bg: "bg-warning",
+    text: "text-warning-foreground",
   },
   high: {
-    bg: "bg-red-100",
-    text: "text-red-800",
+    bg: "bg-destructive",
+    text: "text-destructive-foreground",
   },
 };
 

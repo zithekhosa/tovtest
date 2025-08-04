@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
-import { DashLayout } from "@/layout/dash-layout";
+import DashLayout from "@/components/layout/DashLayout";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { MaintenanceRequest } from "@shared/schema";
@@ -144,7 +144,7 @@ export default function MaintenanceMarketplace() {
     if (!ownListings) return [];
     return ownListings.filter(job => 
       job.status === "open_for_bids" && 
-      job.bids && job.bids.length > 0
+      (job as any).bids && (job as any).bids.length > 0
     );
   };
 
@@ -207,8 +207,8 @@ export default function MaintenanceMarketplace() {
     return (
       <DashLayout>
         <div className="p-6 bg-white rounded-lg shadow-md text-center">
-          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold mb-2">Error Loading Marketplace</h2>
+          <AlertCircle className="h-12 w-12 text-destructive-foreground mx-auto mb-4" />
+          <h2 className="text-heading-3 mb-2">Error Loading Marketplace</h2>
           <p className="text-gray-500 mb-4">Failed to load maintenance marketplace. Please try again later.</p>
         </div>
       </DashLayout>
@@ -285,15 +285,15 @@ export default function MaintenanceMarketplace() {
                         <div className="flex justify-between items-start mb-2">
                           <div>
                             <h3 className="font-medium truncate">{job.title}</h3>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-caption">
                               Posted {formatDate(job.createdAt)} • 
                               Category: {job.category || 'General Repair'}
                             </p>
                           </div>
-                          <Badge>{job.bids ? `${job.bids.length} Bids` : 'New'}</Badge>
+                          <Badge>{(job as any).bids ? `${(job as any).bids.length} Bids` : 'New'}</Badge>
                         </div>
                         
-                        <p className="text-sm text-gray-600 line-clamp-2 mb-3">
+                        <p className="text-body-small line-clamp-2 mb-3">
                           {job.description}
                         </p>
                         
@@ -328,7 +328,7 @@ export default function MaintenanceMarketplace() {
             ) : (
               <div className="p-10 bg-white rounded-lg shadow-sm text-center">
                 <Wrench className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                <h2 className="text-xl font-semibold mb-2">No Jobs Found</h2>
+                <h2 className="text-heading-3 mb-2">No Jobs Found</h2>
                 <p className="text-gray-500 mb-4">
                   {categoryFilter || searchQuery 
                     ? 'No jobs matching your filters. Try adjusting your search criteria.'
@@ -364,9 +364,9 @@ export default function MaintenanceMarketplace() {
                           <div key={job.id} className="border rounded-md p-4">
                             <div className="flex justify-between items-start mb-2">
                               <h3 className="font-medium">{job.title}</h3>
-                              <Badge className="bg-green-500">{job.bids?.length || 0} Bids</Badge>
+                              <Badge className="bg-success">{(job as any).bids?.length || 0} Bids</Badge>
                             </div>
-                            <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                            <p className="text-body-small mb-3 line-clamp-2">
                               {job.description}
                             </p>
                             <div className="flex flex-wrap gap-2 text-sm mb-3">
@@ -380,7 +380,7 @@ export default function MaintenanceMarketplace() {
                               </div>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                              {(job.bids || []).slice(0, 2).map((bid, index) => (
+                              {((job as any).bids || []).slice(0, 2).map((bid: any, index: number) => (
                                 <Card key={index} className="bg-gray-50">
                                   <CardContent className="p-3">
                                     <div className="flex items-center mb-1">
@@ -390,7 +390,7 @@ export default function MaintenanceMarketplace() {
                                     <div className="flex justify-between items-center">
                                       <span className="text-sm">{formatCurrency(bid.amount)}</span>
                                       <div className="flex items-center">
-                                        <Star className="h-3 w-3 text-yellow-400 mr-1" />
+                                        <Star className="h-3 w-3 text-primary mr-1" />
                                         <span className="text-xs">{bid.providerRating || '4.5'}</span>
                                       </div>
                                     </div>
@@ -423,9 +423,9 @@ export default function MaintenanceMarketplace() {
                         <div key={job.id} className="border rounded-md p-4">
                           <div className="flex justify-between items-start mb-2">
                             <h3 className="font-medium">{job.title}</h3>
-                            <Badge>{job.bids?.length || 0} Bids</Badge>
+                            <Badge>{(job as any).bids?.length || 0} Bids</Badge>
                           </div>
-                          <p className="text-sm text-gray-600 mb-3">
+                          <p className="text-body-small mb-3">
                             {job.description}
                           </p>
                           <div className="flex flex-wrap gap-2 text-sm mb-3">
@@ -464,7 +464,7 @@ export default function MaintenanceMarketplace() {
             ) : (
               <div className="p-10 bg-white rounded-lg shadow-sm text-center">
                 <Wrench className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                <h2 className="text-xl font-semibold mb-2">No Open Jobs</h2>
+                <h2 className="text-heading-3 mb-2">No Open Jobs</h2>
                 <p className="text-gray-500 mb-4">
                   You haven't posted any maintenance jobs in the marketplace.
                 </p>
@@ -601,28 +601,28 @@ export default function MaintenanceMarketplace() {
                 <Badge className="bg-primary">
                   {selectedRequest.category || 'General Repair'}
                 </Badge>
-                <Badge variant="outline" className="border-green-500 text-green-700">
+                <Badge variant="outline" className="border-success text-success-foreground">
                   Budget: {formatCurrency(selectedRequest.estimatedCost || 0)}
                 </Badge>
-                <Badge variant="outline" className="border-yellow-500 text-yellow-700">
-                  {selectedRequest.bids ? `${selectedRequest.bids.length} Bids` : 'No Bids Yet'}
+                <Badge variant="outline" className="border-warning text-warning-foreground">
+                  {(selectedRequest as any).bids ? `${(selectedRequest as any).bids.length} Bids` : 'No Bids Yet'}
                 </Badge>
               </div>
               
               <div>
                 <h3 className="font-medium mb-1">Description</h3>
-                <p className="text-sm text-gray-600">
+                <p className="text-body-small">
                   {selectedRequest.description}
                 </p>
               </div>
               
               <Separator />
               
-              {selectedRequest.bids && selectedRequest.bids.length > 0 ? (
+              {(selectedRequest as any).bids && (selectedRequest as any).bids.length > 0 ? (
                 <div>
                   <h3 className="font-medium mb-2">Bids Received</h3>
                   <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2">
-                    {selectedRequest.bids.map((bid, index) => (
+                    {(selectedRequest as any).bids.map((bid: any, index: number) => (
                       <Card key={index}>
                         <CardContent className="p-4">
                           <div className="flex justify-between items-start mb-2">
@@ -633,14 +633,14 @@ export default function MaintenanceMarketplace() {
                               <div>
                                 <p className="font-medium">Provider #{bid.providerId}</p>
                                 <div className="flex items-center">
-                                  <Star className="h-3 w-3 text-yellow-400 mr-1" />
+                                  <Star className="h-3 w-3 text-primary mr-1" />
                                   <span className="text-xs">{bid.providerRating || '4.5'} (15 reviews)</span>
                                 </div>
                               </div>
                             </div>
                             <p className="font-bold text-lg">{formatCurrency(bid.amount)}</p>
                           </div>
-                          <p className="text-sm text-gray-600 mb-3">
+                          <p className="text-body-small mb-3">
                             {bid.message || "I can complete this job efficiently and to a high standard."}
                           </p>
                           <div className="flex justify-end gap-2">
@@ -659,7 +659,7 @@ export default function MaintenanceMarketplace() {
                 </div>
               ) : (
                 <div className="py-4 text-center">
-                  <AlertCircle className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
+                  <AlertCircle className="h-8 w-8 text-warning-foreground mx-auto mb-2" />
                   <h3 className="font-medium">No Bids Yet</h3>
                   <p className="text-sm text-gray-500 mt-1">
                     This job hasn't received any bids from service providers yet.
@@ -709,7 +709,7 @@ export default function MaintenanceMarketplace() {
                     onChange={(e) => setBidAmount(e.target.value)}
                   />
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-caption mt-1">
                   Budget: {formatCurrency(selectedRequest.estimatedCost || 0)}
                 </p>
               </div>
@@ -725,7 +725,7 @@ export default function MaintenanceMarketplace() {
               </div>
               
               <div className="bg-gray-50 p-3 rounded-md">
-                <p className="text-xs text-gray-500">
+                <p className="text-caption">
                   By placing a bid, you agree to complete the work as described if your bid is accepted. 
                   The client will release payment once the work is completed to their satisfaction.
                 </p>

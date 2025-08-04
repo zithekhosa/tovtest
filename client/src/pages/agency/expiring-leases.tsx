@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { DashLayout } from "@/layout/dash-layout";
+import DashLayout from "@/components/layout/DashLayout";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/utils";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -289,7 +289,7 @@ const subscriptionPlans = [
       "Unlimited lease unlocks"
     ],
     recommended: true,
-    color: "bg-amber-50 border-amber-200"
+    color: "bg-warning/10 border-amber-200"
   },
   {
     id: 2,
@@ -303,7 +303,7 @@ const subscriptionPlans = [
       "Notifications 30 days before expiry"
     ],
     recommended: false,
-    color: "bg-blue-50 border-blue-200"
+    color: "bg-primary/10 border-primary"
   },
   {
     id: 3,
@@ -317,7 +317,7 @@ const subscriptionPlans = [
       "No subscription required"
     ],
     recommended: false,
-    color: "bg-green-50 border-green-200"
+    color: "bg-success/10 border-success/30"
   }
 ];
 
@@ -331,31 +331,31 @@ const getDaysUntilExpiry = (endDate: Date) => {
 
 // Get expiry status color
 const getExpiryStatusColor = (days: number) => {
-  if (days <= 15) return "bg-red-100 text-red-700 border-red-200";
-  if (days <= 30) return "bg-amber-100 text-amber-700 border-amber-200";
-  if (days <= 60) return "bg-blue-100 text-blue-700 border-blue-200";
-  return "bg-green-100 text-green-700 border-green-200";
+  if (days <= 15) return "bg-destructive text-destructive-foreground border-destructive/30";
+  if (days <= 30) return "bg-warning/20 text-warning-foreground border-amber-200";
+  if (days <= 60) return "bg-primary/10 text-primary border-primary";
+  return "bg-success text-success-foreground border-success/30";
 };
 
 // Get renewal likelihood icon and color
 const getRenewalLikelihoodDetails = (likelihood: string) => {
   if (likelihood === "high") {
     return { 
-      icon: <CheckCircle className="h-4 w-4 text-green-500" />, 
-      text: "text-green-700",
+      icon: <CheckCircle className="h-4 w-4 text-success-foreground" />, 
+      text: "text-success-foreground",
       label: "High" 
     };
   }
   if (likelihood === "medium") {
     return { 
       icon: <AlertTriangle className="h-4 w-4 text-amber-500" />, 
-      text: "text-amber-700",
+      text: "text-warning-foreground",
       label: "Medium" 
     };
   }
   return { 
-    icon: <Timer className="h-4 w-4 text-red-500" />, 
-    text: "text-red-700",
+    icon: <Timer className="h-4 w-4 text-destructive-foreground" />, 
+    text: "text-destructive-foreground",
     label: "Low" 
   };
 };
@@ -491,12 +491,12 @@ export default function ExpiringLeases() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Expiring Leases</h1>
+            <h1 className="text-heading-2 tracking-tight">Expiring Leases</h1>
             <p className="text-muted-foreground">Find and contact tenants with expiring leases</p>
           </div>
           
           {isSubscribed ? (
-            <Badge className="bg-green-100 text-green-700 border-green-200 gap-1 px-3 py-1 text-xs">
+            <Badge className="bg-success text-success-foreground border-success/30 gap-1 px-3 py-1 text-xs">
               <Crown className="h-3.5 w-3.5" />
               <span>Premium Subscriber</span>
             </Badge>
@@ -519,12 +519,12 @@ export default function ExpiringLeases() {
                 <div className="space-y-1">
                   <p className="text-muted-foreground text-sm">Total Expiring Leases</p>
                   <div className="flex items-baseline">
-                    <p className="text-2xl font-bold">{totalLeases}</p>
+                    <p className="text-heading-2">{totalLeases}</p>
                     <p className="text-sm text-muted-foreground ml-2">leases</p>
                   </div>
                 </div>
-                <div className="p-2 bg-blue-50 rounded-full">
-                  <FileText className="h-5 w-5 text-blue-600" />
+                <div className="p-2 bg-primary/10 rounded-full">
+                  <FileText className="h-5 w-5 text-primary" />
                 </div>
               </div>
               <div className="mt-3">
@@ -546,12 +546,12 @@ export default function ExpiringLeases() {
                 <div className="space-y-1">
                   <p className="text-muted-foreground text-sm">Expiring in 30 Days</p>
                   <div className="flex items-baseline">
-                    <p className="text-2xl font-bold">{expiringIn30Days}</p>
+                    <p className="text-heading-2">{expiringIn30Days}</p>
                     <p className="text-sm text-muted-foreground ml-2">urgent</p>
                   </div>
                 </div>
-                <div className="p-2 bg-red-50 rounded-full">
-                  <AlertTriangle className="h-5 w-5 text-red-600" />
+                <div className="p-2 bg-destructive/10 rounded-full">
+                  <AlertTriangle className="h-5 w-5 text-destructive-foreground" />
                 </div>
               </div>
               <div className="mt-3">
@@ -561,7 +561,7 @@ export default function ExpiringLeases() {
                 </div>
                 <Progress 
                   value={(expiringIn30Days / totalLeases) * 100} 
-                  className="h-1.5 mt-1 [&>div]:bg-red-500" 
+                  className="h-1.5 mt-1 [&>div]:bg-destructive" 
                 />
               </div>
             </CardContent>
@@ -573,11 +573,11 @@ export default function ExpiringLeases() {
                 <div className="space-y-1">
                   <p className="text-muted-foreground text-sm">Potential Commission</p>
                   <div className="flex items-baseline">
-                    <p className="text-2xl font-bold">{formatCurrency(potentialCommission)}</p>
+                    <p className="text-heading-2">{formatCurrency(potentialCommission)}</p>
                   </div>
                 </div>
-                <div className="p-2 bg-green-50 rounded-full">
-                  <DollarSign className="h-5 w-5 text-green-600" />
+                <div className="p-2 bg-success/10 rounded-full">
+                  <DollarSign className="h-5 w-5 text-success-foreground" />
                 </div>
               </div>
               <div className="mt-3">
@@ -585,7 +585,7 @@ export default function ExpiringLeases() {
                   <span className="text-muted-foreground">Based on one month's rent</span>
                   <span className="font-medium">{totalLeases} properties</span>
                 </div>
-                <div className="text-xs text-green-600 flex items-center mt-1">
+                <div className="text-xs text-success-foreground flex items-center mt-1">
                   <TrendingUp className="h-3.5 w-3.5 mr-1" />
                   <span>High potential earnings</span>
                 </div>
@@ -599,12 +599,12 @@ export default function ExpiringLeases() {
                 <div className="space-y-1">
                   <p className="text-muted-foreground text-sm">Success Rate</p>
                   <div className="flex items-baseline">
-                    <p className="text-2xl font-bold">{successRate}%</p>
+                    <p className="text-heading-2">{successRate}%</p>
                     <p className="text-sm text-muted-foreground ml-2">conversion</p>
                   </div>
                 </div>
-                <div className="p-2 bg-purple-50 rounded-full">
-                  <CheckCircle className="h-5 w-5 text-purple-600" />
+                <div className="p-2 bg-accent/10 rounded-full">
+                  <CheckCircle className="h-5 w-5 text-primary" />
                 </div>
               </div>
               <div className="mt-3">
@@ -613,7 +613,7 @@ export default function ExpiringLeases() {
                 </div>
                 <Progress 
                   value={successRate} 
-                  className="h-1.5 mt-1 [&>div]:bg-purple-500" 
+                  className="h-1.5 mt-1 [&>div]:bg-accent" 
                 />
               </div>
             </CardContent>
@@ -622,17 +622,17 @@ export default function ExpiringLeases() {
 
         {/* Subscription CTA for non-subscribers */}
         {!isSubscribed && (
-          <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+          <Card className="bg-gradient-to-r from-primary/10 to-purple-50 border-primary">
             <CardContent className="p-6">
               <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                 <div className="space-y-2">
-                  <h3 className="text-lg font-medium text-blue-800">Unlock Premium Lease Data</h3>
-                  <p className="text-sm text-blue-600">
+                  <h3 className="text-body-large text-primary">Unlock Premium Lease Data</h3>
+                  <p className="text-sm text-primary">
                     Subscribe to get full access to tenant contact information, renewal predictions, and property details.
                   </p>
                 </div>
                 <Button 
-                  className="bg-blue-600 hover:bg-blue-700"
+                  className="bg-primary hover:bg-primary"
                   onClick={() => setIsSubscriptionDialogOpen(true)}
                 >
                   <Lock className="h-4 w-4 mr-2" />
@@ -672,7 +672,7 @@ export default function ExpiringLeases() {
         {/* Lease List */}
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg font-medium">Expiring Leases</CardTitle>
+            <CardTitle className="text-body-large">Expiring Leases</CardTitle>
           </CardHeader>
 
           <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
@@ -817,14 +817,14 @@ export default function ExpiringLeases() {
         {/* FAQ Section */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg font-medium">Frequently Asked Questions</CardTitle>
+            <CardTitle className="text-body-large">Frequently Asked Questions</CardTitle>
             <CardDescription>Learn more about the Expiring Leases feature</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div>
                 <h3 className="text-sm font-medium flex items-center">
-                  <HelpCircle className="h-4 w-4 mr-2 text-blue-600" />
+                  <HelpCircle className="h-4 w-4 mr-2 text-primary" />
                   How is this data collected?
                 </h3>
                 <p className="text-sm text-muted-foreground ml-6 mt-1">
@@ -834,7 +834,7 @@ export default function ExpiringLeases() {
               
               <div>
                 <h3 className="text-sm font-medium flex items-center">
-                  <HelpCircle className="h-4 w-4 mr-2 text-blue-600" />
+                  <HelpCircle className="h-4 w-4 mr-2 text-primary" />
                   How accurate is the renewal likelihood prediction?
                 </h3>
                 <p className="text-sm text-muted-foreground ml-6 mt-1">
@@ -844,7 +844,7 @@ export default function ExpiringLeases() {
               
               <div>
                 <h3 className="text-sm font-medium flex items-center">
-                  <HelpCircle className="h-4 w-4 mr-2 text-blue-600" />
+                  <HelpCircle className="h-4 w-4 mr-2 text-primary" />
                   Can landlords see that I'm contacting their tenants?
                 </h3>
                 <p className="text-sm text-muted-foreground ml-6 mt-1">
@@ -854,7 +854,7 @@ export default function ExpiringLeases() {
               
               <div>
                 <h3 className="text-sm font-medium flex items-center">
-                  <HelpCircle className="h-4 w-4 mr-2 text-blue-600" />
+                  <HelpCircle className="h-4 w-4 mr-2 text-primary" />
                   What happens when I "unlock" a property?
                 </h3>
                 <p className="text-sm text-muted-foreground ml-6 mt-1">
@@ -877,9 +877,9 @@ export default function ExpiringLeases() {
           </DialogHeader>
           
           <div className="space-y-5">
-            <div className="bg-blue-50 p-4 rounded-md flex gap-3 border border-blue-200">
-              <Info className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-              <div className="text-sm text-blue-700">
+            <div className="bg-primary/10 p-4 rounded-md flex gap-3 border border-primary">
+              <Info className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+              <div className="text-sm text-primary">
                 <p className="font-medium">Why subscribe?</p>
                 <p className="mt-1">
                   Agencies with premium access contact tenants on average 47 days before competitors, resulting in 3.5x higher client acquisition rates.
@@ -895,7 +895,7 @@ export default function ExpiringLeases() {
                 >
                   {plan.recommended && (
                     <div className="flex justify-end -mt-4 -mr-4">
-                      <Badge className="bg-amber-100 text-amber-800 border-amber-200">
+                      <Badge className="bg-warning/20 text-warning-foreground border-amber-200">
                         Recommended
                       </Badge>
                     </div>
@@ -903,7 +903,7 @@ export default function ExpiringLeases() {
                   
                   <div className="flex justify-between items-start">
                     <div>
-                      <h3 className="text-lg font-medium">{plan.name}</h3>
+                      <h3 className="text-body-large">{plan.name}</h3>
                       <p className="text-sm text-muted-foreground">
                         {plan.duration ? `${plan.duration}-day access` : 'One-time purchase'}
                       </p>
@@ -919,7 +919,7 @@ export default function ExpiringLeases() {
                   <ul className="mt-4 space-y-2">
                     {plan.features.map((feature, index) => (
                       <li key={index} className="flex items-start gap-2 text-sm">
-                        <CheckCircle className="h-4 w-4 text-green-600 mt-0.5" />
+                        <CheckCircle className="h-4 w-4 text-success-foreground mt-0.5" />
                         <span>{feature}</span>
                       </li>
                     ))}
@@ -952,8 +952,8 @@ export default function ExpiringLeases() {
             {selectedLease && (
               <>
                 <div className="flex gap-4 items-start border rounded-lg p-3">
-                  <div className="p-2 bg-blue-50 rounded-full">
-                    <Home className="h-6 w-6 text-blue-600" />
+                  <div className="p-2 bg-primary/10 rounded-full">
+                    <Home className="h-6 w-6 text-primary" />
                   </div>
                   <div className="flex-1">
                     <h3 className="font-medium">{selectedLease.propertyAddress.split(",")[0]}</h3>
@@ -966,35 +966,35 @@ export default function ExpiringLeases() {
                   </div>
                 </div>
                 
-                <div className="bg-amber-50 p-4 rounded-md border border-amber-200">
-                  <h3 className="font-medium flex items-center text-amber-800">
+                <div className="bg-warning/10 p-4 rounded-md border border-amber-200">
+                  <h3 className="font-medium flex items-center text-warning-foreground">
                     <Lock className="h-4 w-4 mr-2" />
                     Locked Information
                   </h3>
-                  <ul className="mt-2 space-y-1 text-sm text-amber-700">
+                  <ul className="mt-2 space-y-1 text-sm text-warning-foreground">
                     <li className="flex items-center gap-2">
-                      <CheckCircle className="h-3.5 w-3.5 text-green-600" />
+                      <CheckCircle className="h-3.5 w-3.5 text-success-foreground" />
                       Tenant contact details
                     </li>
                     <li className="flex items-center gap-2">
-                      <CheckCircle className="h-3.5 w-3.5 text-green-600" />
+                      <CheckCircle className="h-3.5 w-3.5 text-success-foreground" />
                       Renewal likelihood assessment
                     </li>
                     <li className="flex items-center gap-2">
-                      <CheckCircle className="h-3.5 w-3.5 text-green-600" />
+                      <CheckCircle className="h-3.5 w-3.5 text-success-foreground" />
                       Previous property management information
                     </li>
                     <li className="flex items-center gap-2">
-                      <CheckCircle className="h-3.5 w-3.5 text-green-600" />
+                      <CheckCircle className="h-3.5 w-3.5 text-success-foreground" />
                       Property specifications and details
                     </li>
                   </ul>
                 </div>
                 
                 {remainingUnlocks === 0 && !isSubscribed ? (
-                  <div className="bg-blue-50 p-4 rounded-md border border-blue-200">
-                    <h3 className="font-medium text-blue-800">No unlocks remaining</h3>
-                    <p className="text-sm text-blue-700 mt-1">
+                  <div className="bg-primary/10 p-4 rounded-md border border-primary">
+                    <h3 className="font-medium text-primary">No unlocks remaining</h3>
+                    <p className="text-sm text-primary mt-1">
                       Subscribe to a plan to unlock more lease details or purchase individual lease access.
                     </p>
                     <Button 

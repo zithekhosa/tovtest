@@ -43,7 +43,7 @@ export default function PinterestPropertyGrid({ properties, onPropertyClick }: P
             
             {/* Status badge */}
             {property.available && (
-              <Badge className="absolute top-3 left-3 bg-green-500 hover:bg-green-600 text-white">
+              <Badge className="absolute top-3 left-3 bg-success hover:bg-success text-white">
                 Available
               </Badge>
             )}
@@ -68,7 +68,7 @@ export default function PinterestPropertyGrid({ properties, onPropertyClick }: P
           <div className="p-5 flex-grow flex flex-col">
             {/* Price */}
             <div className="mb-3">
-              <p className="text-xl font-semibold text-primary">
+              <p className="text-heading-3 text-primary">
                 {formatCurrency(property.rentAmount)}
                 <span className="text-sm text-gray-500 font-normal"> / month</span>
               </p>
@@ -91,10 +91,10 @@ export default function PinterestPropertyGrid({ properties, onPropertyClick }: P
                 <Bath className="h-4 w-4 mr-2 text-gray-500" />
                 <span>{property.bathrooms} {property.bathrooms === 1 ? 'Bathroom' : 'Bathrooms'}</span>
               </div>
-              {property.squareFootage && (
+              {property.squareMeters && (
                 <div className="flex items-center text-gray-700 col-span-2">
                   <Building className="h-4 w-4 mr-2 text-gray-500" />
-                  <span>{property.squareFootage} sq ft</span>
+                  <span>{property.squareMeters} sq m</span>
                 </div>
               )}
             </div>

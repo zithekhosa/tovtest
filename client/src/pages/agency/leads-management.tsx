@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { DashLayout } from "@/layout/dash-layout";
+import DashLayout from "@/components/layout/DashLayout";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/utils";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -120,12 +120,12 @@ import {
 
 // Lead status options
 const leadStatusOptions = [
-  { value: "new", label: "New Lead", color: "bg-blue-100 text-blue-700" },
-  { value: "contacted", label: "Contacted", color: "bg-purple-100 text-purple-700" },
-  { value: "interested", label: "Interested", color: "bg-green-100 text-green-700" },
-  { value: "negotiating", label: "Negotiating", color: "bg-amber-100 text-amber-700" },
-  { value: "closed", label: "Closed", color: "bg-green-100 text-green-800" },
-  { value: "lost", label: "Lost", color: "bg-red-100 text-red-700" }
+  { value: "new", label: "New Lead", color: "bg-primary/10 text-primary" },
+  { value: "contacted", label: "Contacted", color: "bg-accent text-primary" },
+  { value: "interested", label: "Interested", color: "bg-success text-success-foreground" },
+  { value: "negotiating", label: "Negotiating", color: "bg-warning/20 text-warning-foreground" },
+  { value: "closed", label: "Closed", color: "bg-success text-success-foreground" },
+  { value: "lost", label: "Lost", color: "bg-destructive text-destructive-foreground" }
 ];
 
 // Lead source options
@@ -440,7 +440,7 @@ export default function LeadsManagement() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Leads Management</h1>
+            <h1 className="text-heading-2 tracking-tight">Leads Management</h1>
             <p className="text-muted-foreground">Track and manage your potential clients</p>
           </div>
           <Button onClick={handleAddLead}>
@@ -453,21 +453,21 @@ export default function LeadsManagement() {
         <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
           <Card>
             <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-              <div className="rounded-full w-12 h-12 flex items-center justify-center bg-blue-100 text-blue-700 mb-2">
+              <div className="rounded-full w-12 h-12 flex items-center justify-center bg-primary/10 text-primary mb-2">
                 <Users className="h-6 w-6" />
               </div>
               <p className="text-sm text-muted-foreground">Total Leads</p>
-              <h3 className="text-2xl font-bold">{leads.length}</h3>
+              <h3 className="text-heading-2">{leads.length}</h3>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-              <div className="rounded-full w-12 h-12 flex items-center justify-center bg-green-100 text-green-700 mb-2">
+              <div className="rounded-full w-12 h-12 flex items-center justify-center bg-success text-success-foreground mb-2">
                 <TrendingUp className="h-6 w-6" />
               </div>
               <p className="text-sm text-muted-foreground">Conversion Rate</p>
-              <h3 className="text-2xl font-bold">
+              <h3 className="text-heading-2">
                 {leads.length ? Math.round((statusCounts.closed / leads.length) * 100) : 0}%
               </h3>
             </CardContent>
@@ -475,11 +475,11 @@ export default function LeadsManagement() {
 
           <Card>
             <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-              <div className="rounded-full w-12 h-12 flex items-center justify-center bg-purple-100 text-purple-700 mb-2">
+              <div className="rounded-full w-12 h-12 flex items-center justify-center bg-accent text-primary mb-2">
                 <Briefcase className="h-6 w-6" />
               </div>
               <p className="text-sm text-muted-foreground">Active Deals</p>
-              <h3 className="text-2xl font-bold">
+              <h3 className="text-heading-2">
                 {statusCounts.interested + statusCounts.negotiating || 0}
               </h3>
             </CardContent>
@@ -487,21 +487,21 @@ export default function LeadsManagement() {
 
           <Card>
             <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-              <div className="rounded-full w-12 h-12 flex items-center justify-center bg-amber-100 text-amber-700 mb-2">
+              <div className="rounded-full w-12 h-12 flex items-center justify-center bg-warning/20 text-warning-foreground mb-2">
                 <CalendarPlus className="h-6 w-6" />
               </div>
               <p className="text-sm text-muted-foreground">Today's Follow-ups</p>
-              <h3 className="text-2xl font-bold">{todayFollowUps}</h3>
+              <h3 className="text-heading-2">{todayFollowUps}</h3>
             </CardContent>
           </Card>
 
           <Card>
             <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-              <div className="rounded-full w-12 h-12 flex items-center justify-center bg-green-100 text-green-700 mb-2">
+              <div className="rounded-full w-12 h-12 flex items-center justify-center bg-success text-success-foreground mb-2">
                 <DollarSign className="h-6 w-6" />
               </div>
               <p className="text-sm text-muted-foreground">Closed Deals</p>
-              <h3 className="text-2xl font-bold">{statusCounts.closed || 0}</h3>
+              <h3 className="text-heading-2">{statusCounts.closed || 0}</h3>
             </CardContent>
           </Card>
         </div>
@@ -651,7 +651,7 @@ export default function LeadsManagement() {
                               Add note
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-red-600" onClick={() => handleDeleteLead(lead.id)}>
+                            <DropdownMenuItem className="text-destructive-foreground" onClick={() => handleDeleteLead(lead.id)}>
                               <Trash className="h-4 w-4 mr-2" />
                               Delete lead
                             </DropdownMenuItem>

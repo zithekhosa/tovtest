@@ -124,7 +124,7 @@ export function DashboardHeader({ title, subtitle, showSearch = true, showAction
     <div className="flex flex-col space-y-4 pb-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
+          <h1 className="text-heading-2 tracking-tight">{title}</h1>
           {subtitle && <p className="text-muted-foreground">{subtitle}</p>}
         </div>
 

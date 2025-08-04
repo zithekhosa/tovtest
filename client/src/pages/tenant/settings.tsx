@@ -1,10 +1,10 @@
 import { SettingsPage } from "@/components/settings/SettingsPage";
-import { DashLayout } from "@/layout/dash-layout";
+import { TOVLayout } from "@/components/layout/TOVLayout";
 
 export default function TenantSettings() {
   return (
-    <DashLayout>
+    <TOVLayout title="Settings" subtitle="Manage your account preferences">
       <SettingsPage role="tenant" />
-    </DashLayout>
+    </TOVLayout>
   );
 }

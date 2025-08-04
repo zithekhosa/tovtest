@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { Property } from "@shared/schema";
-import { DashLayout } from "@/layout/dash-layout";
+import DashLayout from "@/components/layout/DashLayout";
 import { AgencyPropertyCard } from "@/components/agency/AgencyPropertyCard";
 import { 
   Search, 
@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 
 // Mock marketing stats generator (would come from real data in a real implementation)
 const generateMarketingStats = (propertyId: number) => {
@@ -137,8 +138,8 @@ export default function AgencyProperties() {
       <header className="mb-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold">Properties Marketing</h1>
-            <p className="text-gray-500 mt-1">Manage and track your property listings</p>
+            <h1 className="text-2xl md:text-3xl font-bold">Properties</h1>
+            <p className="text-gray-500 mt-1">Manage listings and marketing performance</p>
           </div>
           <Button 
             className="mt-4 md:mt-0" 
@@ -149,6 +150,14 @@ export default function AgencyProperties() {
           </Button>
         </div>
       </header>
+
+      <Tabs defaultValue="marketing" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="marketing">Marketing Performance</TabsTrigger>
+          <TabsTrigger value="listings">Property Listings</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="marketing" className="space-y-6">
       
       {/* Performance overview */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
@@ -157,8 +166,8 @@ export default function AgencyProperties() {
             <CardTitle className="text-sm font-medium text-gray-500">Total Views</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">{performanceMetrics.totalViews}</p>
-            <p className="text-sm text-green-600 flex items-center mt-1">
+            <p className="text-heading-2">{performanceMetrics.totalViews}</p>
+            <p className="text-sm text-success-foreground flex items-center mt-1">
               <TrendingUp className="h-3 w-3 mr-1" />
               +12% this month
             </p>
@@ -169,8 +178,8 @@ export default function AgencyProperties() {
             <CardTitle className="text-sm font-medium text-gray-500">Total Inquiries</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">{performanceMetrics.totalInquiries}</p>
-            <p className="text-sm text-green-600 flex items-center mt-1">
+            <p className="text-heading-2">{performanceMetrics.totalInquiries}</p>
+            <p className="text-sm text-success-foreground flex items-center mt-1">
               <TrendingUp className="h-3 w-3 mr-1" />
               +5% this month
             </p>
@@ -181,8 +190,8 @@ export default function AgencyProperties() {
             <CardTitle className="text-sm font-medium text-gray-500">Conversion Rate</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">{performanceMetrics.conversionRate}%</p>
-            <p className="text-sm text-green-600 flex items-center mt-1">
+            <p className="text-heading-2">{performanceMetrics.conversionRate}%</p>
+            <p className="text-sm text-success-foreground flex items-center mt-1">
               <TrendingUp className="h-3 w-3 mr-1" />
               +2.5% this month
             </p>
@@ -193,8 +202,8 @@ export default function AgencyProperties() {
             <CardTitle className="text-sm font-medium text-gray-500">Avg. Days Listed</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">{performanceMetrics.averageDaysListed}</p>
-            <p className="text-sm text-green-600 flex items-center mt-1">
+            <p className="text-heading-2">{performanceMetrics.averageDaysListed}</p>
+            <p className="text-sm text-success-foreground flex items-center mt-1">
               <TrendingUp className="h-3 w-3 mr-1" />
               -3 days from last month
             </p>
@@ -279,6 +288,29 @@ export default function AgencyProperties() {
           </TabsContent>
         </Tabs>
       </div>
+        </TabsContent>
+        
+        <TabsContent value="listings" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Property Listings Management</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-8">
+                <Building className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-body-large mb-2">Listings Management</h3>
+                <p className="text-gray-500 mb-4">Manage your property listings and availability</p>
+                <Button asChild>
+                  <a href="/agency/property-listings" className="inline-flex items-center">
+                    <Building className="h-4 w-4 mr-2" />
+                    View All Listings
+                  </a>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </DashLayout>
   );
   
@@ -287,7 +319,7 @@ export default function AgencyProperties() {
       return (
         <div className="bg-white p-6 rounded-lg text-center">
           <Building className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium">No properties found</h3>
+          <h3 className="text-body-large">No properties found</h3>
           <p className="text-gray-500 mb-4">
             {searchTerm ? "No properties match your search criteria" : "Get started by adding your first property"}
           </p>

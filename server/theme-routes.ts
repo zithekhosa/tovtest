@@ -5,7 +5,9 @@ import path from "path";
 export function registerThemeRoutes(app: Express) {
   // Endpoint to update theme.json
   app.post("/api/update-theme", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+    // Use Supabase auth middleware
+    const user = (req as any).user;
+    if (!user) return res.status(401).json({ message: "Not authenticated" });
     
     try {
       const theme = req.body;

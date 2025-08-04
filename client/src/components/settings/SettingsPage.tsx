@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
+import { useTheme } from "@/hooks/use-theme";
 import { UserRoleType } from "@shared/schema";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,20 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Separator } from "@/components/ui/separator";
 import { Globe, Bell, Shield, Palette, UserCircle, CircleDot } from "lucide-react";
-
-// Types for theme settings
-type ThemeVariant = "tint" | "vibrant" | "professional";
-type ThemeAppearance = "light" | "dark" | "system";
-
-interface ThemeSettings {
-  primary: string;
-  variant: ThemeVariant;
-  appearance: ThemeAppearance;
-  radius: number;
-}
 
 interface SettingsPageProps {
   role: UserRoleType;
@@ -30,9 +19,9 @@ interface SettingsPageProps {
 
 export function SettingsPage({ role }: SettingsPageProps) {
   const { user } = useAuth();
+  const { theme, setTheme } = useTheme();
   const { toast } = useToast();
   
-  const [loading, setLoading] = useState(false);
   const [notifications, setNotifications] = useState({
     email: true,
     sms: true,
@@ -43,40 +32,11 @@ export function SettingsPage({ role }: SettingsPageProps) {
     messages: true,
   });
   
-  // Theme settings
-  const [themeSettings, setThemeSettings] = useState<ThemeSettings>({
-    primary: "hsl(210, 90%, 95%)",
-    variant: "tint",
-    appearance: "light",
-    radius: 0.5,
-  });
-  
-  const handleThemeChange = async () => {
-    setLoading(true);
-    try {
-      const response = await apiRequest("POST", "/api/update-theme", themeSettings);
-      
-      if (response.ok) {
-        toast({
-          title: "Theme updated",
-          description: "Your theme settings have been saved.",
-        });
-        
-        // Force reload to apply theme changes
-        window.location.reload();
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to update theme");
-      }
-    } catch (error: any) {
-      toast({
-        title: "Error updating theme",
-        description: error.message || "There was a problem updating your theme.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
+  const handleThemeChange = () => {
+    toast({
+      title: "Theme updated",
+      description: "Your theme settings have been saved automatically.",
+    });
   };
   
   const handleNotificationChange = (key: string, value: boolean) => {
@@ -392,25 +352,25 @@ export function SettingsPage({ role }: SettingsPageProps) {
                 <Label htmlFor="theme">Color Theme</Label>
                 <div className="grid grid-cols-3 gap-2">
                   <Button 
-                    variant={themeSettings.variant === "tint" ? "default" : "outline"} 
+                    variant={theme.variant === "tint" ? "default" : "outline"} 
                     className="h-16 justify-start flex-col items-start p-3"
-                    onClick={() => setThemeSettings(prev => ({ ...prev, variant: "tint" }))}
+                    onClick={() => setTheme({ ...theme, variant: "tint" })}
                   >
                     <span className="font-semibold">Tint</span>
                     <span className="text-xs text-muted-foreground">Soft, muted colors</span>
                   </Button>
                   <Button 
-                    variant={themeSettings.variant === "vibrant" ? "default" : "outline"} 
+                    variant={theme.variant === "vibrant" ? "default" : "outline"} 
                     className="h-16 justify-start flex-col items-start p-3"
-                    onClick={() => setThemeSettings(prev => ({ ...prev, variant: "vibrant" }))}
+                    onClick={() => setTheme({ ...theme, variant: "vibrant" })}
                   >
                     <span className="font-semibold">Vibrant</span>
                     <span className="text-xs text-muted-foreground">Bold, colorful theme</span>
                   </Button>
                   <Button 
-                    variant={themeSettings.variant === "professional" ? "default" : "outline"} 
+                    variant={theme.variant === "professional" ? "default" : "outline"} 
                     className="h-16 justify-start flex-col items-start p-3"
-                    onClick={() => setThemeSettings(prev => ({ ...prev, variant: "professional" }))}
+                    onClick={() => setTheme({ ...theme, variant: "professional" })}
                   >
                     <span className="font-semibold">Professional</span>
                     <span className="text-xs text-muted-foreground">Clean business look</span>
@@ -422,25 +382,25 @@ export function SettingsPage({ role }: SettingsPageProps) {
                 <Label htmlFor="mode">Appearance Mode</Label>
                 <div className="grid grid-cols-3 gap-2">
                   <Button 
-                    variant={themeSettings.appearance === "light" ? "default" : "outline"} 
+                    variant={theme.appearance === "light" ? "default" : "outline"} 
                     className="h-16 justify-start flex-col items-start p-3"
-                    onClick={() => setThemeSettings(prev => ({ ...prev, appearance: "light" }))}
+                    onClick={() => setTheme({ ...theme, appearance: "light" })}
                   >
                     <span className="font-semibold">Light</span>
                     <span className="text-xs text-muted-foreground">White background</span>
                   </Button>
                   <Button 
-                    variant={themeSettings.appearance === "dark" ? "default" : "outline"} 
+                    variant={theme.appearance === "dark" ? "default" : "outline"} 
                     className="h-16 justify-start flex-col items-start p-3"
-                    onClick={() => setThemeSettings(prev => ({ ...prev, appearance: "dark" }))}
+                    onClick={() => setTheme({ ...theme, appearance: "dark" })}
                   >
                     <span className="font-semibold">Dark</span>
                     <span className="text-xs text-muted-foreground">Dark background</span>
                   </Button>
                   <Button 
-                    variant={themeSettings.appearance === "system" ? "default" : "outline"} 
+                    variant={theme.appearance === "system" ? "default" : "outline"} 
                     className="h-16 justify-start flex-col items-start p-3"
-                    onClick={() => setThemeSettings(prev => ({ ...prev, appearance: "system" }))}
+                    onClick={() => setTheme({ ...theme, appearance: "system" })}
                   >
                     <span className="font-semibold">System</span>
                     <span className="text-xs text-muted-foreground">Follow device</span>
@@ -453,28 +413,28 @@ export function SettingsPage({ role }: SettingsPageProps) {
                 <div className="grid grid-cols-5 gap-2">
                   <Button 
                     variant="outline" 
-                    className="h-10 bg-blue-50 hover:bg-blue-100 border-blue-200"
-                    onClick={() => setThemeSettings(prev => ({ ...prev, primary: "hsl(210, 90%, 95%)" }))}
+                    className="h-10 bg-primary/10 hover:bg-primary/10 border-primary"
+                    onClick={() => setTheme({ ...theme, primary: "hsl(210, 90%, 95%)" })}
                   ></Button>
                   <Button 
                     variant="outline" 
-                    className="h-10 bg-green-50 hover:bg-green-100 border-green-200"
-                    onClick={() => setThemeSettings(prev => ({ ...prev, primary: "hsl(142, 76%, 95%)" }))}
+                    className="h-10 bg-success/10 hover:bg-success border-success/30"
+                    onClick={() => setTheme({ ...theme, primary: "hsl(142, 76%, 95%)" })}
                   ></Button>
                   <Button 
                     variant="outline" 
                     className="h-10 bg-violet-50 hover:bg-violet-100 border-violet-200"
-                    onClick={() => setThemeSettings(prev => ({ ...prev, primary: "hsl(270, 76%, 95%)" }))}
+                    onClick={() => setTheme({ ...theme, primary: "hsl(270, 76%, 95%)" })}
                   ></Button>
                   <Button 
                     variant="outline" 
-                    className="h-10 bg-amber-50 hover:bg-amber-100 border-amber-200"
-                    onClick={() => setThemeSettings(prev => ({ ...prev, primary: "hsl(43, 96%, 90%)" }))}
+                    className="h-10 bg-warning/10 hover:bg-warning/20 border-amber-200"
+                    onClick={() => setTheme({ ...theme, primary: "hsl(43, 96%, 90%)" })}
                   ></Button>
                   <Button 
                     variant="outline" 
-                    className="h-10 bg-red-50 hover:bg-red-100 border-red-200"
-                    onClick={() => setThemeSettings(prev => ({ ...prev, primary: "hsl(0, 96%, 95%)" }))}
+                    className="h-10 bg-destructive/10 hover:bg-destructive border-destructive/30"
+                    onClick={() => setTheme({ ...theme, primary: "hsl(0, 96%, 95%)" })}
                   ></Button>
                 </div>
               </div>
@@ -483,25 +443,25 @@ export function SettingsPage({ role }: SettingsPageProps) {
                 <Label>Corner Roundness</Label>
                 <div className="grid grid-cols-3 gap-2">
                   <Button 
-                    variant={themeSettings.radius === 0 ? "default" : "outline"} 
+                    variant={theme.radius === 0 ? "default" : "outline"} 
                     className="h-16 justify-start flex-col items-start p-3"
-                    onClick={() => setThemeSettings(prev => ({ ...prev, radius: 0 }))}
+                    onClick={() => setTheme({ ...theme, radius: 0 })}
                   >
                     <span className="font-semibold">Square</span>
                     <span className="text-xs text-muted-foreground">No rounding</span>
                   </Button>
                   <Button 
-                    variant={themeSettings.radius === 0.5 ? "default" : "outline"} 
+                    variant={theme.radius === 0.5 ? "default" : "outline"} 
                     className="h-16 justify-start flex-col items-start p-3"
-                    onClick={() => setThemeSettings(prev => ({ ...prev, radius: 0.5 }))}
+                    onClick={() => setTheme({ ...theme, radius: 0.5 })}
                   >
                     <span className="font-semibold">Rounded</span>
                     <span className="text-xs text-muted-foreground">Medium corners</span>
                   </Button>
                   <Button 
-                    variant={themeSettings.radius === 1 ? "default" : "outline"} 
+                    variant={theme.radius === 1 ? "default" : "outline"} 
                     className="h-16 justify-start flex-col items-start p-3"
-                    onClick={() => setThemeSettings(prev => ({ ...prev, radius: 1 }))}
+                    onClick={() => setTheme({ ...theme, radius: 1 })}
                   >
                     <span className="font-semibold">Smooth</span>
                     <span className="text-xs text-muted-foreground">Full rounding</span>
@@ -510,10 +470,9 @@ export function SettingsPage({ role }: SettingsPageProps) {
               </div>
               
               <Button 
-                onClick={handleThemeChange} 
-                disabled={loading}
+                onClick={handleThemeChange}
               >
-                {loading ? "Saving..." : "Save Appearance Settings"}
+                Save Appearance Settings
               </Button>
             </CardContent>
           </Card>

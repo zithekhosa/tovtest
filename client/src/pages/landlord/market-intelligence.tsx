@@ -204,8 +204,8 @@ export default function MarketIntelligence() {
             <CardContent className="pt-0">
               <div className="text-3xl font-bold text-primary">7.4%</div>
               <div className="flex items-center mt-1 text-sm">
-                <TrendingUp className="h-4 w-4 mr-1 text-green-500" />
-                <span className="text-green-600 font-medium">+0.6%</span>
+                <TrendingUp className="h-4 w-4 mr-1 text-success-foreground" />
+                <span className="text-success-foreground font-medium">+0.6%</span>
                 <span className="text-muted-foreground ml-1">from last quarter</span>
               </div>
               <div className="mt-4 flex justify-between">
@@ -235,26 +235,26 @@ export default function MarketIntelligence() {
             <CardContent className="pt-0">
               <div className="text-3xl font-bold text-primary">+5.8%</div>
               <div className="flex items-center mt-1 text-sm">
-                <TrendingUp className="h-4 w-4 mr-1 text-green-500" />
-                <span className="text-green-600 font-medium">+2.3%</span>
+                <TrendingUp className="h-4 w-4 mr-1 text-success-foreground" />
+                <span className="text-success-foreground font-medium">+2.3%</span>
                 <span className="text-muted-foreground ml-1">vs. national average</span>
               </div>
               <div className="mt-4 pt-4 border-t grid grid-cols-4 gap-3">
                 <div>
                   <div className="text-xs text-muted-foreground">Q1</div>
-                  <div className="text-sm font-medium text-green-600">+1.4%</div>
+                  <div className="text-sm font-medium text-success-foreground">+1.4%</div>
                 </div>
                 <div>
                   <div className="text-xs text-muted-foreground">Q2</div>
-                  <div className="text-sm font-medium text-green-600">+1.6%</div>
+                  <div className="text-sm font-medium text-success-foreground">+1.6%</div>
                 </div>
                 <div>
                   <div className="text-xs text-muted-foreground">Q3</div>
-                  <div className="text-sm font-medium text-green-600">+1.3%</div>
+                  <div className="text-sm font-medium text-success-foreground">+1.3%</div>
                 </div>
                 <div>
                   <div className="text-xs text-muted-foreground">Q4</div>
-                  <div className="text-sm font-medium text-green-600">+1.5%</div>
+                  <div className="text-sm font-medium text-success-foreground">+1.5%</div>
                 </div>
               </div>
               <div className="absolute -bottom-12 -right-12 h-32 w-32 rounded-full bg-primary/10 z-0"></div>
@@ -270,8 +270,8 @@ export default function MarketIntelligence() {
             <CardContent className="pt-0">
               <div className="text-3xl font-bold text-primary">46</div>
               <div className="flex items-center mt-1 text-sm">
-                <TrendingDown className="h-4 w-4 mr-1 text-green-500" />
-                <span className="text-green-600 font-medium">-12 days</span>
+                <TrendingDown className="h-4 w-4 mr-1 text-success-foreground" />
+                <span className="text-success-foreground font-medium">-12 days</span>
                 <span className="text-muted-foreground ml-1">from previous period</span>
               </div>
               <div className="mt-4 grid grid-cols-1 gap-3">
@@ -422,8 +422,8 @@ export default function MarketIntelligence() {
                                 variant="outline" 
                                 className={
                                   area.direction === "up" 
-                                    ? "bg-green-50 text-green-700 border-green-200" 
-                                    : "bg-red-50 text-red-700 border-red-200"
+                                    ? "bg-success/10 text-success-foreground border-success/30" 
+                                    : "bg-destructive/10 text-destructive-foreground border-destructive/30"
                                 }
                               >
                                 {area.direction === "up" ? "+" : ""}{area.change}%
@@ -450,7 +450,7 @@ export default function MarketIntelligence() {
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="text-center">
                         <Map className="h-12 w-12 text-primary mx-auto opacity-50 mb-4" />
-                        <h3 className="text-lg font-medium mb-2">Interactive Map</h3>
+                        <h3 className="text-body-large mb-2">Interactive Map</h3>
                         <p className="text-sm text-muted-foreground max-w-xs mx-auto mb-4">
                           View property heatmaps, market trends, and investment opportunities across Botswana.
                         </p>
@@ -513,8 +513,8 @@ export default function MarketIntelligence() {
                         </CardHeader>
                         <CardContent className="py-0 px-5">
                           <div className="flex justify-between items-center">
-                            <div className="text-2xl font-bold text-green-600">+4.2%</div>
-                            <TrendingUp className="h-5 w-5 text-green-600" />
+                            <div className="text-heading-2 text-success-foreground">+4.2%</div>
+                            <TrendingUp className="h-5 w-5 text-success-foreground" />
                           </div>
                           <p className="text-xs text-muted-foreground mt-1">Projected 12-month</p>
                         </CardContent>
@@ -525,8 +525,8 @@ export default function MarketIntelligence() {
                         </CardHeader>
                         <CardContent className="py-0 px-5">
                           <div className="flex justify-between items-center">
-                            <div className="text-2xl font-bold text-green-600">+6.7%</div>
-                            <TrendingUp className="h-5 w-5 text-green-600" />
+                            <div className="text-heading-2 text-success-foreground">+6.7%</div>
+                            <TrendingUp className="h-5 w-5 text-success-foreground" />
                           </div>
                           <p className="text-xs text-muted-foreground mt-1">Projected 12-month</p>
                         </CardContent>
@@ -537,8 +537,8 @@ export default function MarketIntelligence() {
                         </CardHeader>
                         <CardContent className="py-0 px-5">
                           <div className="flex justify-between items-center">
-                            <div className="text-2xl font-bold">76/100</div>
-                            <TrendingUp className="h-5 w-5 text-green-600" />
+                            <div className="text-heading-2">76/100</div>
+                            <TrendingUp className="h-5 w-5 text-success-foreground" />
                           </div>
                           <p className="text-xs text-muted-foreground mt-1">Strong buyer demand</p>
                         </CardContent>
@@ -549,8 +549,8 @@ export default function MarketIntelligence() {
                         </CardHeader>
                         <CardContent className="py-0 px-5">
                           <div className="flex justify-between items-center">
-                            <div className="text-2xl font-bold">59/100</div>
-                            <TrendingDown className="h-5 w-5 text-amber-600" />
+                            <div className="text-heading-2">59/100</div>
+                            <TrendingDown className="h-5 w-5 text-warning-foreground" />
                           </div>
                           <p className="text-xs text-muted-foreground mt-1">Limited new inventory</p>
                         </CardContent>

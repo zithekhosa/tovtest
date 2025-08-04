@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
-import { DashLayout } from "@/layout/dash-layout";
+import DashLayout from "@/components/layout/DashLayout";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatCurrency, formatDate, apiRequest } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 import { Lease, Property } from "@shared/schema";
 
 import {
@@ -63,8 +64,11 @@ interface LeaseWithProperty extends Lease {
 
 export default function LeaseHistoryPage() {
   const { user } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [selectedLease, setSelectedLease] = useState<LeaseWithProperty | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isAccepting, setIsAccepting] = useState(false);
 
   // Fetch all leases for the tenant
   const {
@@ -72,7 +76,8 @@ export default function LeaseHistoryPage() {
     isLoading,
     error
   } = useQuery<Lease[]>({
-    queryKey: ["/api/leases/tenant/all"],
+    queryKey: ["/api/leases/tenant"],
+    queryFn: () => apiRequest("GET", "/api/leases/tenant"),
   });
 
   // Fetch properties for each lease
@@ -81,6 +86,7 @@ export default function LeaseHistoryPage() {
     isLoading: isLoadingProperties
   } = useQuery<Property[]>({
     queryKey: ["/api/properties"],
+    queryFn: () => apiRequest("GET", "/api/properties"),
     enabled: !!leases && leases.length > 0,
   });
 
@@ -114,7 +120,7 @@ export default function LeaseHistoryPage() {
     if (!lease) return null;
     
     if (lease.active) {
-      return <Badge className="bg-green-500">Active</Badge>;
+      return <Badge className="bg-success">Active</Badge>;
     }
 
     const now = new Date();
@@ -124,7 +130,7 @@ export default function LeaseHistoryPage() {
       return <Badge variant="outline" className="bg-gray-100 text-gray-700">Expired</Badge>;
     }
 
-    return <Badge variant="outline" className="bg-amber-50 text-amber-700">Upcoming</Badge>;
+    return <Badge variant="outline" className="bg-warning/10 text-warning-foreground">Upcoming</Badge>;
   };
 
   // View lease details
@@ -132,6 +138,37 @@ export default function LeaseHistoryPage() {
     setSelectedLease(lease);
     setIsDialogOpen(true);
   };
+
+  // Accept lease
+  const handleAcceptLease = async (leaseId: number) => {
+    setIsAccepting(true);
+    try {
+      await apiRequest("PUT", `/api/leases/${leaseId}`, {
+        status: 'active',
+        tenantSignedAt: new Date().toISOString()
+      });
+
+      toast({
+        title: "Lease Accepted",
+        description: "You have successfully accepted the lease agreement. Welcome to your new home!",
+      });
+
+      // Refresh leases
+      queryClient.invalidateQueries({ queryKey: ["/api/leases/tenant"] });
+      setIsDialogOpen(false);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to accept lease. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAccepting(false);
+    }
+  };
+
+  // Separate pending leases for review
+  const pendingLeases = sortedLeases.filter(lease => lease.status === 'pending_tenant_signature');
 
   if (isLoading || isLoadingProperties) {
     return (
@@ -147,8 +184,8 @@ export default function LeaseHistoryPage() {
     return (
       <DashLayout>
         <div className="p-6 bg-white rounded-lg shadow-md text-center">
-          <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold mb-2">Error Loading Lease History</h2>
+          <XCircle className="h-12 w-12 text-destructive-foreground mx-auto mb-4" />
+          <h2 className="text-heading-3 mb-2">Error Loading Lease History</h2>
           <p className="text-gray-500 mb-4">Failed to load your lease history. Please try again later.</p>
         </div>
       </DashLayout>
@@ -164,10 +201,10 @@ export default function LeaseHistoryPage() {
         />
         <div className="p-6 bg-white rounded-lg shadow-md text-center mt-6">
           <Building className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold mb-2">No Lease History Found</h2>
+          <h2 className="text-heading-3 mb-2">No Lease History Found</h2>
           <p className="text-gray-500 mb-4">You don't have any lease records in the system.</p>
           <Button asChild>
-            <a href="/tenant/property-search">Find Properties</a>
+            <a href="/properties">Find Properties</a>
           </Button>
         </div>
       </DashLayout>
@@ -181,6 +218,62 @@ export default function LeaseHistoryPage() {
           title="Lease History"
           subtitle="View your current and previous rental agreements"
         />
+
+        {/* Pending Leases for Review */}
+        {pendingLeases.length > 0 && (
+          <Card className="border-warning bg-warning/5">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2">
+                <ClipboardList className="h-5 w-5 text-warning" />
+                Lease Agreement for Review
+              </CardTitle>
+              <CardDescription>You have a new lease agreement that requires your acceptance</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {pendingLeases.map((lease) => (
+                  <div key={lease.id} className="flex items-center justify-between p-4 bg-white rounded-lg border">
+                    <div className="flex-1">
+                      <h3 className="font-semibold">{lease.property?.title || `Property ${lease.propertyId}`}</h3>
+                      <p className="text-sm text-gray-600">{lease.property?.address}</p>
+                      <div className="flex items-center gap-4 mt-2 text-sm">
+                        <span className="flex items-center gap-1">
+                          <DollarSign className="h-4 w-4" />
+                          {formatCurrency(lease.monthlyRent)}/month
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-4 w-4" />
+                          {formatDate(new Date(lease.startDate))} - {formatDate(new Date(lease.endDate))}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => handleViewLease(lease)}
+                      >
+                        <FileText className="h-4 w-4 mr-2" />
+                        Review Lease
+                      </Button>
+                      <Button
+                        onClick={() => handleAcceptLease(lease.id)}
+                        disabled={isAccepting}
+                        className="bg-success hover:bg-success/90"
+                      >
+                        {isAccepting ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : (
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                        )}
+                        Accept Lease
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Active Lease Card */}
         {activeLeases.length > 0 && (
@@ -215,7 +308,7 @@ export default function LeaseHistoryPage() {
                       <div className="md:w-2/3 space-y-4">
                         <div className="flex justify-between items-start">
                           <div>
-                            <h3 className="text-lg font-medium">
+                            <h3 className="text-body-large">
                               {property ? property.address : `Property #${lease.propertyId}`}
                             </h3>
                             {property && (
@@ -336,7 +429,7 @@ export default function LeaseHistoryPage() {
                 {sortedLeases.map((lease, index) => (
                   <TimelineItem
                     key={lease.id}
-                    title={lease.property ? lease.property.address : `Property #${lease.propertyId}`}
+                    label={lease.property ? lease.property.address : `Property #${lease.propertyId}`}
                     description={`${formatDate(lease.startDate)} - ${formatDate(lease.endDate)}`}
                     icon={<CalendarDays className="h-4 w-4" />}
                     isActive={lease.active}
@@ -375,7 +468,7 @@ export default function LeaseHistoryPage() {
               <div className="bg-gray-50 p-4 rounded-md">
                 <div className="flex items-center">
                   {selectedLease.active ? (
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
+                    <CheckCircle className="h-5 w-5 text-success-foreground mr-2" />
                   ) : (
                     <Clock className="h-5 w-5 text-gray-400 mr-2" />
                   )}
@@ -472,7 +565,7 @@ export default function LeaseHistoryPage() {
                       <div className="flex justify-between">
                         <span className="text-gray-500">Square Feet:</span>
                         <span className="font-medium">
-                          {selectedLease.property.squareFootage || 'N/A'}
+                          {selectedLease.property.squareMeters || 'N/A'}
                         </span>
                       </div>
                     </div>
@@ -514,6 +607,23 @@ export default function LeaseHistoryPage() {
               <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
                 Close
               </Button>
+              
+              {/* Show acceptance button for pending leases */}
+              {selectedLease.status === 'pending_tenant_signature' && (
+                <Button 
+                  onClick={() => handleAcceptLease(selectedLease.id)}
+                  disabled={isAccepting}
+                  className="bg-success hover:bg-success/90"
+                >
+                  {isAccepting ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                  )}
+                  Accept Lease Agreement
+                </Button>
+              )}
+              
               {selectedLease.documentUrl && (
                 <Button asChild>
                   <a href={selectedLease.documentUrl} target="_blank" rel="noopener noreferrer">

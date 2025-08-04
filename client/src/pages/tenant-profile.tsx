@@ -64,7 +64,7 @@ export default function TenantProfile() {
     queryFn: async () => {
       if (!tenantId || !leases?.length) return [];
       // Get unique property IDs from leases
-      const propertyIds = [...new Set(leases.map(lease => lease.propertyId))];
+      const propertyIds = Array.from(new Set(leases.map(lease => lease.propertyId)));
       
       // Fetch each property
       const propertiesPromises = propertyIds.map(async id => {
@@ -118,7 +118,7 @@ export default function TenantProfile() {
   if (!isTenant) {
     return (
       <div className="container max-w-6xl mx-auto py-8 px-4">
-        <h1 className="text-2xl font-bold mb-4">User is not a tenant</h1>
+        <h1 className="text-heading-2 mb-4">User is not a tenant</h1>
         <p>The requested user is not a tenant.</p>
         <Button className="mt-4" onClick={() => navigate('/')}>
           Return to Home
@@ -177,7 +177,7 @@ export default function TenantProfile() {
                 <Badge>Tenant</Badge>
                 {ratings?.length && avgRating ? (
                   <span className="flex items-center">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
+                    <Star className="h-4 w-4 fill-primary text-primary mr-1" />
                     {avgRating.toFixed(1)}
                   </span>
                 ) : null}
@@ -274,7 +274,7 @@ export default function TenantProfile() {
                     <span>Overall Rating</span>
                     <span className="flex items-center">
                       {avgRating.toFixed(1)}
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 ml-1" />
+                      <Star className="h-4 w-4 fill-primary text-primary ml-1" />
                     </span>
                   </div>
                   <Progress value={avgRating * 20} className="h-2" />
@@ -318,7 +318,7 @@ export default function TenantProfile() {
             
             {/* Properties Tab */}
             <TabsContent value="properties" className="mt-4">
-              <h2 className="text-xl font-semibold mb-4">Rental History</h2>
+              <h2 className="text-heading-3 mb-4">Rental History</h2>
               {isLoadingLeases || isLoadingProperties ? (
                 <div className="flex justify-center py-8">
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -326,7 +326,7 @@ export default function TenantProfile() {
               ) : !leases?.length ? (
                 <Card className="bg-muted/50">
                   <CardContent className="py-8 text-center">
-                    <h3 className="text-lg font-medium mb-2">No Rental History</h3>
+                    <h3 className="text-body-large mb-2">No Rental History</h3>
                     <p className="text-muted-foreground">
                       This tenant doesn't have any rental history yet.
                     </p>
@@ -396,7 +396,7 @@ export default function TenantProfile() {
             
             {/* Reviews Tab */}
             <TabsContent value="reviews" className="mt-4">
-              <h2 className="text-xl font-semibold mb-4">Reviews & Ratings</h2>
+              <h2 className="text-heading-3 mb-4">Reviews & Ratings</h2>
               {isLoadingRatings ? (
                 <div className="flex justify-center py-8">
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -404,7 +404,7 @@ export default function TenantProfile() {
               ) : !ratings?.length ? (
                 <Card className="bg-muted/50">
                   <CardContent className="py-8 text-center">
-                    <h3 className="text-lg font-medium mb-2">No Reviews Yet</h3>
+                    <h3 className="text-body-large mb-2">No Reviews Yet</h3>
                     <p className="text-muted-foreground">
                       This tenant hasn't received any reviews yet.
                     </p>

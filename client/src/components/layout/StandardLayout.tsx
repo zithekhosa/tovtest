@@ -185,7 +185,7 @@ export function StandardLayout({
         <header className="hidden md:flex h-16 items-center justify-between px-4 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
           <div>
             {title && (
-              <h1 className="text-xl font-semibold">{title}</h1>
+              <h1 className="text-heading-3">{title}</h1>
             )}
             {subtitle && (
               <p className="text-sm text-muted-foreground">{subtitle}</p>
@@ -201,7 +201,7 @@ export function StandardLayout({
               <Link href={`/${role}/notifications`}>
                 <div className="relative">
                   <Bell className="h-5 w-5" />
-                  <span className="absolute top-0 right-0.5 w-2 h-2 bg-red-500 rounded-full"></span>
+                  <span className="absolute top-0 right-0.5 w-2 h-2 bg-destructive rounded-full"></span>
                 </div>
               </Link>
             </Button>
@@ -225,7 +225,7 @@ export function StandardLayout({
               <Link href={`/${role}/notifications`}>
                 <div className="relative">
                   <Bell className="h-5 w-5" />
-                  <span className="absolute top-0 right-0.5 w-2 h-2 bg-red-500 rounded-full"></span>
+                  <span className="absolute top-0 right-0.5 w-2 h-2 bg-destructive rounded-full"></span>
                 </div>
               </Link>
             </Button>
@@ -242,7 +242,7 @@ export function StandardLayout({
 
         {/* Main Content Scrollable Area */}
         <main className="flex-1 overflow-y-auto pb-16 md:pb-0 pt-14 md:pt-0">
-          <div className="container mx-auto px-4 py-6 max-w-6xl">{children}</div>
+          <div className="container-wide py-6">{children}</div>
         </main>
 
         {/* Mobile Bottom Navigation */}
@@ -262,7 +262,7 @@ export function StandardLayout({
                 <item.icon className="h-5 w-5 mb-1" />
                 <span className="text-[10px] font-medium">{item.label}</span>
                 {item.notification && (
-                  <span className="absolute top-0 right-1/4 bg-red-500 text-white text-[10px] font-medium min-w-[16px] h-4 flex items-center justify-center rounded-full px-1">
+                  <span className="absolute top-0 right-1/4 bg-destructive text-white text-[10px] font-medium min-w-[16px] h-4 flex items-center justify-center rounded-full px-1">
                     {item.notification}
                   </span>
                 )}
@@ -334,7 +334,7 @@ export function StandardLayout({
                       </div>
                       <span className="flex-1 truncate">{item.label}</span>
                       {item.notification && (
-                        <span className="bg-red-500 text-white text-xs font-medium min-w-[20px] h-5 flex items-center justify-center rounded-full px-1 ml-2">
+                        <span className="bg-destructive text-white text-xs font-medium min-w-[20px] h-5 flex items-center justify-center rounded-full px-1 ml-2">
                           {item.notification}
                         </span>
                       )}

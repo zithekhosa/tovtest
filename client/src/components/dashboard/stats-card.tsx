@@ -32,7 +32,7 @@ export function StatsCard({
       <div className="flex justify-between items-start">
         <div>
           <p className="text-gray-500 text-sm">{title}</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{value}</p>
+          <p className="text-heading-2 text-gray-900 mt-1">{value}</p>
         </div>
         <span className={cn(
           "p-2 rounded-md",
@@ -47,7 +47,7 @@ export function StatsCard({
           {changeDirection && (
             <span className={cn(
               "flex items-center",
-              changeDirection === "up" ? "text-green-600" : "text-red-600"
+              changeDirection === "up" ? "text-success-foreground" : "text-destructive-foreground"
             )}>
               {changeDirection === "up" ? (
                 <ArrowUp className="mr-1 h-3 w-3" />

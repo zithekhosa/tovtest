@@ -13,7 +13,7 @@ export function ProtectedRoute({
   component: (props?: { user?: any }) => React.JSX.Element | null;
   role?: UserRoleType;
 }) {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, authBypassMode } = useAuth();
 
   // Show loading state
   if (isLoading) {

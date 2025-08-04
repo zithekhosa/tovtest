@@ -1,3 +1,4 @@
+// CACHE BUSTER v2.0
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 type Theme = {
@@ -5,7 +6,6 @@ type Theme = {
   primary: string;
   appearance: "light" | "dark" | "system";
   radius: number;
-  region?: string;
 };
 
 type RegionalTheme = {
@@ -13,165 +13,45 @@ type RegionalTheme = {
   theme: Theme;
 };
 
-// Regional theme presets for different regions of Africa
-const regionalThemes: RegionalTheme[] = [
-  // Botswana Themes
-  {
-    name: "Gaborone",
-    theme: {
-      variant: "tint",
-      primary: "hsl(210, 90%, 50%)",
-      appearance: "light",
-      radius: 0.5,
-      region: "Gaborone"
-    }
-  },
-  {
-    name: "Francistown",
-    theme: {
-      variant: "professional",
-      primary: "hsl(210, 90%, 50%)",
-      appearance: "dark",
-      radius: 0.5,
-      region: "Francistown"
-    }
-  },
-  {
-    name: "Maun",
-    theme: {
-      variant: "vibrant",
-      primary: "hsl(35, 90%, 55%)",
-      appearance: "light", 
-      radius: 0.5,
-      region: "Maun"
-    }
-  },
-  {
-    name: "Palapye",
-    theme: {
-      variant: "professional",
-      primary: "hsl(160, 60%, 40%)",
-      appearance: "dark",
-      radius: 0.5,
-      region: "Palapye"
-    }
-  },
-  {
-    name: "Jwaneng",
-    theme: {
-      variant: "vibrant",
-      primary: "hsl(245, 60%, 60%)",
-      appearance: "light",
-      radius: 0.5,
-      region: "Jwaneng"
-    }
-  },
-  
-  // South Africa Themes
-  {
-    name: "Johannesburg",
-    theme: {
-      variant: "professional",
-      primary: "hsl(215, 80%, 45%)",
-      appearance: "light",
-      radius: 1.0,
-      region: "Johannesburg"
-    }
-  },
-  {
-    name: "Cape Town",
-    theme: {
-      variant: "vibrant",
-      primary: "hsl(195, 80%, 50%)",
-      appearance: "dark",
-      radius: 1.0,
-      region: "Cape Town"
-    }
-  },
-  
-  // Nigeria Themes
-  {
-    name: "Lagos",
-    theme: {
-      variant: "professional",
-      primary: "hsl(120, 60%, 40%)",
-      appearance: "light",
-      radius: 0.5,
-      region: "Lagos"
-    }
-  },
-  {
-    name: "Abuja",
-    theme: {
-      variant: "tint",
-      primary: "hsl(110, 70%, 45%)",
-      appearance: "dark",
-      radius: 0.5,
-      region: "Abuja"
-    }
-  },
-  
-  // Kenya Themes
-  {
-    name: "Nairobi",
-    theme: {
-      variant: "vibrant",
-      primary: "hsl(0, 80%, 50%)",
-      appearance: "light",
-      radius: 0.5,
-      region: "Nairobi"
-    }
-  },
-  {
-    name: "Mombasa",
-    theme: {
-      variant: "professional",
-      primary: "hsl(200, 80%, 50%)",
-      appearance: "dark",
-      radius: 1.0,
-      region: "Mombasa"
-    }
-  },
-  
-  // Ghana Themes
-  {
-    name: "Accra",
-    theme: {
-      variant: "vibrant",
-      primary: "hsl(45, 90%, 50%)",
-      appearance: "light",
-      radius: 0.5,
-      region: "Accra"
-    }
-  },
-  
-  // Morocco Themes
-  {
-    name: "Casablanca",
-    theme: {
-      variant: "professional",
-      primary: "hsl(15, 70%, 50%)",
-      appearance: "dark",
-      radius: 1.0,
-      region: "Casablanca"
-    }
-  }
-];
-
 type ThemeContextType = {
   theme: Theme;
   setTheme: (theme: Theme) => void;
   toggleAppearance: () => void;
   regionalThemes: RegionalTheme[];
-  setRegionalTheme: (region: string) => void;
+  setRegionalTheme: (regionName: string) => void;
 };
 
 const defaultTheme: Theme = {
-  variant: "tint",
-  primary: "hsl(210, 90%, 95%)",
+  variant: "professional",
+  primary: "rgb(15, 23, 42)", // Clean dark slate
   appearance: "light",
   radius: 0.5
 };
+
+const regionalThemes: RegionalTheme[] = [
+  // All regions use the clean white theme
+  { name: "Gaborone", theme: { variant: "professional", primary: "rgb(15, 23, 42)", appearance: "light", radius: 0.5 } },
+  { name: "Francistown", theme: { variant: "professional", primary: "rgb(15, 23, 42)", appearance: "light", radius: 0.5 } },
+  { name: "Maun", theme: { variant: "professional", primary: "rgb(15, 23, 42)", appearance: "light", radius: 0.5 } },
+  { name: "Palapye", theme: { variant: "professional", primary: "rgb(15, 23, 42)", appearance: "light", radius: 0.5 } },
+  { name: "Jwaneng", theme: { variant: "professional", primary: "rgb(15, 23, 42)", appearance: "light", radius: 0.5 } },
+  
+  // South Africa
+  { name: "Johannesburg", theme: { variant: "professional", primary: "rgb(15, 23, 42)", appearance: "light", radius: 0.5 } },
+  { name: "Cape Town", theme: { variant: "professional", primary: "rgb(15, 23, 42)", appearance: "light", radius: 0.5 } },
+  
+  // East Africa
+  { name: "Nairobi", theme: { variant: "professional", primary: "rgb(15, 23, 42)", appearance: "light", radius: 0.5 } },
+  { name: "Mombasa", theme: { variant: "professional", primary: "rgb(15, 23, 42)", appearance: "light", radius: 0.5 } },
+  
+  // West Africa
+  { name: "Lagos", theme: { variant: "professional", primary: "rgb(15, 23, 42)", appearance: "light", radius: 0.5 } },
+  { name: "Abuja", theme: { variant: "professional", primary: "rgb(15, 23, 42)", appearance: "light", radius: 0.5 } },
+  { name: "Accra", theme: { variant: "professional", primary: "rgb(15, 23, 42)", appearance: "light", radius: 0.5 } },
+  
+  // North Africa
+  { name: "Casablanca", theme: { variant: "professional", primary: "rgb(15, 23, 42)", appearance: "light", radius: 0.5 } },
+];
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
@@ -184,16 +64,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     localStorage.setItem("tov-theme", JSON.stringify(theme));
 
-    // Update theme.json via custom endpoint
-    fetch("/api/update-theme", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(theme),
-    }).catch(err => console.error("Failed to update theme:", err));
-
-    // Apply system preference if set to "system"
+    // Apply theme to document
     if (theme.appearance === "system") {
       const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
       document.documentElement.classList.toggle("dark", prefersDark);
@@ -201,20 +72,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       document.documentElement.classList.toggle("dark", theme.appearance === "dark");
     }
   }, [theme]);
-
-  // Listen for system preference changes if theme is set to "system"
-  useEffect(() => {
-    if (theme.appearance === "system") {
-      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-      
-      const handleChange = (e: MediaQueryListEvent) => {
-        document.documentElement.classList.toggle("dark", e.matches);
-      };
-      
-      mediaQuery.addEventListener("change", handleChange);
-      return () => mediaQuery.removeEventListener("change", handleChange);
-    }
-  }, [theme.appearance]);
 
   const toggleAppearance = () => {
     setTheme(prev => {
@@ -228,21 +85,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
-  const setRegionalTheme = (region: string) => {
-    const foundTheme = regionalThemes.find(rt => rt.name === region);
-    if (foundTheme) {
-      setTheme(foundTheme.theme);
+  const setRegionalTheme = (regionName: string) => {
+    const regionalTheme = regionalThemes.find(rt => rt.name === regionName);
+    if (regionalTheme) {
+      setTheme(regionalTheme.theme);
     }
   };
 
   return (
-    <ThemeContext.Provider value={{ 
-      theme, 
-      setTheme, 
-      toggleAppearance, 
-      regionalThemes,
-      setRegionalTheme 
-    }}>
+    <ThemeContext.Provider value={{ theme, setTheme, toggleAppearance, regionalThemes, setRegionalTheme }}>
       {children}
     </ThemeContext.Provider>
   );

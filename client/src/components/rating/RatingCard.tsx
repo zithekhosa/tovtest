@@ -19,7 +19,8 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
-import { apiRequest, queryClient } from '@/lib/queryClient';
+import { queryClient } from '@/lib/queryClient';
+import { apiRequest } from '@/lib/utils';
 import { RatingForm } from './RatingForm';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -116,7 +117,7 @@ export default function RatingCard({ rating, type, onUpdate }: RatingCardProps) 
                   <Star
                     key={star}
                     className={`h-4 w-4 ${
-                      star <= rating.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
+                      star <= rating.rating ? 'fill-primary text-primary' : 'text-gray-300'
                     }`}
                   />
                 ))}

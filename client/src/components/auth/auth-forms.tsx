@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { insertUserSchema, UserRole } from '@shared/schema';
-import { useAuth } from '@/hooks/use-auth';
+import { UserRole } from '@shared/schema';
+import { useAuth, registerSchema } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import {
@@ -30,15 +30,7 @@ const loginSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
-// Registration form schema extended from insertUserSchema with password confirmation
-const registerSchema = insertUserSchema
-  .extend({
-    passwordConfirm: z.string().min(6, "Password must be at least 6 characters"),
-  })
-  .refine((data) => data.password === data.passwordConfirm, {
-    message: "Passwords do not match",
-    path: ["passwordConfirm"],
-  });
+// Using registerSchema from use-auth.tsx
 
 export function AuthForms() {
   const [activeTab, setActiveTab] = useState<string>("login");
@@ -147,18 +139,19 @@ function RegisterForm({ onSuccess }: RegisterFormProps) {
     defaultValues: {
       username: "",
       email: "",
-      name: "",
+      firstName: "",
+      lastName: "",
       password: "",
-      passwordConfirm: "",
-      role: "tenant" as keyof typeof UserRole,
+      confirmPassword: "",
+      role: "tenant" as "tenant" | "landlord" | "agency" | "maintenance",
     },
   });
 
   const onSubmit = async (values: z.infer<typeof registerSchema>) => {
     try {
-      // Remove passwordConfirm before sending to API
-      const { passwordConfirm, ...userData } = values;
-      await registerMutation.mutateAsync(userData);
+      // Remove confirmPassword before sending to API
+      const { confirmPassword, ...userData } = values;
+      await registerMutation.mutateAsync(values);
       onSuccess?.();
     } catch (error) {
       toast({
@@ -200,12 +193,25 @@ function RegisterForm({ onSuccess }: RegisterFormProps) {
         />
         <FormField
           control={form.control}
-          name="name"
+          name="firstName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Full Name</FormLabel>
+              <FormLabel>First Name</FormLabel>
               <FormControl>
-                <Input placeholder="John Doe" {...field} />
+                <Input placeholder="John" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="lastName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Last Name</FormLabel>
+              <FormControl>
+                <Input placeholder="Doe" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -252,7 +258,7 @@ function RegisterForm({ onSuccess }: RegisterFormProps) {
         />
         <FormField
           control={form.control}
-          name="passwordConfirm"
+          name="confirmPassword"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Confirm Password</FormLabel>

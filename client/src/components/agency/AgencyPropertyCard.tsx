@@ -88,21 +88,21 @@ export function AgencyPropertyCard({
               <Eye className="h-4 w-4 text-primary" />
             </div>
             <p className="text-lg font-semibold">{marketingStats.views}</p>
-            <p className="text-xs text-gray-500">Views</p>
+            <p className="text-caption">Views</p>
           </div>
           <div className="bg-gray-50 rounded p-2">
             <div className="flex justify-center mb-1">
               <PhoneCall className="h-4 w-4 text-primary" />
             </div>
             <p className="text-lg font-semibold">{marketingStats.calls}</p>
-            <p className="text-xs text-gray-500">Calls</p>
+            <p className="text-caption">Calls</p>
           </div>
           <div className="bg-gray-50 rounded p-2">
             <div className="flex justify-center mb-1">
               <Calendar className="h-4 w-4 text-primary" />
             </div>
             <p className="text-lg font-semibold">{marketingStats.scheduledViewings}</p>
-            <p className="text-xs text-gray-500">Viewings</p>
+            <p className="text-caption">Viewings</p>
           </div>
         </div>
         
@@ -118,8 +118,8 @@ export function AgencyPropertyCard({
         {/* Market performance indicators */}
         <div className="flex justify-between items-center text-sm">
           <div className="flex items-center">
-            <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-            <span className="text-green-600 font-medium">{marketingStats.leadConversionRate}% conversion</span>
+            <TrendingUp className="h-4 w-4 text-success-foreground mr-1" />
+            <span className="text-success-foreground font-medium">{marketingStats.leadConversionRate}% conversion</span>
           </div>
           <div className="flex items-center">
             <Clock className="h-4 w-4 text-gray-400 mr-1" />

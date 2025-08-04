@@ -96,7 +96,7 @@ export default function AgencyProfile() {
   if (!isAgency) {
     return (
       <div className="container max-w-6xl mx-auto py-8 px-4">
-        <h1 className="text-2xl font-bold mb-4">User is not an agency</h1>
+        <h1 className="text-heading-2 mb-4">User is not an agency</h1>
         <p>The requested user is not a real estate agency.</p>
         <Button className="mt-4" onClick={() => navigate('/')}>
           Return to Home
@@ -149,7 +149,7 @@ export default function AgencyProfile() {
                 <Badge variant="outline">Agency</Badge>
                 {ratings?.length && avgRating ? (
                   <span className="flex items-center">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
+                    <Star className="h-4 w-4 fill-primary text-primary mr-1" />
                     {avgRating.toFixed(1)}
                   </span>
                 ) : null}
@@ -241,7 +241,7 @@ export default function AgencyProfile() {
                     <span>Overall Rating</span>
                     <span className="flex items-center">
                       {avgRating.toFixed(1)}
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 ml-1" />
+                      <Star className="h-4 w-4 fill-primary text-primary ml-1" />
                     </span>
                   </div>
                   <Progress value={avgRating * 20} className="h-2" />
@@ -285,7 +285,7 @@ export default function AgencyProfile() {
             
             {/* Properties Tab */}
             <TabsContent value="properties" className="mt-4">
-              <h2 className="text-xl font-semibold mb-4">Properties Managed by {agency.firstName} {agency.lastName}</h2>
+              <h2 className="text-heading-3 mb-4">Properties Managed by {agency.firstName} {agency.lastName}</h2>
               {isLoadingProperties ? (
                 <div className="flex justify-center py-8">
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -293,7 +293,7 @@ export default function AgencyProfile() {
               ) : !properties?.length ? (
                 <Card className="bg-muted/50">
                   <CardContent className="py-8 text-center">
-                    <h3 className="text-lg font-medium mb-2">No Properties Listed</h3>
+                    <h3 className="text-body-large mb-2">No Properties Listed</h3>
                     <p className="text-muted-foreground">
                       This agency doesn't have any properties listed currently.
                     </p>
@@ -310,7 +310,7 @@ export default function AgencyProfile() {
             
             {/* Reviews Tab */}
             <TabsContent value="reviews" className="mt-4">
-              <h2 className="text-xl font-semibold mb-4">Reviews & Ratings</h2>
+              <h2 className="text-heading-3 mb-4">Reviews & Ratings</h2>
               {isLoadingRatings ? (
                 <div className="flex justify-center py-8">
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -318,7 +318,7 @@ export default function AgencyProfile() {
               ) : !ratings?.length ? (
                 <Card className="bg-muted/50">
                   <CardContent className="py-8 text-center">
-                    <h3 className="text-lg font-medium mb-2">No Reviews Yet</h3>
+                    <h3 className="text-body-large mb-2">No Reviews Yet</h3>
                     <p className="text-muted-foreground">
                       This agency hasn't received any reviews yet.
                     </p>

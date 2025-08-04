@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { DashLayout } from "@/layout/dash-layout";
+import DashLayout from "@/components/layout/DashLayout";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/utils";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -316,9 +316,9 @@ type DealFormValues = z.infer<typeof dealSchema>;
 // Colors for charts
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 const STATUS_COLORS = {
-  pending: 'bg-amber-100 text-amber-700',
-  paid: 'bg-green-100 text-green-700',
-  overdue: 'bg-red-100 text-red-700'
+  pending: 'bg-warning/20 text-warning-foreground',
+  paid: 'bg-success text-success-foreground',
+  overdue: 'bg-destructive text-destructive-foreground'
 };
 
 export default function CommissionTracker() {
@@ -473,9 +473,9 @@ export default function CommissionTracker() {
       return (
         <div className="bg-white p-3 shadow-md rounded-md border">
           <p className="font-medium">{`${label}`}</p>
-          <p className="text-sm text-green-600">{`Commission: ${formatCurrency(payload[0].value)}`}</p>
+          <p className="text-sm text-success-foreground">{`Commission: ${formatCurrency(payload[0].value)}`}</p>
           {payload[1] && (
-            <p className="text-sm text-blue-600">{`Target: ${formatCurrency(payload[1].value)}`}</p>
+            <p className="text-sm text-primary">{`Target: ${formatCurrency(payload[1].value)}`}</p>
           )}
         </div>
       );
@@ -488,7 +488,7 @@ export default function CommissionTracker() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Commission Tracker</h1>
+            <h1 className="text-heading-2 tracking-tight">Commission Tracker</h1>
             <p className="text-muted-foreground">Track and analyze your commission earnings</p>
           </div>
           <Button onClick={handleAddDeal}>
@@ -503,8 +503,8 @@ export default function CommissionTracker() {
             <CardContent className="p-6">
               <div className="flex flex-col space-y-2">
                 <span className="text-muted-foreground text-sm">Total Commission</span>
-                <span className="text-2xl font-bold">{formatCurrency(totalCommission)}</span>
-                <div className="flex items-center text-xs text-green-600 mt-1">
+                <span className="text-heading-2">{formatCurrency(totalCommission)}</span>
+                <div className="flex items-center text-xs text-success-foreground mt-1">
                   <TrendingUp className="h-3.5 w-3.5 mr-1" />
                   <span>15% from last year</span>
                 </div>
@@ -516,7 +516,7 @@ export default function CommissionTracker() {
             <CardContent className="p-6">
               <div className="flex flex-col space-y-2">
                 <span className="text-muted-foreground text-sm">Pending Commission</span>
-                <span className="text-2xl font-bold">{formatCurrency(pendingCommission)}</span>
+                <span className="text-heading-2">{formatCurrency(pendingCommission)}</span>
                 <Progress 
                   value={(pendingCommission / totalCommission) * 100} 
                   className="h-1.5 mt-1.5" 
@@ -532,10 +532,10 @@ export default function CommissionTracker() {
             <CardContent className="p-6">
               <div className="flex flex-col space-y-2">
                 <span className="text-muted-foreground text-sm">Paid Commission</span>
-                <span className="text-2xl font-bold">{formatCurrency(paidCommission)}</span>
+                <span className="text-heading-2">{formatCurrency(paidCommission)}</span>
                 <Progress 
                   value={(paidCommission / totalCommission) * 100} 
-                  className="h-1.5 mt-1.5 [&>div]:bg-green-500" 
+                  className="h-1.5 mt-1.5 [&>div]:bg-success" 
                 />
                 <span className="text-xs text-muted-foreground">
                   {Math.round((paidCommission / totalCommission) * 100)}% of total
@@ -548,10 +548,10 @@ export default function CommissionTracker() {
             <CardContent className="p-6">
               <div className="flex flex-col space-y-2">
                 <span className="text-muted-foreground text-sm">Overdue Commission</span>
-                <span className="text-2xl font-bold">{formatCurrency(overdueCommission)}</span>
+                <span className="text-heading-2">{formatCurrency(overdueCommission)}</span>
                 <Progress 
                   value={(overdueCommission / totalCommission) * 100} 
-                  className="h-1.5 mt-1.5 [&>div]:bg-red-500" 
+                  className="h-1.5 mt-1.5 [&>div]:bg-destructive" 
                 />
                 <span className="text-xs text-muted-foreground">
                   {Math.round((overdueCommission / totalCommission) * 100)}% of total
@@ -565,7 +565,7 @@ export default function CommissionTracker() {
         <div className="grid gap-4 md:grid-cols-3">
           <Card className="md:col-span-2">
             <CardHeader>
-              <CardTitle className="text-lg font-medium">Monthly Commission Performance</CardTitle>
+              <CardTitle className="text-body-large">Monthly Commission Performance</CardTitle>
               <CardDescription>Track your commission against monthly targets</CardDescription>
             </CardHeader>
             <CardContent>
@@ -606,7 +606,7 @@ export default function CommissionTracker() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg font-medium">Commission by Property Type</CardTitle>
+              <CardTitle className="text-body-large">Commission by Property Type</CardTitle>
               <CardDescription>Distribution of earnings by sector</CardDescription>
             </CardHeader>
             <CardContent>
@@ -639,7 +639,7 @@ export default function CommissionTracker() {
         <Card>
           <CardHeader className="pb-3">
             <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-              <CardTitle className="text-lg font-medium">Commission Deals</CardTitle>
+              <CardTitle className="text-body-large">Commission Deals</CardTitle>
               
               <div className="flex gap-2">
                 <Select defaultValue="all" onValueChange={setFilterStatus}>
@@ -739,7 +739,7 @@ export default function CommissionTracker() {
                                 View contract
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem className="text-red-600" onClick={() => handleDeleteDeal(deal.id)}>
+                              <DropdownMenuItem className="text-destructive-foreground" onClick={() => handleDeleteDeal(deal.id)}>
                                 <Trash className="h-4 w-4 mr-2" />
                                 Delete record
                               </DropdownMenuItem>
@@ -771,7 +771,7 @@ export default function CommissionTracker() {
         {/* Top Performing Landlords */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg font-medium">Top Landlord Clients</CardTitle>
+            <CardTitle className="text-body-large">Top Landlord Clients</CardTitle>
             <CardDescription>Landlords providing the most commission</CardDescription>
           </CardHeader>
           <CardContent>

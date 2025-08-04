@@ -38,7 +38,7 @@ export default function PropertyDetails({
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">{address}</h1>
+          <h1 className="text-heading-2">{address}</h1>
           <p className="text-gray-500 flex items-center mt-1">
             <MapPin className="h-4 w-4 mr-1" />
             {city}, {state} {zipCode}
@@ -46,14 +46,14 @@ export default function PropertyDetails({
         </div>
         
         <div className="flex flex-col items-start md:items-end">
-          <div className="text-2xl font-bold text-primary flex items-center">
+          <div className="text-heading-2 text-primary flex items-center">
             <DollarSign className="h-5 w-5" />
             {formatCurrency(rentAmount, false)}
             <span className="text-sm font-normal text-gray-500 ml-1">/month</span>
           </div>
           
           {available ? (
-            <Badge className="mt-1 bg-green-500">Available Now</Badge>
+            <Badge className="mt-1 bg-success">Available Now</Badge>
           ) : (
             <Badge variant="outline" className="mt-1">Unavailable</Badge>
           )}
@@ -91,7 +91,7 @@ export default function PropertyDetails({
 
       {/* Description */}
       <div>
-        <h2 className="text-xl font-semibold mb-2">Description</h2>
+        <h2 className="text-heading-3 mb-2">Description</h2>
         <p className="text-gray-600 whitespace-pre-line">
           {description || "No description provided."}
         </p>

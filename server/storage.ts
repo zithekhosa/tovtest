@@ -1,1335 +1,660 @@
-import { users, properties, leases, payments, maintenanceRequests, documents, messages, applications, maintenanceJobs, maintenanceBids, landlordRatings, tenantRatings, type User, type Property, type Lease, type Payment, type MaintenanceRequest, type Document, type Message, type Application, type MaintenanceJob, type MaintenanceBid, type LandlordRating, type TenantRating, type InsertUser, type InsertProperty, type InsertLease, type InsertPayment, type InsertMaintenanceRequest, type InsertDocument, type InsertMessage, type InsertApplication, type InsertMaintenanceJob, type InsertMaintenanceBid, type InsertLandlordRating, type InsertTenantRating, type UserRoleType } from "@shared/schema";
-import session from "express-session";
-import createMemoryStore from "memorystore";
-import { db } from "./db";
-import { and, eq, or, desc, asc, isNull, gte, lte, ilike } from "drizzle-orm";
-import connectPg from "connect-pg-simple";
-import { Pool } from "@neondatabase/serverless";
+import { 
+  type User, 
+  type Property, 
+  type Lease, 
+  type Payment,
+  type MaintenanceRequest,
+  type PropertyMaintenanceSettings,
+  type Message,
+  type InsertUser,
+  type InsertProperty,
+  type InsertLease,
+  type InsertPayment,
+  type InsertMaintenanceRequest,
+  type InsertPropertyMaintenanceSettings,
+  type InsertMessage
+} from "@shared/schema";
+import { Application } from "express";
+import { Application } from "express";
+import { Application } from "express";
+import { Application } from "express";
+import { Application } from "express";
 
-const MemoryStore = createMemoryStore(session);
-const PostgresStore = connectPg(session);
-
-// define the storage interface
+// Simplified storage interface
 export interface IStorage {
   // Users
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
   getUsersByRole(role: string): Promise<User[]>;
-  clearUsers(): Promise<void>;
+  createUser(user: InsertUser): Promise<User>;
+  updateUser(id: number, updates: Partial<InsertUser>): Promise<User | undefined>;
   
   // Properties
   getProperty(id: number): Promise<Property | undefined>;
   getProperties(): Promise<Property[]>;
   getPropertiesByLandlord(landlordId: number): Promise<Property[]>;
   createProperty(property: InsertProperty): Promise<Property>;
-  updateProperty(id: number, property: Partial<InsertProperty>): Promise<Property | undefined>;
-  getAvailableProperties(): Promise<Property[]>;
-  searchProperties(params: {
-    query?: string;
-    propertyType?: string;
-    minBedrooms?: number;
-    maxBedrooms?: number;
-    minBathrooms?: number;
-    maxBathrooms?: number;
-    minPrice?: number;
-    maxPrice?: number;
-    location?: string;
-    sortBy?: string;
-    sortOrder?: 'asc' | 'desc';
-    limit?: number;
-    offset?: number;
-  }): Promise<Property[]>;
-  clearProperties(): Promise<void>;
+  updateProperty(id: number, updates: Partial<InsertProperty>): Promise<Property | undefined>;
+  deleteProperty(id: number): Promise<boolean>;
   
   // Leases
   getLease(id: number): Promise<Lease | undefined>;
   getLeasesByTenant(tenantId: number): Promise<Lease[]>;
   getLeasesByProperty(propertyId: number): Promise<Lease[]>;
   createLease(lease: InsertLease): Promise<Lease>;
-  updateLease(id: number, lease: Partial<InsertLease>): Promise<Lease | undefined>;
-  clearLeases(): Promise<void>;
+  updateLease(id: number, updates: Partial<InsertLease>): Promise<Lease | undefined>;
   
   // Payments
   getPayment(id: number): Promise<Payment | undefined>;
   getPaymentsByTenant(tenantId: number): Promise<Payment[]>;
   getPaymentsByLease(leaseId: number): Promise<Payment[]>;
   createPayment(payment: InsertPayment): Promise<Payment>;
-  clearPayments(): Promise<void>;
+  updatePayment(id: number, updates: Partial<InsertPayment>): Promise<Payment | undefined>;
   
   // Maintenance Requests
   getMaintenanceRequest(id: number): Promise<MaintenanceRequest | undefined>;
   getMaintenanceRequestsByTenant(tenantId: number): Promise<MaintenanceRequest[]>;
   getMaintenanceRequestsByProperty(propertyId: number): Promise<MaintenanceRequest[]>;
   getMaintenanceRequestsByStatus(status: string): Promise<MaintenanceRequest[]>;
-  getMaintenanceRequestsByAssignee(assigneeId: number): Promise<MaintenanceRequest[]>;
   createMaintenanceRequest(request: InsertMaintenanceRequest): Promise<MaintenanceRequest>;
-  updateMaintenanceRequest(id: number, request: Partial<InsertMaintenanceRequest>): Promise<MaintenanceRequest | undefined>;
-  clearMaintenanceRequests(): Promise<void>;
+  updateMaintenanceRequest(id: number, updates: Partial<InsertMaintenanceRequest>): Promise<MaintenanceRequest | undefined>;
+  
+  // Maintenance Bids
+  getMaintenanceBids(requestId: number): Promise<any[]>;
+  createMaintenanceBid(data: any): Promise<any>;
+  updateMaintenanceBid(id: number, data: any): Promise<any>;
+  
+  // Applications
+  getApplicationsByTenant(tenantId: number): Promise<any[]>;
+  getApplicationsByProperty(propertyId: number): Promise<any[]>;
+  getApplication(id: number): Promise<any>;
+  createApplication(data: any): Promise<any>;
+  updateApplication(id: number, data: any): Promise<any>;
+  getApplications(): Promise<any[]>;
+  
+  // Property Maintenance Settings
+  getPropertyMaintenanceSettings(propertyId: number): Promise<any>;
+  createPropertyMaintenanceSettings(data: any): Promise<any>;
+  updatePropertyMaintenanceSettings(propertyId: number, data: any): Promise<any>;
+  
+  // Agent Property Assignments
+  getAgentPropertyAssignments(landlordId: number): Promise<any[]>;
+  createAgentPropertyAssignment(data: any): Promise<any>;
+  
+  // Emergency Contacts
+  getEmergencyContactsByUser(userId: number): Promise<any[]>;
+  createEmergencyContact(data: any): Promise<any>;
   
   // Documents
-  getDocument(id: number): Promise<Document | undefined>;
-  getDocumentsByUser(userId: number): Promise<Document[]>;
-  getDocumentsByProperty(propertyId: number): Promise<Document[]>;
-  createDocument(document: InsertDocument): Promise<Document>;
-  clearDocuments(): Promise<void>;
+  getDocumentsByUser(userId: number): Promise<any[]>;
+  createDocument(data: any): Promise<any>;
+  
+  // Notifications
+  getNotificationsByUser(userId: number): Promise<any[]>;
+  createNotification(data: any): Promise<any>;
+  
+  // Audit Logs
+  createAuditLog(data: any): Promise<any>;
+  
+  // Lease Terminations
+  getLeaseTermination(id: number): Promise<any | undefined>;
+  getLeaseTerminationByLeaseId(leaseId: number): Promise<any | undefined>;
+  getLeaseTerminationsByLeaseIds(leaseIds: number[]): Promise<any[]>;
+  getLeaseTerminationsByTenant(tenantId: number): Promise<any[]>;
+  getLeaseTerminationsByLandlord(landlordId: number): Promise<any[]>;
+  createLeaseTermination(data: any): Promise<any>;
+  updateLeaseTermination(id: number, updates: any): Promise<any | undefined>;
   
   // Messages
   getMessage(id: number): Promise<Message | undefined>;
   getMessagesBySender(senderId: number): Promise<Message[]>;
   getMessagesByReceiver(receiverId: number): Promise<Message[]>;
-  getConversation(user1Id: number, user2Id: number): Promise<Message[]>;
+  getConversation(userId1: number, userId2: number): Promise<Message[]>;
   createMessage(message: InsertMessage): Promise<Message>;
-  markMessageAsRead(id: number): Promise<Message | undefined>;
-  clearMessages(): Promise<void>;
-  
-  // Ratings
-  // Landlord Ratings
-  getLandlordRating(id: number): Promise<LandlordRating | undefined>;
-  getLandlordRatingsByLandlord(landlordId: number): Promise<LandlordRating[]>;
-  getLandlordRatingsByTenant(tenantId: number): Promise<LandlordRating[]>;
-  getLandlordRatingsByProperty(propertyId: number): Promise<LandlordRating[]>;
-  createLandlordRating(rating: InsertLandlordRating): Promise<LandlordRating>;
-  updateLandlordRating(id: number, rating: Partial<InsertLandlordRating>): Promise<LandlordRating | undefined>;
-  deleteLandlordRating(id: number): Promise<boolean>;
-  clearLandlordRatings(): Promise<void>;
-  
-  // Tenant Ratings
-  getTenantRating(id: number): Promise<TenantRating | undefined>;
-  getTenantRatingsByTenant(tenantId: number): Promise<TenantRating[]>;
-  getTenantRatingsByLandlord(landlordId: number): Promise<TenantRating[]>;
-  getTenantRatingsByProperty(propertyId: number): Promise<TenantRating[]>;
-  createTenantRating(rating: InsertTenantRating): Promise<TenantRating>;
-  updateTenantRating(id: number, rating: Partial<InsertTenantRating>): Promise<TenantRating | undefined>;
-  deleteTenantRating(id: number): Promise<boolean>;
-  clearTenantRatings(): Promise<void>;
-
-  // Session store
-  sessionStore: session.Store;
+  updateMessage(id: number, updates: Partial<InsertMessage>): Promise<Message | undefined>;
 }
 
 export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private properties: Map<number, Property>;
-  private leases: Map<number, Lease>;
-  private payments: Map<number, Payment>;
-  private maintenanceRequests: Map<number, MaintenanceRequest>;
-  private documents: Map<number, Document>;
-  private messages: Map<number, Message>;
-  private landlordRatings: Map<number, LandlordRating>;
-  private tenantRatings: Map<number, TenantRating>;
+  private users: Map<number, User> = new Map();
+  private properties: Map<number, Property> = new Map();
+  private leases: Map<number, Lease> = new Map();
+  private payments: Map<number, Payment> = new Map();
+  private maintenanceRequests: Map<number, MaintenanceRequest> = new Map();
+  private messages: Map<number, Message> = new Map();
   
-  sessionStore: session.Store;
-  
-  private userIdCounter: number;
-  private propertyIdCounter: number;
-  private leaseIdCounter: number;
-  private paymentIdCounter: number;
-  private maintenanceRequestIdCounter: number;
-  private documentIdCounter: number;
-  private messageIdCounter: number;
-  private landlordRatingIdCounter: number;
-  private tenantRatingIdCounter: number;
-  
+  private userIdCounter = 1;
+  private propertyIdCounter = 1;
+  private leaseIdCounter = 1;
+  private paymentIdCounter = 1;
+  private maintenanceRequestIdCounter = 1;
+  private messageIdCounter = 1;
+
   constructor() {
-    this.users = new Map();
-    this.properties = new Map();
-    this.leases = new Map();
-    this.payments = new Map();
-    this.maintenanceRequests = new Map();
-    this.documents = new Map();
-    this.messages = new Map();
-    this.landlordRatings = new Map();
-    this.tenantRatings = new Map();
-    
-    this.userIdCounter = 1;
-    this.propertyIdCounter = 1;
-    this.leaseIdCounter = 1;
-    this.paymentIdCounter = 1;
-    this.maintenanceRequestIdCounter = 1;
-    this.documentIdCounter = 1;
-    this.messageIdCounter = 1;
-    this.landlordRatingIdCounter = 1;
-    this.tenantRatingIdCounter = 1;
-    
-    this.sessionStore = new MemoryStore({
-      checkPeriod: 86400000, // 24 hours
-      stale: true, // Allow stale sessions
-      ttl: 7 * 24 * 60 * 60 * 1000, // 7 days to match cookie
-    });
-    
-    // Add error handler for session store
-    this.sessionStore.on('error', (error) => {
-      console.error('Session store error:', error);
-    });
-  }
-  
-  // Clear data methods for testing and cleanup
-  async clearUsers(): Promise<void> {
-    this.users.clear();
-    this.userIdCounter = 1;
-  }
-  
-  async clearProperties(): Promise<void> {
-    this.properties.clear();
-    this.propertyIdCounter = 1;
-  }
-  
-  async clearLeases(): Promise<void> {
-    this.leases.clear();
-    this.leaseIdCounter = 1;
-  }
-  
-  async clearPayments(): Promise<void> {
-    this.payments.clear();
-    this.paymentIdCounter = 1;
-  }
-  
-  async clearMaintenanceRequests(): Promise<void> {
-    this.maintenanceRequests.clear();
-    this.maintenanceRequestIdCounter = 1;
-  }
-  
-  async clearDocuments(): Promise<void> {
-    this.documents.clear();
-    this.documentIdCounter = 1;
-  }
-  
-  async clearMessages(): Promise<void> {
-    this.messages.clear();
-    this.messageIdCounter = 1;
-  }
-  
-  async clearLandlordRatings(): Promise<void> {
-    this.landlordRatings.clear();
-    this.landlordRatingIdCounter = 1;
-  }
-  
-  async clearTenantRatings(): Promise<void> {
-    this.tenantRatings.clear();
-    this.tenantRatingIdCounter = 1;
-  }
-  
-  // Landlord Ratings
-  async getLandlordRating(id: number): Promise<LandlordRating | undefined> {
-    return this.landlordRatings.get(id);
+    this.initializeTestData();
   }
 
-  async getLandlordRatingsByLandlord(landlordId: number): Promise<LandlordRating[]> {
-    return Array.from(this.landlordRatings.values()).filter(
-      (rating) => rating.landlordId === landlordId
-    );
+  private initializeTestData(): void {
+    // Add test users with minimal required fields
+    const testUsers = [
+      {
+        id: 1,
+        username: 'testuser',
+        password: 'hashed_password',
+        firstName: 'Test',
+        lastName: 'User',
+        email: 'test@example.com',
+        role: 'landlord' as const,
+        phone: '+267 71234567',
+        profileImage: null,
+        emergencyContactId: null,
+        createdAt: new Date(),
+        updatedAt: null,
+        isEmergencyProvider: false,
+        emergencyAvailability: null,
+        emergencySpecialties: null,
+        emergencyResponseTime: null,
+        emergencyContactInfo: null,
+        emergencyServiceRadius: null,
+        emergencyRating: null,
+        // Verification fields (default values)
+        verificationStatus: 'unverified',
+        verificationSubmittedAt: null,
+        verificationApprovedAt: null,
+        verificationExpiresAt: null,
+        verificationNotes: null,
+        monthlyIncome: null,
+        employmentStatus: null,
+        verificationBadge: 'none'
+      },
+      {
+        id: 2,
+        username: 'tenant',
+        password: 'hashed_password',
+        firstName: 'Test',
+        lastName: 'Tenant',
+        email: 'tenant@example.com',
+        role: 'tenant' as const,
+        phone: '+267 72345678',
+        profileImage: null,
+        emergencyContactId: null,
+        createdAt: new Date(),
+        updatedAt: null,
+        isEmergencyProvider: false,
+        emergencyAvailability: null,
+        emergencySpecialties: null,
+        emergencyResponseTime: null,
+        emergencyContactInfo: null,
+        emergencyServiceRadius: null,
+        emergencyRating: null,
+        // Verification fields (default values)
+        verificationStatus: 'unverified',
+        verificationSubmittedAt: null,
+        verificationApprovedAt: null,
+        verificationExpiresAt: null,
+        verificationNotes: null,
+        monthlyIncome: null,
+        employmentStatus: null,
+        verificationBadge: 'none'
+      },
+      {
+        id: 3,
+        username: 'agency',
+        password: 'hashed_password',
+        firstName: 'Test',
+        lastName: 'Agency',
+        email: 'agency@example.com',
+        role: 'agency' as const,
+        phone: '+267 73456789',
+        profileImage: null,
+        emergencyContactId: null,
+        createdAt: new Date(),
+        updatedAt: null,
+        isEmergencyProvider: false,
+        emergencyAvailability: null,
+        emergencySpecialties: null,
+        emergencyResponseTime: null,
+        emergencyContactInfo: null,
+        emergencyServiceRadius: null,
+        emergencyRating: null,
+        // Verification fields (default values)
+        verificationStatus: 'unverified',
+        verificationSubmittedAt: null,
+        verificationApprovedAt: null,
+        verificationExpiresAt: null,
+        verificationNotes: null,
+        monthlyIncome: null,
+        employmentStatus: null,
+        verificationBadge: 'none'
+      }
+    ];
+
+    testUsers.forEach(user => this.users.set(user.id, user));
+    this.userIdCounter = 4;
+
+    // Add test properties
+    const testProperties = [
+      {
+        id: 1,
+        landlordId: 1,
+        agencyId: null || null,
+        title: 'Modern Apartment in Gaborone',
+        description: 'A beautiful 2-bedroom apartment in the heart of Gaborone',
+        address: '123 Main Street',
+        city: 'Gaborone',
+        state: 'South East',
+        zipCode: '00000',
+        location: 'Gaborone CBD',
+        propertyType: 'apartment',
+        bedrooms: 2,
+        bathrooms: 2,
+        squareMeters: 120,
+        parkingSpaces: 1,
+        yearBuilt: 2020,
+        rentAmount: 8000,
+        securityDeposit: 8000,
+        available: true,
+        availableDate: new Date(),
+        isListed: false, // Add isListed field - default to private
+        minLeaseTerm: 12,
+        maxLeaseTerm: 24,
+        images: ['https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400'],
+        amenities: ['Parking', 'Security', 'Pool'],
+        createdAt: new Date(),
+        updatedAt: null
+      },
+      {
+        id: 2,
+        landlordId: 1,
+        agencyId: null || null,
+        title: 'Family House with Garden',
+        description: 'Spacious 3-bedroom house with a beautiful garden',
+        address: '456 Oak Avenue',
+        city: 'Gaborone',
+        state: 'South East',
+        zipCode: '00001',
+        location: 'Extension 15',
+        propertyType: 'house',
+        bedrooms: 3,
+        bathrooms: 2,
+        squareMeters: 180,
+        parkingSpaces: 2,
+        yearBuilt: 2018,
+        rentAmount: 12000,
+        securityDeposit: 12000,
+        available: true,
+        availableDate: new Date(),
+        isListed: false, // Add isListed field - default to private
+        minLeaseTerm: 12,
+        maxLeaseTerm: 36,
+        images: ['https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=400'],
+        amenities: ['Garden', 'Garage', 'Study Room'],
+        createdAt: new Date(),
+        updatedAt: null
+      }
+    ];
+
+    testProperties.forEach(property => this.properties.set(property.id, property));
+    this.propertyIdCounter = 3;
   }
 
-  async getLandlordRatingsByTenant(tenantId: number): Promise<LandlordRating[]> {
-    return Array.from(this.landlordRatings.values()).filter(
-      (rating) => rating.tenantId === tenantId
-    );
-  }
-
-  async getLandlordRatingsByProperty(propertyId: number): Promise<LandlordRating[]> {
-    return Array.from(this.landlordRatings.values()).filter(
-      (rating) => rating.propertyId === propertyId
-    );
-  }
-
-  async createLandlordRating(rating: InsertLandlordRating): Promise<LandlordRating> {
-    const id = this.landlordRatingIdCounter++;
-    const newRating: LandlordRating = {
-      id,
-      createdAt: new Date(),
-      updatedAt: null,
-      ...rating,
-      communicationRating: rating.communicationRating || null,
-      maintenanceRating: rating.maintenanceRating || null,
-      valueRating: rating.valueRating || null
-    };
-    this.landlordRatings.set(id, newRating);
-    return newRating;
-  }
-
-  async updateLandlordRating(id: number, updates: Partial<InsertLandlordRating>): Promise<LandlordRating | undefined> {
-    const rating = this.landlordRatings.get(id);
-    if (!rating) return undefined;
-    
-    const updatedRating = { 
-      ...rating, 
-      ...updates,
-      updatedAt: new Date() 
-    };
-    this.landlordRatings.set(id, updatedRating);
-    return updatedRating;
-  }
-
-  async deleteLandlordRating(id: number): Promise<boolean> {
-    return this.landlordRatings.delete(id);
-  }
-  
-  // Tenant Ratings
-  async getTenantRating(id: number): Promise<TenantRating | undefined> {
-    return this.tenantRatings.get(id);
-  }
-
-  async getTenantRatingsByTenant(tenantId: number): Promise<TenantRating[]> {
-    return Array.from(this.tenantRatings.values()).filter(
-      (rating) => rating.tenantId === tenantId
-    );
-  }
-
-  async getTenantRatingsByLandlord(landlordId: number): Promise<TenantRating[]> {
-    return Array.from(this.tenantRatings.values()).filter(
-      (rating) => rating.landlordId === landlordId
-    );
-  }
-
-  async getTenantRatingsByProperty(propertyId: number): Promise<TenantRating[]> {
-    return Array.from(this.tenantRatings.values()).filter(
-      (rating) => rating.propertyId === propertyId
-    );
-  }
-
-  async createTenantRating(rating: InsertTenantRating): Promise<TenantRating> {
-    const id = this.tenantRatingIdCounter++;
-    const newRating: TenantRating = {
-      id,
-      createdAt: new Date(),
-      updatedAt: null,
-      ...rating,
-      communicationRating: rating.communicationRating || null,
-      paymentRating: rating.paymentRating || null,
-      propertyRespectRating: rating.propertyRespectRating || null
-    };
-    this.tenantRatings.set(id, newRating);
-    return newRating;
-  }
-
-  async updateTenantRating(id: number, updates: Partial<InsertTenantRating>): Promise<TenantRating | undefined> {
-    const rating = this.tenantRatings.get(id);
-    if (!rating) return undefined;
-    
-    const updatedRating = { 
-      ...rating, 
-      ...updates,
-      updatedAt: new Date() 
-    };
-    this.tenantRatings.set(id, updatedRating);
-    return updatedRating;
-  }
-
-  async deleteTenantRating(id: number): Promise<boolean> {
-    return this.tenantRatings.delete(id);
-  }
-  
-  // Users
+  // User methods
   async getUser(id: number): Promise<User | undefined> {
     return this.users.get(id);
   }
-  
+
   async getUserByUsername(username: string): Promise<User | undefined> {
     return Array.from(this.users.values()).find(
-      (user) => user.username.toLowerCase() === username.toLowerCase(),
+      user => user.username.toLowerCase() === username.toLowerCase()
     );
   }
-  
+
   async getUserByEmail(email: string): Promise<User | undefined> {
     return Array.from(this.users.values()).find(
-      (user) => user.email.toLowerCase() === email.toLowerCase(),
+      user => user.email.toLowerCase() === email.toLowerCase()
     );
   }
-  
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.userIdCounter++;
-    const user: User = {
-      id,
-      username: insertUser.username,
-      password: insertUser.password,
-      firstName: insertUser.firstName,
-      lastName: insertUser.lastName,
-      email: insertUser.email,
-      role: insertUser.role as unknown as UserRoleType,
-      phone: insertUser.phone || null,
-      profileImage: insertUser.profileImage || null
-    };
-    this.users.set(id, user);
-    return user;
-  }
-  
+
   async getUsersByRole(role: string): Promise<User[]> {
     return Array.from(this.users.values()).filter(user => user.role === role);
   }
-  
-  // Properties
+
+  async createUser(userData: InsertUser): Promise<User> {
+    const user: User = {
+      id: this.userIdCounter++,
+      ...userData,
+      createdAt: new Date(),
+      updatedAt: null,
+      isEmergencyProvider: false,
+      emergencyAvailability: null,
+      emergencySpecialties: null,
+      emergencyResponseTime: null,
+      emergencyContactInfo: null,
+      emergencyServiceRadius: null,
+      emergencyRating: null
+    };
+    this.users.set(user.id, user);
+    return user;
+  }
+
+  async updateUser(id: number, updates: Partial<InsertUser>): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (!user) return undefined;
+    
+    const updatedUser: User = {
+      ...user,
+      ...updates,
+      updatedAt: new Date()
+    };
+    
+    this.users.set(id, updatedUser);
+    return updatedUser;
+  }
+
+  // Property methods
   async getProperty(id: number): Promise<Property | undefined> {
     return this.properties.get(id);
   }
-  
+
   async getProperties(): Promise<Property[]> {
     return Array.from(this.properties.values());
   }
-  
+
   async getPropertiesByLandlord(landlordId: number): Promise<Property[]> {
     return Array.from(this.properties.values()).filter(
-      (property) => property.landlordId === landlordId,
+      property => property.landlordId === landlordId
     );
   }
-  
-  async createProperty(insertProperty: InsertProperty): Promise<Property> {
-    const id = this.propertyIdCounter++;
+
+  async createProperty(propertyData: InsertProperty): Promise<Property> {
     const property: Property = {
-      id,
-      landlordId: insertProperty.landlordId,
-      address: insertProperty.address,
-      city: insertProperty.city,
-      state: insertProperty.state,
-      zipCode: insertProperty.zipCode,
-      propertyType: insertProperty.propertyType,
-      bedrooms: insertProperty.bedrooms,
-      bathrooms: insertProperty.bathrooms,
-      squareFeet: insertProperty.squareFeet || null,
-      rentAmount: insertProperty.rentAmount,
-      description: insertProperty.description || null,
-      available: insertProperty.available ?? true,
-      images: insertProperty.images || null
+      propertyCategory: "residential" as const,
+      id: this.propertyIdCounter++,
+      ...propertyData,
+      createdAt: new Date(),
+      updatedAt: null
     };
-    this.properties.set(id, property);
+    this.properties.set(property.id, property);
     return property;
   }
-  
+
   async updateProperty(id: number, updates: Partial<InsertProperty>): Promise<Property | undefined> {
     const property = this.properties.get(id);
     if (!property) return undefined;
-    
-    const updatedProperty = { ...property, ...updates };
+
+    const updatedProperty = { ...property, ...updates, updatedAt: new Date() };
     this.properties.set(id, updatedProperty);
     return updatedProperty;
   }
-  
-  async getAvailableProperties(): Promise<Property[]> {
-    return Array.from(this.properties.values()).filter(
-      (property) => property.available === true,
-    );
+
+  async deleteProperty(id: number): Promise<boolean> {
+    const property = this.properties.get(id);
+    if (!property) return false;
+
+    this.properties.delete(id);
+    return true;
   }
-  
-  async searchProperties(params: {
-    query?: string;
-    propertyType?: string;
-    minBedrooms?: number;
-    maxBedrooms?: number;
-    minBathrooms?: number;
-    maxBathrooms?: number;
-    minPrice?: number;
-    maxPrice?: number;
-    location?: string;
-    sortBy?: string;
-    sortOrder?: 'asc' | 'desc';
-    limit?: number;
-    offset?: number;
-  }): Promise<Property[]> {
-    const {
-      query = '',
-      propertyType = 'all',
-      minBedrooms,
-      maxBedrooms,
-      minBathrooms,
-      maxBathrooms,
-      minPrice,
-      maxPrice,
-      location,
-      sortBy = 'createdAt',
-      sortOrder = 'desc',
-      limit = 20,
-      offset = 0
-    } = params;
-    
-    // Get all available properties
-    let properties = Array.from(this.properties.values()).filter(property => property.available === true);
-    
-    // Apply text search filter if query is provided
-    if (query) {
-      const searchTerms = query.toLowerCase().split(' ');
-      properties = properties.filter(property => {
-        // Search across multiple fields
-        const searchText = [
-          property.title || '',
-          property.description || '',
-          property.location || '',
-          property.city || '',
-          property.address || ''
-        ].join(' ').toLowerCase();
-        
-        // Match if any search term exists in the search text
-        return searchTerms.some(term => searchText.includes(term));
-      });
-    }
-    
-    // Filter by property type
-    if (propertyType && propertyType !== 'all') {
-      properties = properties.filter(property => property.propertyType === propertyType);
-    }
-    
-    // Filter by bedrooms range
-    if (minBedrooms !== undefined) {
-      properties = properties.filter(property => property.bedrooms >= minBedrooms);
-    }
-    if (maxBedrooms !== undefined) {
-      properties = properties.filter(property => property.bedrooms <= maxBedrooms);
-    }
-    
-    // Filter by bathrooms range
-    if (minBathrooms !== undefined) {
-      properties = properties.filter(property => property.bathrooms >= minBathrooms);
-    }
-    if (maxBathrooms !== undefined) {
-      properties = properties.filter(property => property.bathrooms <= maxBathrooms);
-    }
-    
-    // Filter by price range
-    if (minPrice !== undefined) {
-      properties = properties.filter(property => property.rentAmount >= minPrice);
-    }
-    if (maxPrice !== undefined) {
-      properties = properties.filter(property => property.rentAmount <= maxPrice);
-    }
-    
-    // Filter by location
-    if (location) {
-      const locationLower = location.toLowerCase();
-      properties = properties.filter(property => {
-        return (property.location || '').toLowerCase().includes(locationLower) ||
-               (property.city || '').toLowerCase().includes(locationLower) ||
-               (property.address || '').toLowerCase().includes(locationLower);
-      });
-    }
-    
-    // Apply sorting
-    if (sortBy === 'price') {
-      properties.sort((a, b) => {
-        return sortOrder === 'asc' ? 
-          a.rentAmount - b.rentAmount : 
-          b.rentAmount - a.rentAmount;
-      });
-    } else if (sortBy === 'bedrooms') {
-      properties.sort((a, b) => {
-        return sortOrder === 'asc' ? 
-          a.bedrooms - b.bedrooms : 
-          b.bedrooms - a.bedrooms;
-      });
-    } else if (sortBy === 'bathrooms') {
-      properties.sort((a, b) => {
-        return sortOrder === 'asc' ? 
-          a.bathrooms - b.bathrooms : 
-          b.bathrooms - a.bathrooms;
-      });
-    } else if (sortBy === 'area') {
-      properties.sort((a, b) => {
-        const aArea = a.squareFeet || 0;
-        const bArea = b.squareFeet || 0;
-        return sortOrder === 'asc' ? 
-          aArea - bArea : 
-          bArea - aArea;
-      });
-    } else {
-      // Default to sorting by creation date if available (newer first)
-      properties.sort((a, b) => {
-        const aDate = a.createdAt ? a.createdAt.getTime() : 0;
-        const bDate = b.createdAt ? b.createdAt.getTime() : 0;
-        return sortOrder === 'asc' ? aDate - bDate : bDate - aDate;
-      });
-    }
-    
-    // Apply pagination
-    return properties.slice(offset, offset + limit);
-  }
-  
-  // Leases
+
+  // Lease methods
   async getLease(id: number): Promise<Lease | undefined> {
     return this.leases.get(id);
   }
-  
+
   async getLeasesByTenant(tenantId: number): Promise<Lease[]> {
-    return Array.from(this.leases.values()).filter(
-      (lease) => lease.tenantId === tenantId,
-    );
+    return Array.from(this.leases.values()).filter(lease => lease.tenantId === tenantId);
   }
-  
+
   async getLeasesByProperty(propertyId: number): Promise<Lease[]> {
-    return Array.from(this.leases.values()).filter(
-      (lease) => lease.propertyId === propertyId,
-    );
+    return Array.from(this.leases.values()).filter(lease => lease.propertyId === propertyId);
   }
-  
-  async createLease(insertLease: InsertLease): Promise<Lease> {
-    const id = this.leaseIdCounter++;
-    const lease: Lease = { 
-      id,
-      rentAmount: insertLease.rentAmount,
-      propertyId: insertLease.propertyId,
-      tenantId: insertLease.tenantId,
-      startDate: insertLease.startDate,
-      endDate: insertLease.endDate,
-      securityDeposit: insertLease.securityDeposit,
-      documentUrl: insertLease.documentUrl || null,
-      active: insertLease.active ?? true
+
+  async createLease(leaseData: InsertLease): Promise<Lease> {
+    const lease: Lease = {
+      id: this.leaseIdCounter++,
+      ...leaseData,
+      createdAt: new Date(),
+      updatedAt: null
     };
-    this.leases.set(id, lease);
+    this.leases.set(lease.id, lease);
     return lease;
   }
-  
+
   async updateLease(id: number, updates: Partial<InsertLease>): Promise<Lease | undefined> {
     const lease = this.leases.get(id);
     if (!lease) return undefined;
-    
-    const updatedLease = { ...lease, ...updates };
+
+    const updatedLease = { ...lease, ...updates, updatedAt: new Date() };
     this.leases.set(id, updatedLease);
     return updatedLease;
   }
-  
-  // Payments
+
+  // Payment methods
   async getPayment(id: number): Promise<Payment | undefined> {
     return this.payments.get(id);
   }
-  
+
   async getPaymentsByTenant(tenantId: number): Promise<Payment[]> {
-    return Array.from(this.payments.values()).filter(
-      (payment) => payment.tenantId === tenantId,
-    );
+    return Array.from(this.payments.values()).filter(payment => payment.tenantId === tenantId);
   }
-  
+
   async getPaymentsByLease(leaseId: number): Promise<Payment[]> {
-    return Array.from(this.payments.values()).filter(
-      (payment) => payment.leaseId === leaseId,
-    );
+    return Array.from(this.payments.values()).filter(payment => payment.leaseId === leaseId);
   }
-  
-  async createPayment(insertPayment: InsertPayment): Promise<Payment> {
-    const id = this.paymentIdCounter++;
-    const payment: Payment = { 
-      id,
-      tenantId: insertPayment.tenantId,
-      leaseId: insertPayment.leaseId,
-      amount: insertPayment.amount,
-      paymentDate: insertPayment.paymentDate,
-      paymentType: insertPayment.paymentType,
-      description: insertPayment.description || null
+
+  async createPayment(paymentData: InsertPayment): Promise<Payment> {
+    const payment: Payment = {
+      id: this.paymentIdCounter++,
+      ...paymentData,
+      createdAt: new Date(),
+      updatedAt: null
     };
-    this.payments.set(id, payment);
+    this.payments.set(payment.id, payment);
     return payment;
   }
-  
-  // Maintenance Requests
+
+  async updatePayment(id: number, updates: Partial<InsertPayment>): Promise<Payment | undefined> {
+    const payment = this.payments.get(id);
+    if (!payment) return undefined;
+
+    const updatedPayment = { ...payment, ...updates, updatedAt: new Date() };
+    this.payments.set(id, updatedPayment);
+    return updatedPayment;
+  }
+
+  // Maintenance Request methods
   async getMaintenanceRequest(id: number): Promise<MaintenanceRequest | undefined> {
     return this.maintenanceRequests.get(id);
   }
-  
+
   async getMaintenanceRequestsByTenant(tenantId: number): Promise<MaintenanceRequest[]> {
     return Array.from(this.maintenanceRequests.values()).filter(
-      (request) => request.tenantId === tenantId,
+      request => request.tenantId === tenantId
     );
   }
-  
+
   async getMaintenanceRequestsByProperty(propertyId: number): Promise<MaintenanceRequest[]> {
     return Array.from(this.maintenanceRequests.values()).filter(
-      (request) => request.propertyId === propertyId,
+      request => request.propertyId === propertyId
     );
   }
-  
+
   async getMaintenanceRequestsByStatus(status: string): Promise<MaintenanceRequest[]> {
     return Array.from(this.maintenanceRequests.values()).filter(
-      (request) => request.status === status,
+      request => request.status === status
     );
   }
-  
-  async getMaintenanceRequestsByAssignee(assigneeId: number): Promise<MaintenanceRequest[]> {
-    return Array.from(this.maintenanceRequests.values()).filter(
-      (request) => request.assignedToId === assigneeId,
-    );
-  }
-  
-  async createMaintenanceRequest(insertRequest: InsertMaintenanceRequest): Promise<MaintenanceRequest> {
-    const id = this.maintenanceRequestIdCounter++;
-    const request: MaintenanceRequest = { 
-      id,
-      title: insertRequest.title, 
-      description: insertRequest.description,
-      propertyId: insertRequest.propertyId,
-      tenantId: insertRequest.tenantId,
-      priority: insertRequest.priority,
-      status: insertRequest.status || 'New',
-      images: insertRequest.images || null,
-      assignedToId: insertRequest.assignedToId || null,
+
+  async createMaintenanceRequest(requestData: InsertMaintenanceRequest): Promise<MaintenanceRequest> {
+    const request: MaintenanceRequest = {
+      id: this.maintenanceRequestIdCounter++,
+      ...requestData,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: null
     };
-    this.maintenanceRequests.set(id, request);
+    this.maintenanceRequests.set(request.id, request);
     return request;
   }
-  
+
   async updateMaintenanceRequest(id: number, updates: Partial<InsertMaintenanceRequest>): Promise<MaintenanceRequest | undefined> {
     const request = this.maintenanceRequests.get(id);
     if (!request) return undefined;
-    
-    // Process images array separately if provided
-    let processedImages = request.images;
-    if (updates.images !== undefined) {
-      processedImages = updates.images || null;
-    }
-    
-    // Create a new object with all updates
-    const updatedRequest: MaintenanceRequest = {
-      ...request,
-      title: updates.title ?? request.title,
-      description: updates.description ?? request.description,
-      propertyId: updates.propertyId ?? request.propertyId,
-      tenantId: updates.tenantId ?? request.tenantId,
-      priority: updates.priority ?? request.priority,
-      status: updates.status ?? request.status,
-      assignedToId: updates.assignedToId !== undefined ? (updates.assignedToId || null) : request.assignedToId,
-      images: processedImages,
-      updatedAt: new Date()
-    };
-    
+
+    const updatedRequest = { ...request, ...updates, updatedAt: new Date() };
     this.maintenanceRequests.set(id, updatedRequest);
     return updatedRequest;
   }
-  
-  // Documents
-  async getDocument(id: number): Promise<Document | undefined> {
-    return this.documents.get(id);
+
+  async getUserById(id: number): Promise<User | undefined> {
+    return this.users.get(id);
   }
-  
-  async getDocumentsByUser(userId: number): Promise<Document[]> {
-    return Array.from(this.documents.values()).filter(
-      (document) => document.userId === userId,
-    );
+
+  async getPropertyById(id: number): Promise<Property | undefined> {
+    return this.getProperty(id);
   }
-  
-  async getDocumentsByProperty(propertyId: number): Promise<Document[]> {
-    return Array.from(this.documents.values()).filter(
-      (document) => document.propertyId === propertyId,
-    );
+
+  async getMaintenanceRequestsByAssignee(assigneeId: number): Promise<MaintenanceRequest[]> {
+    return Array.from(this.maintenanceRequests.values())
+      .filter(request => request.assignedToId === assigneeId);
   }
-  
-  async createDocument(insertDocument: InsertDocument): Promise<Document> {
-    const id = this.documentIdCounter++;
-    const document: Document = { 
+
+  async getPropertyMaintenanceSettings(propertyId: number): Promise<PropertyMaintenanceSettings | undefined> {
+    return Array.from(this.propertyMaintenanceSettings.values())
+      .find(settings => settings.propertyId === propertyId);
+  }
+
+  async getApplicationsByTenant(tenantId: number): Promise<Application[]> {
+    return Array.from(this.applications.values())
+      .filter(app => app.tenantId === tenantId);
+  }
+
+  async getApplicationsByProperty(propertyId: number): Promise<Application[]> {
+    return Array.from(this.applications.values())
+      .filter(app => app.propertyId === propertyId);
+  }
+
+  async getApplication(id: number): Promise<Application | undefined> {
+    return this.applications.get(id);
+  }
+
+  async createApplication(data: any): Promise<Application> {
+    const id = this.applications.size + 1;
+    const application = {
       id,
-      userId: insertDocument.userId,
-      fileName: insertDocument.fileName,
-      fileUrl: insertDocument.fileUrl,
-      fileType: insertDocument.fileType,
-      documentType: insertDocument.documentType,
-      propertyId: insertDocument.propertyId || null,
-      uploadedAt: new Date()
+      ...data,
+      createdAt: new Date(),
+      updatedAt: null
     };
-    this.documents.set(id, document);
-    return document;
+    this.applications.set(id, application);
+    return application;
   }
-  
-  // Messages
+
+  async updateApplication(id: number, data: any): Promise<Application | undefined> {
+    const application = this.applications.get(id);
+    if (application) {
+      const updated = { ...application, ...data, updatedAt: new Date() };
+      this.applications.set(id, updated);
+      return updated;
+    }
+    return undefined;
+  }
+
+  // ===== MESSAGE METHODS =====
   async getMessage(id: number): Promise<Message | undefined> {
     return this.messages.get(id);
   }
-  
+
   async getMessagesBySender(senderId: number): Promise<Message[]> {
-    return Array.from(this.messages.values()).filter(
-      (message) => message.senderId === senderId,
-    );
+    return Array.from(this.messages.values())
+      .filter(message => message.senderId === senderId)
+      .sort((a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime());
   }
-  
+
   async getMessagesByReceiver(receiverId: number): Promise<Message[]> {
-    return Array.from(this.messages.values()).filter(
-      (message) => message.receiverId === receiverId,
-    );
+    return Array.from(this.messages.values())
+      .filter(message => message.receiverId === receiverId)
+      .sort((a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime());
   }
-  
-  async getConversation(user1Id: number, user2Id: number): Promise<Message[]> {
-    return Array.from(this.messages.values()).filter(
-      (message) => 
-        (message.senderId === user1Id && message.receiverId === user2Id) ||
-        (message.senderId === user2Id && message.receiverId === user1Id)
-    ).sort((a, b) => a.sentAt.getTime() - b.sentAt.getTime());
+
+  async getConversation(userId1: number, userId2: number): Promise<Message[]> {
+    return Array.from(this.messages.values())
+      .filter(message => 
+        (message.senderId === userId1 && message.receiverId === userId2) ||
+        (message.senderId === userId2 && message.receiverId === userId1)
+      )
+      .sort((a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime());
   }
-  
-  async createMessage(insertMessage: InsertMessage): Promise<Message> {
+
+  async createMessage(messageData: InsertMessage): Promise<Message> {
     const id = this.messageIdCounter++;
-    const message: Message = { 
-      ...insertMessage, 
+    const message: Message = {
       id,
+      ...messageData,
       sentAt: new Date(),
       read: false
     };
     this.messages.set(id, message);
     return message;
   }
-  
-  async markMessageAsRead(id: number): Promise<Message | undefined> {
+
+  async updateMessage(id: number, updates: Partial<InsertMessage>): Promise<Message | undefined> {
     const message = this.messages.get(id);
-    if (!message) return undefined;
-    
-    const updatedMessage = { ...message, read: true };
-    this.messages.set(id, updatedMessage);
-    return updatedMessage;
-  }
-  
-  // Landlord Ratings
-  async getLandlordRating(id: number): Promise<LandlordRating | undefined> {
-    return this.landlordRatings.get(id);
+    if (message) {
+      const updated = { ...message, ...updates };
+      this.messages.set(id, updated);
+      return updated;
+    }
+    return undefined;
   }
 
-  async getLandlordRatingsByLandlord(landlordId: number): Promise<LandlordRating[]> {
-    return Array.from(this.landlordRatings.values()).filter(
-      (rating) => rating.landlordId === landlordId
-    );
+  // Placeholder implementations for missing methods
+  async getPropertyMaintenanceSettings(propertyId: number): Promise<any> {
+    return null;
   }
 
-  async getLandlordRatingsByTenant(tenantId: number): Promise<LandlordRating[]> {
-    return Array.from(this.landlordRatings.values()).filter(
-      (rating) => rating.tenantId === tenantId
-    );
+  async createPropertyMaintenanceSettings(data: any): Promise<any> {
+    return data;
   }
 
-  async getLandlordRatingsByProperty(propertyId: number): Promise<LandlordRating[]> {
-    return Array.from(this.landlordRatings.values()).filter(
-      (rating) => rating.propertyId === propertyId
-    );
+  async updatePropertyMaintenanceSettings(propertyId: number, data: any): Promise<any> {
+    return data;
   }
 
-  async createLandlordRating(insertRating: InsertLandlordRating): Promise<LandlordRating> {
-    const id = this.landlordRatingIdCounter++;
-    const rating: LandlordRating = {
-      id,
-      landlordId: insertRating.landlordId,
-      tenantId: insertRating.tenantId,
-      propertyId: insertRating.propertyId,
-      rating: insertRating.rating,
-      review: insertRating.review || null,
-      createdAt: new Date()
-    };
-    this.landlordRatings.set(id, rating);
-    return rating;
+  async getAgentPropertyAssignments(landlordId: number): Promise<any[]> {
+    return [];
   }
 
-  async updateLandlordRating(id: number, updates: Partial<InsertLandlordRating>): Promise<LandlordRating | undefined> {
-    const rating = this.landlordRatings.get(id);
-    if (!rating) return undefined;
-    
-    const updatedRating: LandlordRating = {
-      ...rating,
-      rating: updates.rating ?? rating.rating,
-      review: updates.review !== undefined ? updates.review || null : rating.review
-    };
-    
-    this.landlordRatings.set(id, updatedRating);
-    return updatedRating;
+  async createAgentPropertyAssignment(data: any): Promise<any> {
+    return data;
   }
 
-  async deleteLandlordRating(id: number): Promise<boolean> {
-    if (!this.landlordRatings.has(id)) return false;
-    return this.landlordRatings.delete(id);
-  }
-  
-  // Tenant Ratings
-  async getTenantRating(id: number): Promise<TenantRating | undefined> {
-    return this.tenantRatings.get(id);
+  async getEmergencyContactsByUser(userId: number): Promise<any[]> {
+    return [];
   }
 
-  async getTenantRatingsByTenant(tenantId: number): Promise<TenantRating[]> {
-    return Array.from(this.tenantRatings.values()).filter(
-      (rating) => rating.tenantId === tenantId
-    );
+  async createEmergencyContact(data: any): Promise<any> {
+    return data;
   }
 
-  async getTenantRatingsByLandlord(landlordId: number): Promise<TenantRating[]> {
-    return Array.from(this.tenantRatings.values()).filter(
-      (rating) => rating.landlordId === landlordId
-    );
+  async getDocumentsByUser(userId: number): Promise<any[]> {
+    return [];
   }
 
-  async getTenantRatingsByProperty(propertyId: number): Promise<TenantRating[]> {
-    return Array.from(this.tenantRatings.values()).filter(
-      (rating) => rating.propertyId === propertyId
-    );
+  async createDocument(data: any): Promise<any> {
+    return data;
   }
 
-  async createTenantRating(insertRating: InsertTenantRating): Promise<TenantRating> {
-    const id = this.tenantRatingIdCounter++;
-    const rating: TenantRating = {
-      id,
-      landlordId: insertRating.landlordId,
-      tenantId: insertRating.tenantId,
-      propertyId: insertRating.propertyId,
-      rating: insertRating.rating,
-      review: insertRating.review || null,
-      createdAt: new Date()
-    };
-    this.tenantRatings.set(id, rating);
-    return rating;
+  async getNotificationsByUser(userId: number): Promise<any[]> {
+    return [];
   }
 
-  async updateTenantRating(id: number, updates: Partial<InsertTenantRating>): Promise<TenantRating | undefined> {
-    const rating = this.tenantRatings.get(id);
-    if (!rating) return undefined;
-    
-    const updatedRating: TenantRating = {
-      ...rating,
-      rating: updates.rating ?? rating.rating,
-      review: updates.review !== undefined ? updates.review || null : rating.review
-    };
-    
-    this.tenantRatings.set(id, updatedRating);
-    return updatedRating;
+  async createNotification(data: any): Promise<any> {
+    return data;
   }
 
-  async deleteTenantRating(id: number): Promise<boolean> {
-    if (!this.tenantRatings.has(id)) return false;
-    return this.tenantRatings.delete(id);
+  async createAuditLog(data: any): Promise<any> {
+    return data;
   }
 }
 
-export class DatabaseStorage implements IStorage {
-  sessionStore: session.Store;
-  
-  constructor() {
-    const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-    this.sessionStore = new PostgresStore({
-      pool,
-      createTableIfMissing: true,
-    });
-  }
-  
-  // Users
-  async getUser(id: number): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user;
-  }
-  
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user;
-  }
-  
-  async getUserByEmail(email: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.email, email));
-    return user;
-  }
-  
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db.insert(users).values(insertUser).returning();
-    return user;
-  }
-  
-  async getUsersByRole(role: string): Promise<User[]> {
-    return await db.select().from(users).where(eq(users.role, role));
-  }
-  
-  async clearUsers(): Promise<void> {
-    await db.delete(users);
-  }
-  
-  // Properties
-  async getProperty(id: number): Promise<Property | undefined> {
-    const [property] = await db.select().from(properties).where(eq(properties.id, id));
-    return property;
-  }
-  
-  async getProperties(): Promise<Property[]> {
-    return await db.select().from(properties);
-  }
-  
-  async getPropertiesByLandlord(landlordId: number): Promise<Property[]> {
-    return await db.select().from(properties).where(eq(properties.landlordId, landlordId));
-  }
-  
-  async createProperty(insertProperty: InsertProperty): Promise<Property> {
-    const [property] = await db.insert(properties).values(insertProperty).returning();
-    return property;
-  }
-  
-  async updateProperty(id: number, updatedProperty: Partial<InsertProperty>): Promise<Property | undefined> {
-    const [property] = await db
-      .update(properties)
-      .set(updatedProperty)
-      .where(eq(properties.id, id))
-      .returning();
-    return property;
-  }
-  
-  async getAvailableProperties(): Promise<Property[]> {
-    return await db.select().from(properties).where(eq(properties.available, true));
-  }
-  
-  async searchProperties(params: {
-    query?: string;
-    propertyType?: string;
-    minBedrooms?: number;
-    maxBedrooms?: number;
-    minBathrooms?: number;
-    maxBathrooms?: number;
-    minPrice?: number;
-    maxPrice?: number;
-    location?: string;
-    sortBy?: string;
-    sortOrder?: 'asc' | 'desc';
-    limit?: number;
-    offset?: number;
-  }): Promise<Property[]> {
-    const {
-      query = '',
-      propertyType = 'all',
-      minBedrooms,
-      maxBedrooms,
-      minBathrooms,
-      maxBathrooms,
-      minPrice,
-      maxPrice,
-      location,
-      sortBy = 'createdAt',
-      sortOrder = 'desc',
-      limit = 20,
-      offset = 0
-    } = params;
-    
-    // Base query
-    let queryBuilder = db.select().from(properties)
-      .where(eq(properties.available, true));
-    
-    // Apply filters
-    if (propertyType && propertyType !== 'all') {
-      queryBuilder = queryBuilder.where(eq(properties.propertyType, propertyType));
-    }
-    
-    if (minBedrooms !== undefined) {
-      queryBuilder = queryBuilder.where(gte(properties.bedrooms, minBedrooms));
-    }
-    
-    if (maxBedrooms !== undefined) {
-      queryBuilder = queryBuilder.where(lte(properties.bedrooms, maxBedrooms));
-    }
-    
-    if (minBathrooms !== undefined) {
-      queryBuilder = queryBuilder.where(gte(properties.bathrooms, minBathrooms));
-    }
-    
-    if (maxBathrooms !== undefined) {
-      queryBuilder = queryBuilder.where(lte(properties.bathrooms, maxBathrooms));
-    }
-    
-    if (minPrice !== undefined) {
-      queryBuilder = queryBuilder.where(gte(properties.rentAmount, minPrice));
-    }
-    
-    if (maxPrice !== undefined) {
-      queryBuilder = queryBuilder.where(lte(properties.rentAmount, maxPrice));
-    }
-    
-    if (location) {
-      // Search in location, city, and address fields
-      queryBuilder = queryBuilder.where(
-        or(
-          ilike(properties.location, `%${location}%`),
-          ilike(properties.city, `%${location}%`),
-          ilike(properties.address, `%${location}%`)
-        )
-      );
-    }
-    
-    // Text search across multiple fields
-    if (query) {
-      queryBuilder = queryBuilder.where(
-        or(
-          ilike(properties.title, `%${query}%`),
-          ilike(properties.description, `%${query}%`),
-          ilike(properties.location, `%${query}%`),
-          ilike(properties.city, `%${query}%`),
-          ilike(properties.address, `%${query}%`)
-        )
-      );
-    }
-    
-    // Apply sorting
-    if (sortBy === 'price') {
-      queryBuilder = sortOrder === 'asc' 
-        ? queryBuilder.orderBy(asc(properties.rentAmount)) 
-        : queryBuilder.orderBy(desc(properties.rentAmount));
-    } else if (sortBy === 'bedrooms') {
-      queryBuilder = sortOrder === 'asc' 
-        ? queryBuilder.orderBy(asc(properties.bedrooms)) 
-        : queryBuilder.orderBy(desc(properties.bedrooms));
-    } else if (sortBy === 'bathrooms') {
-      queryBuilder = sortOrder === 'asc' 
-        ? queryBuilder.orderBy(asc(properties.bathrooms)) 
-        : queryBuilder.orderBy(desc(properties.bathrooms));
-    } else if (sortBy === 'area') {
-      queryBuilder = sortOrder === 'asc' 
-        ? queryBuilder.orderBy(asc(properties.squareFootage)) 
-        : queryBuilder.orderBy(desc(properties.squareFootage));
-    } else {
-      // Default to creation date
-      queryBuilder = queryBuilder.orderBy(desc(properties.createdAt));
-    }
-    
-    // Apply pagination
-    queryBuilder = queryBuilder.limit(limit).offset(offset);
-    
-    return await queryBuilder;
-  }
-  
-  async clearProperties(): Promise<void> {
-    await db.delete(properties);
-  }
-  
-  // Leases
-  async getLease(id: number): Promise<Lease | undefined> {
-    const [lease] = await db.select().from(leases).where(eq(leases.id, id));
-    return lease;
-  }
-  
-  async getLeasesByTenant(tenantId: number): Promise<Lease[]> {
-    return await db.select().from(leases).where(eq(leases.tenantId, tenantId));
-  }
-  
-  async getLeasesByProperty(propertyId: number): Promise<Lease[]> {
-    return await db.select().from(leases).where(eq(leases.propertyId, propertyId));
-  }
-  
-  async createLease(insertLease: InsertLease): Promise<Lease> {
-    const [lease] = await db.insert(leases).values(insertLease).returning();
-    return lease;
-  }
-  
-  async updateLease(id: number, updatedLease: Partial<InsertLease>): Promise<Lease | undefined> {
-    const [lease] = await db
-      .update(leases)
-      .set(updatedLease)
-      .where(eq(leases.id, id))
-      .returning();
-    return lease;
-  }
-  
-  async clearLeases(): Promise<void> {
-    await db.delete(leases);
-  }
-  
-  // Payments
-  async getPayment(id: number): Promise<Payment | undefined> {
-    const [payment] = await db.select().from(payments).where(eq(payments.id, id));
-    return payment;
-  }
-  
-  async getPaymentsByTenant(tenantId: number): Promise<Payment[]> {
-    return await db.select().from(payments).where(eq(payments.tenantId, tenantId));
-  }
-  
-  async getPaymentsByLease(leaseId: number): Promise<Payment[]> {
-    return await db.select().from(payments).where(eq(payments.leaseId, leaseId));
-  }
-  
-  async createPayment(insertPayment: InsertPayment): Promise<Payment> {
-    const [payment] = await db.insert(payments).values(insertPayment).returning();
-    return payment;
-  }
-  
-  async clearPayments(): Promise<void> {
-    await db.delete(payments);
-  }
-  
-  // Maintenance Requests
-  async getMaintenanceRequest(id: number): Promise<MaintenanceRequest | undefined> {
-    const [request] = await db.select().from(maintenanceRequests).where(eq(maintenanceRequests.id, id));
-    return request;
-  }
-  
-  async getMaintenanceRequestsByTenant(tenantId: number): Promise<MaintenanceRequest[]> {
-    return await db.select().from(maintenanceRequests).where(eq(maintenanceRequests.tenantId, tenantId));
-  }
-  
-  async getMaintenanceRequestsByProperty(propertyId: number): Promise<MaintenanceRequest[]> {
-    return await db.select().from(maintenanceRequests).where(eq(maintenanceRequests.propertyId, propertyId));
-  }
-  
-  async getMaintenanceRequestsByStatus(status: string): Promise<MaintenanceRequest[]> {
-    return await db.select().from(maintenanceRequests).where(eq(maintenanceRequests.status, status));
-  }
-  
-  async getMaintenanceRequestsByAssignee(assigneeId: number): Promise<MaintenanceRequest[]> {
-    return await db.select().from(maintenanceRequests).where(eq(maintenanceRequests.assignedToId, assigneeId));
-  }
-  
-  async createMaintenanceRequest(insertRequest: InsertMaintenanceRequest): Promise<MaintenanceRequest> {
-    const [request] = await db.insert(maintenanceRequests).values(insertRequest).returning();
-    return request;
-  }
-  
-  async updateMaintenanceRequest(id: number, updatedRequest: Partial<InsertMaintenanceRequest>): Promise<MaintenanceRequest | undefined> {
-    const [request] = await db
-      .update(maintenanceRequests)
-      .set(updatedRequest)
-      .where(eq(maintenanceRequests.id, id))
-      .returning();
-    return request;
-  }
-  
-  async clearMaintenanceRequests(): Promise<void> {
-    await db.delete(maintenanceRequests);
-  }
-  
-  // Documents
-  async getDocument(id: number): Promise<Document | undefined> {
-    const [document] = await db.select().from(documents).where(eq(documents.id, id));
-    return document;
-  }
-  
-  async getDocumentsByUser(userId: number): Promise<Document[]> {
-    return await db.select().from(documents).where(eq(documents.userId, userId));
-  }
-  
-  async getDocumentsByProperty(propertyId: number): Promise<Document[]> {
-    return await db.select().from(documents).where(eq(documents.propertyId, propertyId));
-  }
-  
-  async createDocument(insertDocument: InsertDocument): Promise<Document> {
-    const [document] = await db.insert(documents).values(insertDocument).returning();
-    return document;
-  }
-  
-  async clearDocuments(): Promise<void> {
-    await db.delete(documents);
-  }
-  
-  // Messages
-  async getMessage(id: number): Promise<Message | undefined> {
-    const [message] = await db.select().from(messages).where(eq(messages.id, id));
-    return message;
-  }
-  
-  async getMessagesBySender(senderId: number): Promise<Message[]> {
-    return await db.select().from(messages).where(eq(messages.senderId, senderId));
-  }
-  
-  async getMessagesByReceiver(receiverId: number): Promise<Message[]> {
-    return await db.select().from(messages).where(eq(messages.receiverId, receiverId));
-  }
-  
-  async getConversation(user1Id: number, user2Id: number): Promise<Message[]> {
-    return await db
-      .select()
-      .from(messages)
-      .where(
-        or(
-          and(eq(messages.senderId, user1Id), eq(messages.receiverId, user2Id)),
-          and(eq(messages.senderId, user2Id), eq(messages.receiverId, user1Id))
-        )
-      )
-      .orderBy(asc(messages.sentAt));
-  }
-  
-  async createMessage(insertMessage: InsertMessage): Promise<Message> {
-    const [message] = await db.insert(messages).values(insertMessage).returning();
-    return message;
-  }
-  
-  async markMessageAsRead(id: number): Promise<Message | undefined> {
-    const [message] = await db
-      .update(messages)
-      .set({ read: true })
-      .where(eq(messages.id, id))
-      .returning();
-    return message;
-  }
-  
-  async clearMessages(): Promise<void> {
-    await db.delete(messages);
-  }
-  
-  // Landlord Ratings
-  async getLandlordRating(id: number): Promise<LandlordRating | undefined> {
-    const [rating] = await db.select().from(landlordRatings).where(eq(landlordRatings.id, id));
-    return rating;
-  }
-
-  async getLandlordRatingsByLandlord(landlordId: number): Promise<LandlordRating[]> {
-    return await db.select().from(landlordRatings).where(eq(landlordRatings.landlordId, landlordId));
-  }
-
-  async getLandlordRatingsByTenant(tenantId: number): Promise<LandlordRating[]> {
-    return await db.select().from(landlordRatings).where(eq(landlordRatings.tenantId, tenantId));
-  }
-
-  async getLandlordRatingsByProperty(propertyId: number): Promise<LandlordRating[]> {
-    return await db.select().from(landlordRatings).where(eq(landlordRatings.propertyId, propertyId));
-  }
-
-  async createLandlordRating(rating: InsertLandlordRating): Promise<LandlordRating> {
-    const [newRating] = await db.insert(landlordRatings).values(rating).returning();
-    return newRating;
-  }
-
-  async updateLandlordRating(id: number, updates: Partial<InsertLandlordRating>): Promise<LandlordRating | undefined> {
-    const [rating] = await db
-      .update(landlordRatings)
-      .set(updates)
-      .where(eq(landlordRatings.id, id))
-      .returning();
-    return rating;
-  }
-
-  async deleteLandlordRating(id: number): Promise<boolean> {
-    const result = await db
-      .delete(landlordRatings)
-      .where(eq(landlordRatings.id, id));
-    return result.count > 0;
-  }
-
-  async clearLandlordRatings(): Promise<void> {
-    await db.delete(landlordRatings);
-  }
-  
-  // Tenant Ratings
-  async getTenantRating(id: number): Promise<TenantRating | undefined> {
-    const [rating] = await db.select().from(tenantRatings).where(eq(tenantRatings.id, id));
-    return rating;
-  }
-
-  async getTenantRatingsByTenant(tenantId: number): Promise<TenantRating[]> {
-    return await db.select().from(tenantRatings).where(eq(tenantRatings.tenantId, tenantId));
-  }
-
-  async getTenantRatingsByLandlord(landlordId: number): Promise<TenantRating[]> {
-    return await db.select().from(tenantRatings).where(eq(tenantRatings.landlordId, landlordId));
-  }
-
-  async getTenantRatingsByProperty(propertyId: number): Promise<TenantRating[]> {
-    return await db.select().from(tenantRatings).where(eq(tenantRatings.propertyId, propertyId));
-  }
-
-  async createTenantRating(rating: InsertTenantRating): Promise<TenantRating> {
-    const [newRating] = await db.insert(tenantRatings).values(rating).returning();
-    return newRating;
-  }
-
-  async updateTenantRating(id: number, updates: Partial<InsertTenantRating>): Promise<TenantRating | undefined> {
-    const [rating] = await db
-      .update(tenantRatings)
-      .set(updates)
-      .where(eq(tenantRatings.id, id))
-      .returning();
-    return rating;
-  }
-
-  async deleteTenantRating(id: number): Promise<boolean> {
-    const result = await db
-      .delete(tenantRatings)
-      .where(eq(tenantRatings.id, id));
-    return result.count > 0;
-  }
-
-  async clearTenantRatings(): Promise<void> {
-    await db.delete(tenantRatings);
-  }
-}
-
-// Use PostgreSQL storage in production, MemStorage for development
-export const storage = process.env.DATABASE_URL
-  ? new DatabaseStorage()
-  : new MemStorage();
+// Export storage instance
+export const storage = new MemStorage();

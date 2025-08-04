@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { useLocation } from "wouter";
-import { DashLayout } from "@/layout/dash-layout";
+import DashLayout from "@/components/layout/DashLayout";
 import { Button } from "@/components/ui/button";
 import { Loader2, UserPlus, Search, Filter, MoreHorizontal, Mail, Phone, ExternalLink, User } from "lucide-react";
 import {
@@ -50,47 +50,18 @@ export default function Tenants() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
 
-  // This would come from the API
+  // Fetch tenants from the API
   const { data: tenants = [], isLoading } = useQuery<Tenant[]>({
     queryKey: ["/api/tenants"],
     enabled: user?.role === "landlord",
-    // Mocked for now - in real implementation this would use the API
     queryFn: async () => {
-      return [
-        {
-          id: 1,
-          name: "Jason Cooper",
-          email: "jason@example.com",
-          phone: "(123) 456-7890",
-          property: "Riverside Heights",
-          unit: "5B",
-          leaseEnd: "Dec 31, 2023",
-          status: "active",
-          rentStatus: "paid"
-        },
-        {
-          id: 2,
-          name: "Sarah Williams",
-          email: "sarah@example.com",
-          phone: "(123) 456-7891",
-          property: "Cedar Apartments",
-          unit: "12",
-          leaseEnd: "Jan 15, 2024",
-          status: "active",
-          rentStatus: "pending"
-        },
-        {
-          id: 3,
-          name: "Daniel Smith",
-          email: "daniel@example.com",
-          phone: "(123) 456-7892",
-          property: "Maple Grove",
-          unit: "3A",
-          leaseEnd: "Nov 30, 2023",
-          status: "active",
-          rentStatus: "overdue"
-        }
-      ] as Tenant[];
+      const response = await fetch("/api/tenants", {
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch tenants');
+      }
+      return response.json();
     }
   });
 
@@ -98,7 +69,7 @@ export default function Tenants() {
     return (
       <DashLayout>
         <div className="flex flex-col items-center justify-center h-64">
-          <h1 className="text-xl font-semibold text-gray-900 mb-2">Access Denied</h1>
+          <h1 className="text-heading-3 text-gray-900 mb-2">Access Denied</h1>
           <p className="text-gray-500">You don't have permission to view this page.</p>
         </div>
       </DashLayout>
@@ -205,9 +176,9 @@ export default function Tenants() {
                       <TableCell>{tenant.leaseEnd}</TableCell>
                       <TableCell>
                         <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                          ${tenant.rentStatus === 'paid' ? 'bg-green-100 text-green-800' : 
-                            tenant.rentStatus === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                            'bg-red-100 text-red-800'}`}>
+                          ${tenant.rentStatus === 'paid' ? 'bg-success text-success-foreground' : 
+                            tenant.rentStatus === 'pending' ? 'bg-warning text-warning-foreground' : 
+                            'bg-destructive text-destructive-foreground'}`}>
                           {tenant.rentStatus.charAt(0).toUpperCase() + tenant.rentStatus.slice(1)}
                         </div>
                       </TableCell>
@@ -251,10 +222,16 @@ export default function Tenants() {
                     <TableCell colSpan={6} className="text-center py-10">
                       <div className="flex flex-col items-center justify-center">
                         <UserPlus className="h-8 w-8 text-gray-400 mb-2" />
-                        <h3 className="text-lg font-medium text-gray-900">No tenants found</h3>
+                        <h3 className="text-body-large text-gray-900">No Tenants Found</h3>
                         <p className="text-gray-500 mt-1">
-                          {searchTerm ? "No tenants match your search criteria" : "Get started by adding your first tenant"}
+                          {searchTerm ? "No tenants match your search criteria" : "Add your first tenant to get started"}
                         </p>
+                        {!searchTerm && (
+                          <Button className="mt-4" size="sm">
+                            <UserPlus className="mr-2 h-4 w-4" />
+                            Add Tenant
+                          </Button>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>

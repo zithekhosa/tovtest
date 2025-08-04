@@ -58,11 +58,11 @@ export function DashboardMetricCard({
       {trend && (
         <div className="flex items-center text-xs mt-1">
           {trend.isPositive ? (
-            <TrendingUp className="mr-1 h-3 w-3 text-green-500 shrink-0" />
+            <TrendingUp className="mr-1 h-3 w-3 text-success-foreground shrink-0" />
           ) : (
-            <TrendingDown className="mr-1 h-3 w-3 text-red-500 shrink-0" />
+            <TrendingDown className="mr-1 h-3 w-3 text-destructive-foreground shrink-0" />
           )}
-          <span className={trend.isPositive ? "text-green-500" : "text-red-500"}>
+          <span className={trend.isPositive ? "text-success-foreground" : "text-destructive-foreground"}>
             {trend.value}% {trend.text || ""}
           </span>
         </div>

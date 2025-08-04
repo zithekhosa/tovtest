@@ -47,10 +47,10 @@ export function MaintenanceTable({
 }: MaintenanceTableProps) {
   const getPriorityBadge = (priority: MaintenanceRequest['priority']) => {
     const styles = {
-      urgent: "bg-red-100 text-red-800",
-      high: "bg-orange-100 text-orange-800",
-      medium: "bg-yellow-100 text-yellow-800",
-      low: "bg-green-100 text-green-800",
+      urgent: "bg-destructive text-destructive-foreground",
+      high: "bg-warning text-warning-foreground",
+      medium: "bg-primary text-primary-foreground",
+      low: "bg-success text-success-foreground",
     };
     
     return (
@@ -65,11 +65,11 @@ export function MaintenanceTable({
   
   const getStatusBadge = (status: MaintenanceRequest['status']) => {
     const styles = {
-      pending: "bg-gray-100 text-gray-800",
-      assigned: "bg-blue-100 text-blue-800",
-      in_progress: "bg-yellow-100 text-yellow-800",
-      completed: "bg-green-100 text-green-800",
-      cancelled: "bg-red-100 text-red-800",
+      pending: "bg-secondary text-secondary-foreground",
+      assigned: "bg-primary text-primary-foreground",
+      in_progress: "bg-warning text-warning-foreground",
+      completed: "bg-success text-success-foreground",
+      cancelled: "bg-destructive text-destructive-foreground",
     };
     
     const label = status === 'in_progress' 
@@ -88,11 +88,11 @@ export function MaintenanceTable({
   
   if (isLoading) {
     return (
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div className="premium-card overflow-hidden">
         <div className="p-6 flex justify-center">
           <div className="animate-pulse flex flex-col items-center">
-            <div className="h-6 w-32 bg-gray-200 rounded mb-4"></div>
-            <div className="h-4 w-48 bg-gray-200 rounded"></div>
+            <div className="h-6 w-32 bg-muted rounded mb-4"></div>
+            <div className="h-4 w-48 bg-muted rounded"></div>
           </div>
         </div>
       </div>
@@ -101,11 +101,11 @@ export function MaintenanceTable({
   
   if (requests.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div className="premium-card overflow-hidden">
         <div className="p-6 text-center">
-          <AlertCircle className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-          <h3 className="text-lg font-medium text-gray-900">No maintenance requests</h3>
-          <p className="mt-1 text-sm text-gray-500">
+          <AlertCircle className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+          <h3 className="text-body-large text-foreground">No maintenance requests</h3>
+          <p className="mt-1 text-sm text-muted-foreground">
             There are no maintenance requests at this time.
           </p>
         </div>
@@ -115,7 +115,7 @@ export function MaintenanceTable({
   
   return (
     <div className={cn(
-      "bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden",
+      "premium-card overflow-hidden",
       className
     )}>
       <div className="overflow-x-auto">

@@ -38,16 +38,16 @@ export function AlertCard({ title, alerts, viewAllLink, className }: AlertCardPr
           // Determine styling based on alert severity
           const severityStyles = {
             error: {
-              bg: "bg-red-50",
+              bg: "bg-destructive/10",
               border: "border-red-100",
-              textColor: "text-red-600",
-              actionColor: "text-red-600",
+              textColor: "text-destructive-foreground",
+              actionColor: "text-destructive-foreground",
             },
             warning: {
-              bg: "bg-yellow-50",
-              border: "border-yellow-100",
-              textColor: "text-yellow-600",
-              actionColor: "text-yellow-600",
+              bg: "bg-warning/10",
+              border: "border-warning/20",
+              textColor: "text-warning-foreground",
+              actionColor: "text-warning-foreground",
             },
             info: {
               bg: "bg-primary-50",
